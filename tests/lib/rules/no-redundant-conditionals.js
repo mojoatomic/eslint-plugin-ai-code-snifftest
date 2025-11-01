@@ -360,6 +360,23 @@ const invalidConstantFolding = [
     code: 'if (false && []) { A(); } else { B(); }',
     errors: [{ messageId: 'constantCondition' }],
     output: 'B();'
+  },
+  // More arithmetic falsy
+  {
+    code: 'if (1 - 1) { A(); } else { B(); }',
+    errors: [{ messageId: 'constantCondition' }],
+    output: 'B();'
+  },
+  {
+    code: 'if (2 % 2) { A(); } else { B(); }',
+    errors: [{ messageId: 'constantCondition' }],
+    output: 'B();'
+  },
+  // String equality
+  {
+    code: "if ('a' + 'b' === 'ab') { A(); } else { B(); }",
+    errors: [{ messageId: 'constantCondition' }],
+    output: 'A();'
   }
 ];
 
@@ -608,6 +625,11 @@ const invalidSwitchConstants = [
     code: 'function f(){ switch (2) { default: throw err; } }',
     errors: [{ messageId: 'redundantSwitch' }],
     output: 'function f(){ throw err; }'
+  },
+  {
+    code: 'function f(){ switch (2) { default: C(); break; } }',
+    errors: [{ messageId: 'redundantSwitch' }],
+    output: 'function f(){ C(); }'
   },
 ];
 
