@@ -159,9 +159,9 @@ const invalidComplexTernaries = [
   },
   // Same variable
   {
-    code: 'return test ? result : result;',
+    code: 'function test() { return test ? result : result; }',
     errors: [{ messageId: 'redundantTernary' }],
-    output: 'return result;',
+    output: 'function test() { return result; }',
   },
 ];
 
