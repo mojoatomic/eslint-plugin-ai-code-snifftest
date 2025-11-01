@@ -1,4 +1,6 @@
-# Simplify redundant conditional expressions (`ai-code-snifftest/no-redundant-conditionals`)
+# no-redundant-conditionals
+
+Simplify redundant conditional logic introduced by AI/code generators while preserving behavior (Do No Harm).
 
 🔧 This rule is automatically fixable by the [`--fix` CLI option](https://eslint.org/docs/latest/user-guide/command-line-interface#--fix).
 
@@ -6,7 +8,7 @@
 
 🔧 This rule is automatically fixable by the [`--fix` CLI option](https://eslint.org/docs/user-guide/command-line-interface#--fix).
 
-## Rule Details
+## What this rule reports
 
 This rule detects and simplifies redundant conditional expressions that AI frequently generates:
 
@@ -14,7 +16,12 @@ This rule detects and simplifies redundant conditional expressions that AI frequ
 2. **Boolean tautologies** - `x === true`, `x !== false`
 3. **Redundant ternaries** - `x ? true : false`, `x ? value : value`
 
-AI models generate these patterns because they prioritize readability over conciseness and don't optimize for semantic redundancy.
+- Constant folding in conditions (safe cases only)
+  - Logical: `true && x` → `x`, `false || x` → `x`, `true || x` → constant-true, `false && x` → constant-false
+  - Arithmetic/relational/equality with constants: `1+1`, `5>3`, `1+1===2`, etc.
+- Switch with constant discriminant
+  - Inline matching `case`/`default` when safe (terminated body or last case)
+  - Remove no-op `switch` with no match and no default
 
 ## Examples
 
@@ -82,7 +89,36 @@ const inverted = !test;
 const same = value;
 ```
 
-## Patterns Detected
+## Safety constraints (Do No Harm)
+
+- No auto-fix for potential infinite loops (`while(true)`, `for(;;)`) — warns only
+- `do { stmt } while(false)` is only inlined when the body is a BlockStatement
+- `switch` is inlined only when the selected case/default is clearly terminated (break/return/throw/continue) or is the last case (no fallthrough)
+- Constant folding is limited to expressions where both operands are constant and evaluation is unambiguous (e.g., no BigInt/Number mismatches)
+
+## Configuration
+
+Enable in your ESLint config:
+```json
+{
+  "plugins": ["ai-code-snifftest"],
+  "rules": {
+    "ai-code-snifftest/no-redundant-conditionals": "warn"
+  }
+}
+```
+
+Recommended level is `warn` initially to assess changes with `--fix-dry-run`.
+
+## Known limitations
+
+- Does not refactor non-constant logical chains fully (applies one-pass safe simplifications only)
+- Intentional infinite loops are not auto-fixed
+- Folding avoids type-coercion pitfalls; strict equality used for case matching and constant evaluation
+
+## Rationale
+
+AI-generated code often includes redundant conditionals, constant checks, and boilerplate branches. This rule removes provably redundant logic to improve clarity without changing behavior.
 
 ### 1. Constant Conditions
 
