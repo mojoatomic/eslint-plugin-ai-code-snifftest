@@ -242,6 +242,97 @@ const invalidConstantFolding = [
     code: 'if (false && cond) { A(); } else { B(); }',
     errors: [{ messageId: 'constantCondition' }],
     output: 'B();'
+  },
+  // Arithmetic folding in condition
+  {
+    code: 'if (1 + 1) { A(); } else { B(); }',
+    errors: [{ messageId: 'constantCondition' }],
+    output: 'A();'
+  },
+  {
+    code: 'if (0 + 0) { A(); } else { B(); }',
+    errors: [{ messageId: 'constantCondition' }],
+    output: 'B();'
+  },
+  // Relational/equality folding
+  {
+    code: 'if (5 > 3) { A(); } else { B(); }',
+    errors: [{ messageId: 'constantCondition' }],
+    output: 'A();'
+  },
+  {
+    code: 'if (2 * 3 !== 6) { A(); } else { B(); }',
+    errors: [{ messageId: 'constantCondition' }],
+    output: 'B();'
+  },
+  // String concatenation truthiness
+  {
+    code: "if ('a' + 'b') { A(); } else { B(); }",
+    errors: [{ messageId: 'constantCondition' }],
+    output: 'A();'
+  },
+  {
+    code: "if ('' + '') { A(); } else { B(); }",
+    errors: [{ messageId: 'constantCondition' }],
+    output: 'B();'
+  },
+  // Number operator coverage (-, *, /, %, **)
+  {
+    code: 'if (5 - 3) { A(); } else { B(); }',
+    errors: [{ messageId: 'constantCondition' }],
+    output: 'A();'
+  },
+  {
+    code: 'if (2 * 3) { A(); } else { B(); }',
+    errors: [{ messageId: 'constantCondition' }],
+    output: 'A();'
+  },
+  {
+    code: 'if (4 / 2) { A(); } else { B(); }',
+    errors: [{ messageId: 'constantCondition' }],
+    output: 'A();'
+  },
+  {
+    code: 'if (5 % 2) { A(); } else { B(); }',
+    errors: [{ messageId: 'constantCondition' }],
+    output: 'A();'
+  },
+  {
+    code: 'if (1 ** 3) { A(); } else { B(); }',
+    errors: [{ messageId: 'constantCondition' }],
+    output: 'A();'
+  },
+  // Relational operator coverage (<, >, <=, >=)
+  {
+    code: 'if (3 < 2) { A(); } else { B(); }',
+    errors: [{ messageId: 'constantCondition' }],
+    output: 'B();'
+  },
+  {
+    code: 'if (3 > 2) { A(); } else { B(); }',
+    errors: [{ messageId: 'constantCondition' }],
+    output: 'A();'
+  },
+  {
+    code: 'if (2 <= 2) { A(); } else { B(); }',
+    errors: [{ messageId: 'constantCondition' }],
+    output: 'A();'
+  },
+  {
+    code: 'if (2 >= 3) { A(); } else { B(); }',
+    errors: [{ messageId: 'constantCondition' }],
+    output: 'B();'
+  },
+  // Strict equality/inequality coverage
+  {
+    code: 'if (1 + 1 === 2) { A(); } else { B(); }',
+    errors: [{ messageId: 'constantCondition' }],
+    output: 'A();'
+  },
+  {
+    code: 'if (2 * 2 !== 4) { A(); } else { B(); }',
+    errors: [{ messageId: 'constantCondition' }],
+    output: 'B();'
   }
 ];
 
