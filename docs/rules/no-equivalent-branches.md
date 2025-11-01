@@ -1,4 +1,8 @@
-# Detect if/else branches that do the same thing (`no-equivalent-branches`)
+# Detect if/else branches that do the same thing (`ai-code-snifftest/no-equivalent-branches`)
+
+🔧 This rule is automatically fixable by the [`--fix` CLI option](https://eslint.org/docs/latest/user-guide/command-line-interface#--fix).
+
+<!-- end auto-generated rule header -->
 
 Please describe the origin of the rule here.
 
@@ -21,10 +25,6 @@ Examples of **correct** code for this rule:
 // fill me in
 
 ```
-
-### Options
-
-If there are any options, describe them here. Otherwise, delete this section.
 
 ## When Not To Use It
 
