@@ -1,4 +1,8 @@
-# no-redundant-conditionals
+# Simplify redundant conditional expressions (`ai-code-snifftest/no-redundant-conditionals`)
+
+🔧 This rule is automatically fixable by the [`--fix` CLI option](https://eslint.org/docs/latest/user-guide/command-line-interface#--fix).
+
+<!-- end auto-generated rule header -->
 
 Simplify redundant conditional logic introduced by AI/code generators while preserving behavior (Do No Harm).
 
@@ -6,9 +10,8 @@ Simplify redundant conditional logic introduced by AI/code generators while pres
 
 <!-- end auto-generated rule header -->
 
-🔧 This rule is automatically fixable by the [`--fix` CLI option](https://eslint.org/docs/user-guide/command-line-interface#--fix).
 
-## What this rule reports
+## Rule Details
 
 This rule detects and simplifies redundant conditional expressions that AI frequently generates:
 
