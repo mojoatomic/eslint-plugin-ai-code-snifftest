@@ -12,8 +12,10 @@ lerna-debug.log*
 
 # Coverage
 coverage/
+.coverage/
 *.lcov
 .nyc_output
+.c8
 
 # Testing
 .eslintcache
