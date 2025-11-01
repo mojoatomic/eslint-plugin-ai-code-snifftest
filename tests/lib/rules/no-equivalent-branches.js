@@ -20,8 +20,11 @@ const ruleTester = new RuleTester({
   languageOptions: { ecmaVersion: 2021, sourceType: 'module' }
 });
 
-ruleTester.run("no-equivalent-branches", rule, {
-  valid: [
+//------------------------------------------------------------------------------
+// Basic Functionality Tests
+//------------------------------------------------------------------------------
+
+const validBasicTests = [
     // No else branch
     { code: 'if (x) { foo(); }' },
     { code: 'function test() { if (condition) return 1; }' },
@@ -51,9 +54,100 @@ ruleTester.run("no-equivalent-branches", rule, {
     // Different operators
     { code: 'function test() { if (x) { return a + b; } else { return a - b; } }' },
     { code: 'function test() { if (x) { return a && b; } else { return a || b; } }' },
-  ],
+];
 
-  invalid: [
+//------------------------------------------------------------------------------
+// Phase 1: Critical Edge Cases
+//------------------------------------------------------------------------------
+
+// Falsy Value Comparisons - JavaScript has 6 falsy values with different semantics
+const validFalsyValues = [
+  // null vs undefined (different values)
+  { code: 'function test() { if (x) { return null; } else { return undefined; } }' },
+  { code: 'function test() { if (x) { return undefined; } else { return null; } }' },
+  
+  // 0 vs -0 (different in Object.is)
+  { code: 'function test() { if (x) { return 0; } else { return -0; } }' },
+  
+  // false vs 0 (different types)
+  { code: 'function test() { if (x) { return false; } else { return 0; } }' },
+  { code: 'function test() { if (x) { return 0; } else { return false; } }' },
+  
+  // "" vs 0 (different types)
+  { code: 'function test() { if (x) { return ""; } else { return 0; } }' },
+  { code: 'function test() { if (x) { return 0; } else { return ""; } }' },
+  
+  // null vs 0 (different types)
+  { code: 'function test() { if (x) { return null; } else { return 0; } }' },
+  
+  // undefined vs 0 (different types)
+  { code: 'function test() { if (x) { return undefined; } else { return 0; } }' },
+];
+
+// Object/Array References - Different object instances are not equivalent
+const validObjectReferences = [
+  // Object literals (different references)
+  { code: 'function test() { if (x) { return {}; } else { return {}; } }' },
+  { code: 'function test() { if (x) { return {a: 1}; } else { return {a: 1}; } }' },
+  
+  // Array literals (different references)
+  { code: 'function test() { if (x) { return []; } else { return []; } }' },
+  { code: 'function test() { if (x) { return [1]; } else { return [1]; } }' },
+  
+  // Function expressions (different references)
+  { code: 'function test() { if (x) { return function() {}; } else { return function() {}; } }' },
+  { code: 'function test() { if (x) { return () => {}; } else { return () => {}; } }' },
+  
+  // new Object() calls (different instances)
+  { code: 'function test() { if (x) { return new Date(); } else { return new Date(); } }' },
+  { code: 'function test() { if (x) { return new Error("msg"); } else { return new Error("msg"); } }' },
+];
+
+// Side Effects - Structurally equivalent but may have semantic side effects
+// NOTE: Rule detects structural equivalence; users responsible for side effect analysis
+const invalidSideEffects = [
+  // Function calls (structurally equivalent, may have side effects)
+  {
+    code: 'function test() { if (x) { return fetch(); } else { return fetch(); } }',
+    errors: [{ messageId: 'equivalentBranches' }],
+    output: 'function test() { return fetch(); }'
+  },
+  {
+    code: 'if (x) { console.log("test"); } else { console.log("test"); }',
+    errors: [{ messageId: 'equivalentBranches' }],
+    output: 'console.log("test");'
+  },
+  {
+    code: 'if (x) { arr.push(1); } else { arr.push(1); }',
+    errors: [{ messageId: 'equivalentBranches' }],
+    output: 'arr.push(1);'
+  },
+];
+
+// Update Expressions - Different AST node type
+const validUpdateExpressions = [
+  // Increment/decrement (UpdateExpression, not implemented yet)
+  { code: 'if (x) { count++; } else { count++; }' },
+];
+
+// Special Values - NaN, Infinity, etc.
+const validSpecialValues = [
+  // NaN (NaN !== NaN)
+  { code: 'function test() { if (x) { return NaN; } else { return 0/0; } }' },
+  
+  // Infinity variants
+  { code: 'function test() { if (x) { return Infinity; } else { return -Infinity; } }' },
+  { code: 'function test() { if (x) { return 1/0; } else { return -1/0; } }' },
+];
+
+// Template Literals vs Strings
+const validTemplates = [
+  // Template literal vs string (different if expressions differ)
+  { code: 'function test() { if (x) { return `hello ${a}`; } else { return `hello ${b}`; } }' },
+  { code: 'function test() { if (x) { return `test`; } else { return "test"; } }' }, // Technically same
+];
+
+const invalidBasicTests = [
     // Simple return statements
     {
       code: 'function test() { if (x) { return foo(); } else { return foo(); } }',
@@ -219,5 +313,23 @@ ruleTester.run("no-equivalent-branches", rule, {
       errors: [{ messageId: 'equivalentBranches' }],
       output: 'function test() { return null; }'
     },
+];
+
+//------------------------------------------------------------------------------
+// Run All Tests
+//------------------------------------------------------------------------------
+
+ruleTester.run("no-equivalent-branches", rule, {
+  valid: [
+    ...validBasicTests,
+    ...validFalsyValues,
+    ...validObjectReferences,
+    ...validUpdateExpressions,
+    ...validSpecialValues,
+    ...validTemplates
   ],
+  invalid: [
+    ...invalidBasicTests,
+    ...invalidSideEffects
+  ]
 });
