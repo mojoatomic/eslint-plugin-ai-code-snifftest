@@ -6,11 +6,6 @@
 
 Simplify redundant conditional logic introduced by AI/code generators while preserving behavior (Do No Harm).
 
-🔧 This rule is automatically fixable by the [`--fix` CLI option](https://eslint.org/docs/latest/user-guide/command-line-interface#--fix).
-
-<!-- end auto-generated rule header -->
-
-
 ## Rule Details
 
 This rule detects and simplifies redundant conditional expressions that AI frequently generates:
@@ -98,20 +93,6 @@ const same = value;
 - `do { stmt } while(false)` is only inlined when the body is a BlockStatement
 - `switch` is inlined only when the selected case/default is clearly terminated (break/return/throw/continue) or is the last case (no fallthrough)
 - Constant folding is limited to expressions where both operands are constant and evaluation is unambiguous (e.g., no BigInt/Number mismatches)
-
-## Configuration
-
-Enable in your ESLint config:
-```json
-{
-  "plugins": ["ai-code-snifftest"],
-  "rules": {
-    "ai-code-snifftest/no-redundant-conditionals": "warn"
-  }
-}
-```
-
-Recommended level is `warn` initially to assess changes with `--fix-dry-run`.
 
 ## Known limitations
 
