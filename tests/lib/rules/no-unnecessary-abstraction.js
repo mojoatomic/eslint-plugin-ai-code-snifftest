@@ -363,6 +363,196 @@ for (const item of items) { process(item); }
   },
 ];
 
+// Exported Functions - Public API should not trigger
+const validExportedFunctions = [
+  // Named export
+  {
+    code: `
+export function wrapper(x) {
+  return compute(x);
+}
+function compute(x) { return x * 2; }
+wrapper(5);
+    `,
+  },
+  // Default export
+  {
+    code: `
+export default function wrapper(x) {
+  return compute(x);
+}
+function compute(x) { return x * 2; }
+wrapper(5);
+    `,
+  },
+  // Export const
+  {
+    code: `
+export const wrapper = (x) => compute(x);
+function compute(x) { return x * 2; }
+wrapper(5);
+    `,
+  },
+];
+
+// Side Effects - Functions with side effects should not be inlined
+const validSideEffects = [
+  // Console logging
+  {
+    code: `
+function logAndCompute(x) {
+  console.log('computing:', x);
+  return compute(x);
+}
+function compute(x) { return x * 2; }
+logAndCompute(5);
+    `,
+  },
+  // State mutation
+  {
+    code: `
+let counter = 0;
+function trackAndCompute(x) {
+  counter++;
+  return compute(x);
+}
+function compute(x) { return x * 2; }
+trackAndCompute(5);
+    `,
+  },
+  // Multiple statements
+  {
+    code: `
+function validate(x) {
+  if (x < 0) throw new Error('negative');
+  return compute(x);
+}
+function compute(x) { return x * 2; }
+validate(5);
+    `,
+  },
+];
+
+// Hoisting Edge Cases - Function declarations vs expressions
+const validHoisting = [
+  // Called before declaration (hoisting)
+  {
+    code: `
+helper(5);
+function helper(x) { return x * 2; }
+    `,
+  },
+  // Function expression not hoisted
+  {
+    code: `
+const helper = function(x) { return x * 2; };
+helper(5);
+helper(10);
+    `,
+  },
+];
+
+// Special Arguments - arguments object, new.target
+const validSpecialArguments = [
+  // Uses arguments object
+  {
+    code: `
+function wrapper() {
+  return compute(arguments[0]);
+}
+function compute(x) { return x * 2; }
+wrapper(5);
+    `,
+  },
+  // Uses new.target
+  {
+    code: `
+function Wrapper(x) {
+  if (!new.target) throw new Error('use new');
+  return compute(x);
+}
+function compute(x) { return x * 2; }
+new Wrapper(5);
+    `,
+  },
+];
+
+// Function Properties - Functions used as objects
+const validFunctionProperties = [
+  // Function has properties attached
+  {
+    code: `
+function wrapper(x) { return compute(x); }
+wrapper.version = '1.0';
+function compute(x) { return x * 2; }
+wrapper(5);
+    `,
+  },
+  // Function passed as callback
+  {
+    code: `
+function wrapper(x) { return compute(x); }
+function compute(x) { return x * 2; }
+[1, 2, 3].map(wrapper);
+    `,
+  },
+];
+
+// Conditional/Try-Catch Wrappers - Error handling
+const validErrorHandling = [
+  // Try-catch wrapper
+  {
+    code: `
+function safeCompute(x) {
+  try {
+    return compute(x);
+  } catch (e) {
+    return 0;
+  }
+}
+function compute(x) { return x * 2; }
+safeCompute(5);
+    `,
+  },
+  // Conditional wrapper
+  {
+    code: `
+function conditionalCompute(x) {
+  return x > 0 ? compute(x) : 0;
+}
+function compute(x) { return x * 2; }
+conditionalCompute(5);
+    `,
+  },
+];
+
+// Name Collisions - Same parameter names, different semantics
+const validNameCollisions = [
+  // Parameter shadows outer variable (used multiple times)
+  {
+    code: `
+const x = 10;
+function wrapper(x) {
+  return compute(x);
+}
+function compute(x) { return x * 2; }
+wrapper(5);
+wrapper(10);
+    `,
+  },
+  // Wrapper provides semantic clarity
+  {
+    code: `
+function calculateTotalPrice(price) {
+  return addTax(price);
+}
+function addTax(amount) { return amount * 1.08; }
+calculateTotalPrice(100);
+calculateTotalPrice(200);
+    `,
+  },
+];
+
 const invalidBasicTests = [
     // Basic trivial wrapper - function declaration
     {
@@ -493,7 +683,14 @@ ruleTester.run("no-unnecessary-abstraction", rule, {
     ...validThisBinding,
     ...validAsyncGenerator,
     ...validIIFE,
-    ...validDifferentScopes
+    ...validDifferentScopes,
+    ...validExportedFunctions,
+    ...validSideEffects,
+    ...validHoisting,
+    ...validSpecialArguments,
+    ...validFunctionProperties,
+    ...validErrorHandling,
+    ...validNameCollisions
   ],
   invalid: [
     ...invalidBasicTests
