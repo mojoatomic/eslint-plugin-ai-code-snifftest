@@ -523,6 +523,38 @@ const invalidBasicTests = [
     },
 ];
 
+// Switch constant discriminants
+const invalidSwitchConstants = [
+  // Matching case with break → inline body
+  {
+    code: 'switch (1) { case 1: A(); break; case 2: B(); break; }',
+    errors: [{ messageId: 'redundantSwitch' }],
+    output: 'A();'
+  },
+  // Default with break → inline default
+  {
+    code: 'switch (3) { case 1: A(); break; default: C(); break; }',
+    errors: [{ messageId: 'redundantSwitch' }],
+    output: 'C();'
+  },
+  // No match, no default → remove switch
+  {
+    code: 'switch (3) { case 1: A(); break; case 2: B(); break; }',
+    errors: [{ messageId: 'redundantSwitch' }],
+    output: ''
+  },
+  // Not safe: matching case without break and more cases → report only
+  {
+    code: 'switch (1) { case 1: A(); case 2: B(); break; }',
+    errors: [{ messageId: 'redundantSwitch' }],
+  },
+  // Default without break followed by cases → report only
+  {
+    code: 'switch (0) { default: C(); case 1: D(); break; }',
+    errors: [{ messageId: 'redundantSwitch' }],
+  },
+];
+
 //------------------------------------------------------------------------------
 // Run All Tests
 //------------------------------------------------------------------------------
@@ -541,6 +573,7 @@ ruleTester.run("no-redundant-conditionals", rule, {
     ...invalidTruthyValues,
     ...invalidComplexTernaries,
     ...invalidCoverageGaps,
-    ...invalidConstantFolding
+    ...invalidConstantFolding,
+    ...invalidSwitchConstants
   ]
 });
