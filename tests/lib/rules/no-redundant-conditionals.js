@@ -333,6 +333,50 @@ const invalidConstantFolding = [
     code: 'if (2 * 2 !== 4) { A(); } else { B(); }',
     errors: [{ messageId: 'constantCondition' }],
     output: 'B();'
+  },
+  // Undefined/NaN edge equality
+  {
+    code: 'if (undefined === undefined) { A(); } else { B(); }',
+    errors: [{ messageId: 'constantCondition' }],
+    output: 'A();'
+  },
+  {
+    code: 'if (NaN === NaN) { A(); } else { B(); }',
+    errors: [{ messageId: 'constantCondition' }],
+    output: 'B();'
+  },
+  {
+    code: 'if (NaN !== NaN) { A(); } else { B(); }',
+    errors: [{ messageId: 'constantCondition' }],
+    output: 'A();'
+  },
+  // Logical with literal truthy/falsy
+  {
+    code: 'if ({} || cond) { A(); } else { B(); }',
+    errors: [{ messageId: 'constantCondition' }],
+    output: 'A();'
+  },
+  {
+    code: 'if (false && []) { A(); } else { B(); }',
+    errors: [{ messageId: 'constantCondition' }],
+    output: 'B();'
+  },
+  // More arithmetic falsy
+  {
+    code: 'if (1 - 1) { A(); } else { B(); }',
+    errors: [{ messageId: 'constantCondition' }],
+    output: 'B();'
+  },
+  {
+    code: 'if (2 % 2) { A(); } else { B(); }',
+    errors: [{ messageId: 'constantCondition' }],
+    output: 'B();'
+  },
+  // String equality
+  {
+    code: "if ('a' + 'b' === 'ab') { A(); } else { B(); }",
+    errors: [{ messageId: 'constantCondition' }],
+    output: 'A();'
   }
 ];
 
@@ -523,6 +567,84 @@ const invalidBasicTests = [
     },
 ];
 
+// Switch constant discriminants
+const invalidSwitchConstants = [
+  // Matching case with break → inline body
+  {
+    code: 'switch (1) { case 1: A(); break; case 2: B(); break; }',
+    errors: [{ messageId: 'redundantSwitch' }],
+    output: 'A();'
+  },
+  // Default with break → inline default
+  {
+    code: 'switch (3) { case 1: A(); break; default: C(); break; }',
+    errors: [{ messageId: 'redundantSwitch' }],
+    output: 'C();'
+  },
+  // No match, no default → remove switch
+  {
+    code: 'switch (3) { case 1: A(); break; case 2: B(); break; }',
+    errors: [{ messageId: 'redundantSwitch' }],
+    output: ''
+  },
+  // Not safe: matching case without break and more cases → report only
+  {
+    code: 'switch (1) { case 1: A(); case 2: B(); break; }',
+    errors: [{ messageId: 'redundantSwitch' }],
+  },
+  // Default without break followed by cases → report only
+  {
+    code: 'switch (0) { default: C(); case 1: D(); break; }',
+    errors: [{ messageId: 'redundantSwitch' }],
+  },
+  // Last matching case without break (safe: last case)
+  {
+    code: 'switch (1) { case 1: A(); }',
+    errors: [{ messageId: 'redundantSwitch' }],
+    output: 'A();'
+  },
+  // Last default without break (safe: last case)
+  {
+    code: 'switch (0) { default: C(); }',
+    errors: [{ messageId: 'redundantSwitch' }],
+    output: 'C();'
+  },
+  // Empty switch → remove
+  {
+    code: 'switch (1) { }',
+    errors: [{ messageId: 'redundantSwitch' }],
+    output: ''
+  },
+  // Terminal statements (return/throw) are safe
+  {
+    code: 'function f(){ switch (1) { case 1: return A(); break; default: return B(); } }',
+    errors: [{ messageId: 'redundantSwitch' }],
+    output: 'function f(){ return A(); }'
+  },
+  {
+    code: 'function f(){ switch (2) { default: throw err; } }',
+    errors: [{ messageId: 'redundantSwitch' }],
+    output: 'function f(){ throw err; }'
+  },
+  {
+    code: 'function f(){ switch (2) { default: C(); break; } }',
+    errors: [{ messageId: 'redundantSwitch' }],
+    output: 'function f(){ C(); }'
+  },
+  // Continue in loop: matching case with continue
+  {
+    code: 'for (let i=0;i<1;i++){ switch (1) { case 1: continue; } }',
+    errors: [{ messageId: 'redundantSwitch' }],
+    output: 'for (let i=0;i<1;i++){ continue; }'
+  },
+  // Continue in loop: default with continue
+  {
+    code: 'while (cond) { switch (0) { default: continue; } }',
+    errors: [{ messageId: 'redundantSwitch' }],
+    output: 'while (cond) { continue; }'
+  },
+];
+
 //------------------------------------------------------------------------------
 // Run All Tests
 //------------------------------------------------------------------------------
@@ -541,6 +663,7 @@ ruleTester.run("no-redundant-conditionals", rule, {
     ...invalidTruthyValues,
     ...invalidComplexTernaries,
     ...invalidCoverageGaps,
-    ...invalidConstantFolding
+    ...invalidConstantFolding,
+    ...invalidSwitchConstants
   ]
 });
