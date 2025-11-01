@@ -20,8 +20,11 @@ const ruleTester = new RuleTester({
   languageOptions: { ecmaVersion: 2021, sourceType: 'module' }
 });
 
-ruleTester.run("prefer-simpler-logic", rule, {
-  valid: [
+//------------------------------------------------------------------------------
+// Basic Functionality Tests
+//------------------------------------------------------------------------------
+
+const validBasicTests = [
     // Normal comparisons
     { code: 'if (x === y) {}' },
     { code: 'if (a !== b) {}' },
@@ -30,11 +33,12 @@ ruleTester.run("prefer-simpler-logic", rule, {
     // Different operands in logical expressions
     { code: 'if (x || y) {}' },
     { code: 'if (a && b) {}' },
-    { code: 'if (x && y || z) {}' },
+    // Note: 'x && y || z' tested in edge cases
     
     // Complex but necessary expressions
     { code: 'if (x && y && z) {}' },
     { code: 'if (a || b || c) {}' },
+    // Note: 'x && (y || z)' tested in edge cases
     
     // Boolean variables used correctly
     { code: 'if (isValid) {}' },
@@ -44,9 +48,89 @@ ruleTester.run("prefer-simpler-logic", rule, {
     { code: 'if (x === 0) {}' },
     { code: 'if (y === "test") {}' },
     { code: 'if (z === null) {}' },
-  ],
+];
 
-  invalid: [
+//------------------------------------------------------------------------------
+// Phase 1: Critical Edge Cases
+//------------------------------------------------------------------------------
+
+// Multiple Negation - Test negation chaining
+const validMultipleNegation = [
+  // Double negation for type coercion (common pattern)
+  { code: 'if (!!x) {}' }, // Coerces to boolean
+  { code: 'const bool = !!value;' }, // Common idiom
+  
+  // Single negation (normal)
+  { code: 'if (!flag) {}' },
+  { code: 'if (!x) {}' },
+  
+  // Triple negation (not currently detected by rule)
+  { code: 'if (!!!x) {}' }, // Rule doesn't handle UnaryExpression chains yet
+];
+
+// Mixed Boolean and Non-Boolean - Rule simplifies boolean comparisons independently
+const invalidMixedTypes = [
+  // Mixed with non-boolean comparisons (boolean part still simplifies)
+  {
+    code: 'if (x === true || y > 5) {}',
+    errors: [{ messageId: 'unnecessaryComparison' }],
+    output: 'if (x || y > 5) {}'
+  },
+  {
+    code: 'if (x === true && count > 0) {}',
+    errors: [{ messageId: 'unnecessaryComparison' }],
+    output: 'if (x && count > 0) {}'
+  },
+  {
+    code: 'if (flag === false || str === "test") {}',
+    errors: [{ messageId: 'unnecessaryComparison' }],
+    output: 'if (!flag || str === "test") {}'
+  },
+];
+
+// Type Coercion Differences - Different semantics, should stay valid
+const validTypeDifferences = [
+  // These have different semantics from x === true
+  { code: 'if (x) {}' }, // Truthy check (0, "", null, undefined, false, NaN are falsy)
+  // Note: !!x tested in validMultipleNegation
+  // Note: x === true IS detected by the rule and simplified to x
+];
+
+// Type Coercion - Boolean() function usage
+const validTypeCoercion = [
+  // Boolean() function (similar to !!)
+  { code: 'if (Boolean(x)) {}' },
+  { code: 'const bool = Boolean(value);' },
+  { code: 'function test() { return Boolean(flag); }' },
+];
+
+// Operator Precedence - && has higher precedence than ||
+const validOperatorPrecedence = [
+  // Precedence is clear (no redundancy)
+  { code: 'if (x && y || z) {}' }, // (x && y) || z
+  { code: 'if (a || b && c) {}' }, // a || (b && c)
+  { code: 'if (x && (y || z)) {}' }, // Explicit grouping
+];
+
+// Short-Circuit Evaluation - Must preserve evaluation order
+const validShortCircuit = [
+  // Side effects matter
+  { code: 'if (x || doSomething()) {}' },
+  { code: 'if (getValue() && check()) {}' },
+  { code: 'if (obj && obj.method()) {}' }, // Null check pattern
+  { code: 'if (arr && arr.length > 0) {}' }, // Common pattern
+];
+
+// Parentheses and Grouping - Grouping without boolean literals
+const validGrouping = [
+  // Explicit grouping for readability (no boolean literals to simplify)
+  // Note: 'x && (y || z)' tested in validOperatorPrecedence
+  { code: 'if ((a || b) && c) {}' },
+  { code: 'if ((x)) {}' }, // Extra parens around variable
+  // Note: (x === true) still gets simplified even with parens
+];
+
+const invalidBasicTests = [
     // x === true → x
     {
       code: 'if (x === true) {}',
@@ -271,5 +355,24 @@ ruleTester.run("prefer-simpler-logic", rule, {
       ],
       output: 'if (!a && !b) {}'
     },
+];
+
+//------------------------------------------------------------------------------
+// Run All Tests
+//------------------------------------------------------------------------------
+
+ruleTester.run("prefer-simpler-logic", rule, {
+  valid: [
+    ...validBasicTests,
+    ...validMultipleNegation,
+    ...validTypeDifferences,
+    ...validTypeCoercion,
+    ...validOperatorPrecedence,
+    ...validShortCircuit,
+    ...validGrouping
   ],
+  invalid: [
+    ...invalidBasicTests,
+    ...invalidMixedTypes
+  ]
 });
