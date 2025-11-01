@@ -631,6 +631,18 @@ const invalidSwitchConstants = [
     errors: [{ messageId: 'redundantSwitch' }],
     output: 'function f(){ C(); }'
   },
+  // Continue in loop: matching case with continue
+  {
+    code: 'for (let i=0;i<1;i++){ switch (1) { case 1: continue; } }',
+    errors: [{ messageId: 'redundantSwitch' }],
+    output: 'for (let i=0;i<1;i++){ continue; }'
+  },
+  // Continue in loop: default with continue
+  {
+    code: 'while (cond) { switch (0) { default: continue; } }',
+    errors: [{ messageId: 'redundantSwitch' }],
+    output: 'while (cond) { continue; }'
+  },
 ];
 
 //------------------------------------------------------------------------------
