@@ -1,0 +1,101 @@
+{
+  "name": "eslint-plugin-ai-code-snifftest",
+  "version": "0.1.0",
+  "description": "Does your AI-generated code pass the sniff test? Detect and fix AI code smell.",
+  "keywords": [
+    "eslint",
+    "eslint-plugin",
+    "eslintplugin",
+    "ai",
+    "artificial-intelligence",
+    "code-smell",
+    "code-quality",
+    "sniff-test",
+    "claude",
+    "chatgpt",
+    "copilot",
+    "github-copilot",
+    "code-review",
+    "simplify",
+    "complexity",
+    "static-analysis"
+  ],
+  "author": "Doug <your@email.com>",
+  "license": "MIT",
+  "main": "lib/index.js",
+  "files": [
+    "lib",
+    "docs"
+  ],
+  "scripts": {
+    "test": "node tests/lib/rules/no-redundant-calculations.test.js && echo '✅ All tests passed'",
+    "test:watch": "nodemon --exec npm test",
+    "coverage": "c8 --reporter=text --reporter=lcov --reporter=html npm test",
+    "coverage:check": "c8 check-coverage --lines 95 --functions 95 --branches 90 npm test",
+    "lint": "eslint lib tests",
+    "lint:fix": "eslint lib tests --fix",
+    "format": "prettier --write 'lib/**/*.js' 'tests/**/*.js'",
+    "format:check": "prettier --check 'lib/**/*.js' 'tests/**/*.js'",
+    "prepare": "husky install || true",
+    "precommit": "lint-staged",
+    "prepublishOnly": "npm run lint && npm run coverage:check",
+    "version": "auto-changelog -p && git add CHANGELOG.md"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "peerDependencies": {
+    "eslint": ">=8.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "auto-changelog": "^2.4.0",
+    "c8": "^9.0.0",
+    "eslint": "^9.0.0",
+    "husky": "^9.0.0",
+    "lint-staged": "^15.0.0",
+    "nodemon": "^3.0.0",
+    "prettier": "^3.0.0"
+  },
+  "lint-staged": {
+    "*.js": [
+      "eslint --fix",
+      "prettier --write"
+    ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/eslint-plugin-ai-code-snifftest.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/eslint-plugin-ai-code-snifftest/issues"
+  },
+  "homepage": "https://github.com/yourusername/eslint-plugin-ai-code-snifftest#readme",
+  "c8": {
+    "all": true,
+    "include": [
+      "lib/**/*.js"
+    ],
+    "exclude": [
+      "tests/**",
+      "lib/index.js"
+    ],
+    "reporter": [
+      "text",
+      "lcov",
+      "html"
+    ],
+    "check-coverage": true,
+    "lines": 95,
+    "functions": 95,
+    "branches": 90,
+    "statements": 95
+  },
+  "prettier": {
+    "semi": true,
+    "singleQuote": true,
+    "trailingComma": "es5",
+    "printWidth": 100,
+    "tabWidth": 2
+  }
+}
