@@ -52,6 +52,72 @@ export default defineConfig([
 
 <!-- end auto-generated rules list -->
 
+## Usage with Prettier
+
+This plugin is **fully compatible with Prettier**. Our auto-fixes focus on logical simplification (not formatting), so they work seamlessly with Prettier's formatting.
+
+### Recommended Workflow
+
+Run ESLint before Prettier for best results:
+
+```json
+{
+  "scripts": {
+    "lint": "eslint --fix . && prettier --write .",
+    "lint:check": "eslint . && prettier --check ."
+  }
+}
+```
+
+### Integrated Setup (Alternative)
+
+For a seamless experience, use `eslint-plugin-prettier` to run both tools together:
+
+```bash
+npm install --save-dev eslint-plugin-prettier eslint-config-prettier prettier
+```
+
+```javascript
+// eslint.config.js
+import prettier from 'eslint-plugin-prettier';
+import aiSnifftest from 'eslint-plugin-ai-code-snifftest';
+
+export default [
+  {
+    plugins: {
+      'ai-code-snifftest': aiSnifftest,
+    },
+    rules: {
+      'ai-code-snifftest/no-redundant-calculations': 'error',
+      'ai-code-snifftest/no-equivalent-branches': 'error',
+      'ai-code-snifftest/prefer-simpler-logic': 'error',
+      'ai-code-snifftest/no-redundant-conditionals': 'error',
+      'ai-code-snifftest/no-unnecessary-abstraction': 'warn',
+    },
+  },
+  prettier.configs.recommended,  // Prettier runs after our rules
+];
+```
+
+Now a single command handles both:
+
+```bash
+eslint --fix .  # Fixes logic AND formats code
+```
+
+### How It Works
+
+Our plugin focuses on **logical simplification** (`type: 'suggestion'`), not formatting (`type: 'layout'`). 
+
+ESLint automatically applies fixes in this order:
+1. **Problem rules** (bugs)
+2. **Suggestion rules** ← Our plugin fixes logic here
+3. **Layout rules** (whitespace) ← Prettier formats here
+
+This ensures no conflicts! ✅
+
+**Verified:** All rules tested with Prettier 3.x compatibility suite (18 integration tests).
+
 ## Configurations
 
 <!-- begin auto-generated configs list -->
