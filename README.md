@@ -35,6 +35,20 @@ export default defineConfig([
 
 
 
+## Rules
+
+<!-- begin auto-generated rules list -->
+
+🔧 Automatically fixable by the [`--fix` CLI option](https://eslint.org/docs/user-guide/command-line-interface#--fix).
+
+| Name                                                                 | Description                                                           | 🔧 |
+| :------------------------------------------------------------------- | :-------------------------------------------------------------------- | :- |
+| [no-equivalent-branches](docs/rules/no-equivalent-branches.md)       | Detect if/else branches that do the same thing                        | 🔧 |
+| [no-redundant-calculations](docs/rules/no-redundant-calculations.md) | Detect redundant calculations that should be computed at compile time | 🔧 |
+| [prefer-simpler-logic](docs/rules/prefer-simpler-logic.md)           | Simplify boolean expressions and remove redundant logic               | 🔧 |
+
+<!-- end auto-generated rules list -->
+
 ## Configurations
 
 <!-- begin auto-generated configs list -->
