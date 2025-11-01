@@ -217,6 +217,34 @@ const validLogicalExpressions = [
   'const value = x ?? defaultValue;',
 ];
 
+// Constant Folding in Conditions
+const invalidConstantFolding = [
+  // true && x -> x
+  {
+    code: 'if (true && cond) { work(); }',
+    errors: [{ messageId: 'redundantLogical' }],
+    output: 'if (cond) { work(); }'
+  },
+  // false || x -> x
+  {
+    code: 'if (false || cond) { work(); }',
+    errors: [{ messageId: 'redundantLogical' }],
+    output: 'if (cond) { work(); }'
+  },
+  // true || x -> true (constant)
+  {
+    code: 'if (true || cond) { A(); } else { B(); }',
+    errors: [{ messageId: 'constantCondition' }],
+    output: 'A();'
+  },
+  // false && x -> false (constant)
+  {
+    code: 'if (false && cond) { A(); } else { B(); }',
+    errors: [{ messageId: 'constantCondition' }],
+    output: 'B();'
+  }
+];
+
 const invalidBasicTests = [
     // Constant conditions
     {
@@ -421,6 +449,7 @@ ruleTester.run("no-redundant-conditionals", rule, {
     ...invalidFalsyValues,
     ...invalidTruthyValues,
     ...invalidComplexTernaries,
-    ...invalidCoverageGaps
+    ...invalidCoverageGaps,
+    ...invalidConstantFolding
   ]
 });
