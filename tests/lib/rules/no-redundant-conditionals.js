@@ -16,9 +16,13 @@ const rule = require("../../../lib/rules/no-redundant-conditionals"),
 // Tests
 //------------------------------------------------------------------------------
 
-const ruleTester = new RuleTester({ languageOptions: { ecmaVersion: 2015 } });
-ruleTester.run("no-redundant-conditionals", rule, {
-  valid: [
+const ruleTester = new RuleTester({ languageOptions: { ecmaVersion: 2021, sourceType: 'module' } });
+
+//------------------------------------------------------------------------------
+// Basic Functionality Tests
+//------------------------------------------------------------------------------
+
+const validBasicTests = [
     // Normal conditions
     'if (x) { doSomething(); }',
     'function test() { if (x > 5) { return true; } }',
@@ -39,9 +43,148 @@ ruleTester.run("no-redundant-conditionals", rule, {
     // Number/string comparisons (not boolean)
     'if (x === 1) { }',
     'if (value === "true") { }',
-  ],
+];
 
-  invalid: [
+//------------------------------------------------------------------------------
+// Phase 1: Critical Edge Cases
+//------------------------------------------------------------------------------
+
+// Falsy Values - Different falsy values have different semantics
+const validFalsyValues = [
+  // null check (intentional)
+  'if (x === null) { handleNull(); }',
+  'if (value !== null) { useValue(); }',
+  
+  // undefined check (intentional)
+  'if (x === undefined) { handleUndefined(); }',
+  'if (typeof x !== "undefined") { }',
+  
+  // NaN check (special case)
+  'if (Number.isNaN(x)) { }',
+  'if (x !== x) { }', // NaN !== NaN pattern
+  
+  // Empty string check (intentional)
+  'if (str === "") { handleEmpty(); }',
+  'if (str !== "") { handleNonEmpty(); }',
+];
+
+const invalidFalsyValues = [
+  // Null as constant condition
+  {
+    code: 'if (null) { unreachable(); }',
+    errors: [{ messageId: 'constantCondition' }],
+    output: '',
+  },
+  // Undefined as constant condition
+  {
+    code: 'if (undefined) { unreachable(); }',
+    errors: [{ messageId: 'constantCondition' }],
+    output: '',
+  },
+  // NaN as constant condition
+  {
+    code: 'if (NaN) { unreachable(); }',
+    errors: [{ messageId: 'constantCondition' }],
+    output: '',
+  },
+];
+
+// Truthy Values - Non-boolean truthy constants
+const invalidTruthyValues = [
+  // Non-empty string
+  {
+    code: 'if ("hello") { alwaysRuns(); }',
+    errors: [{ messageId: 'constantCondition' }],
+    output: 'alwaysRuns();',
+  },
+  // Positive number
+  {
+    code: 'if (42) { alwaysRuns(); }',
+    errors: [{ messageId: 'constantCondition' }],
+    output: 'alwaysRuns();',
+  },
+  // Negative number
+  {
+    code: 'if (-1) { alwaysRuns(); }',
+    errors: [{ messageId: 'constantCondition' }],
+    output: 'alwaysRuns();',
+  },
+  // Object literal
+  {
+    code: 'if ({}) { alwaysRuns(); }',
+    errors: [{ messageId: 'constantCondition' }],
+    output: 'alwaysRuns();',
+  },
+  // Array literal
+  {
+    code: 'if ([]) { alwaysRuns(); }',
+    errors: [{ messageId: 'constantCondition' }],
+    output: 'alwaysRuns();',
+  },
+];
+
+// Complex Ternaries - Edge cases for ternary simplification
+const validComplexTernaries = [
+  // Different boolean values (not redundant)
+  'const x = condition ? getValue() : false;',
+  'const y = test ? true : getDefault();',
+  
+  // Non-boolean values
+  'const result = x ? "yes" : "no";',
+  'const num = condition ? 1 : 0;',
+  
+  // Complex expressions
+  'const value = x ? compute(a) : compute(b);', // Different args
+  'const result = test ? obj.method() : other.method();', // Different objects
+];
+
+const invalidComplexTernaries = [
+  // Boolean() wrapper pattern
+  {
+    code: 'const bool = x ? true : false;',
+    errors: [{ messageId: 'redundantTernary' }],
+    output: 'const bool = Boolean(x);',
+  },
+  // Negation pattern
+  {
+    code: 'const inverted = x ? false : true;',
+    errors: [{ messageId: 'redundantTernary' }],
+    output: 'const inverted = !x;',
+  },
+  // Same literal value
+  {
+    code: 'const same = condition ? 42 : 42;',
+    errors: [{ messageId: 'redundantTernary' }],
+    output: 'const same = 42;',
+  },
+  // Same variable
+  {
+    code: 'return test ? result : result;',
+    errors: [{ messageId: 'redundantTernary' }],
+    output: 'return result;',
+  },
+];
+
+// Nested Conditionals - Multiple levels
+const validNestedConditionals = [
+  // Nested with different conditions
+  'if (x) { if (y) { doWork(); } }',
+  'const result = a ? (b ? 1 : 2) : 3;',
+];
+
+// Logical Expressions - Complex boolean logic
+const validLogicalExpressions = [
+  // Short-circuit evaluation (intentional)
+  'if (x && y) { }',
+  'if (a || b) { }',
+  'const value = x || defaultValue;',
+  'const safe = obj && obj.property;',
+  
+  // Nullish coalescing
+  'const value = x ?? defaultValue;',
+];
+
+const invalidBasicTests = [
     // Constant conditions
     {
       code: 'if (true) { doSomething(); }',
@@ -162,5 +305,24 @@ ruleTester.run("no-redundant-conditionals", rule, {
       errors: [{ messageId: 'redundantTernary' }],
       output: 'const x = obj.prop;',
     },
+];
+
+//------------------------------------------------------------------------------
+// Run All Tests
+//------------------------------------------------------------------------------
+
+ruleTester.run("no-redundant-conditionals", rule, {
+  valid: [
+    ...validBasicTests,
+    ...validFalsyValues,
+    ...validComplexTernaries,
+    ...validNestedConditionals,
+    ...validLogicalExpressions
   ],
+  invalid: [
+    ...invalidBasicTests,
+    ...invalidFalsyValues,
+    ...invalidTruthyValues,
+    ...invalidComplexTernaries
+  ]
 });
