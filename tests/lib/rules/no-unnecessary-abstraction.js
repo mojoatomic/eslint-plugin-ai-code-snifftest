@@ -385,10 +385,20 @@ function compute(x) { return x * 2; }
 wrapper(5);
     `,
   },
-  // Export const
+  // Export const (arrow)
   {
     code: `
 export const wrapper = (x) => compute(x);
+function compute(x) { return x * 2; }
+wrapper(5);
+    `,
+  },
+  // Export const (function expression) - should be skipped by rule (public API)
+  {
+    code: `
+export const wrapper = function(x) {
+  return compute(x);
+};
 function compute(x) { return x * 2; }
 wrapper(5);
     `,
