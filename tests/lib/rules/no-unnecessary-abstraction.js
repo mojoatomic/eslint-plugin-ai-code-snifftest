@@ -16,9 +16,13 @@ const rule = require("../../../lib/rules/no-unnecessary-abstraction"),
 // Tests
 //------------------------------------------------------------------------------
 
-const ruleTester = new RuleTester({ languageOptions: { ecmaVersion: 2015 } });
-ruleTester.run("no-unnecessary-abstraction", rule, {
-  valid: [
+const ruleTester = new RuleTester({ languageOptions: { ecmaVersion: 2021, sourceType: 'module' } });
+
+//------------------------------------------------------------------------------
+// Basic Functionality Tests
+//------------------------------------------------------------------------------
+
+const validBasicTests = [
     // Function used multiple times - not a wrapper issue
     {
       code: `
@@ -199,9 +203,167 @@ const o = { data: { transform() { return 1; } } };
 process(o);
       `,
     },
-  ],
+];
 
-  invalid: [
+//------------------------------------------------------------------------------
+// Phase 1: Critical Edge Cases
+//------------------------------------------------------------------------------
+
+// Recursive Functions - Should NEVER be inlined
+const validRecursive = [
+  // Direct recursion
+  {
+    code: `
+function factorial(n) {
+  return n <= 1 ? 1 : n * factorial(n - 1);
+}
+factorial(5);
+    `,
+  },
+  // Mutual recursion
+  {
+    code: `
+function isEven(n) {
+  return n === 0 ? true : isOdd(n - 1);
+}
+function isOdd(n) {
+  return n === 0 ? false : isEven(n - 1);
+}
+isEven(4);
+    `,
+  },
+];
+
+// Closures - Functions capturing state from outer scope
+const validClosures = [
+  // Captures variable from outer scope
+  {
+    code: `
+function makeCounter() {
+  let count = 0;
+  return function increment() {
+    return ++count;
+  };
+}
+const counter = makeCounter();
+counter();
+    `,
+  },
+  // Captures parameter from outer function
+  {
+    code: `
+function multiplier(factor) {
+  return function multiply(x) {
+    return factor * x;
+  };
+}
+const double = multiplier(2);
+double(5);
+    `,
+  },
+];
+
+// This Binding - Functions that use 'this'
+const validThisBinding = [
+  // Method using 'this'
+  {
+    code: `
+const obj = {
+  value: 42,
+  getValue() {
+    return this.value;
+  }
+};
+obj.getValue();
+    `,
+  },
+  // Function with explicit this binding
+  {
+    code: `
+function wrapper(x) {
+  return this.compute(x);
+}
+const ctx = { compute(x) { return x * 2; } };
+wrapper.call(ctx, 5);
+    `,
+  },
+];
+
+// Async/Generator Functions - Special function types
+const validAsyncGenerator = [
+  // Async function
+  {
+    code: `
+async function fetchData(url) {
+  return await fetch(url);
+}
+fetchData('https://api.example.com');
+    `,
+  },
+  // Generator function
+  {
+    code: `
+function* generate(n) {
+  yield n;
+  yield n + 1;
+}
+const gen = generate(1);
+gen.next();
+    `,
+  },
+  // Async generator
+  {
+    code: `
+async function* asyncGen() {
+  yield await Promise.resolve(1);
+}
+const ag = asyncGen();
+ag.next();
+    `,
+  },
+];
+
+// IIFE Patterns - Immediately Invoked Function Expressions
+const validIIFE = [
+  // Classic IIFE
+  {
+    code: `
+(function() {
+  console.log('IIFE');
+})();
+    `,
+  },
+  // Arrow IIFE
+  {
+    code: `
+(() => {
+  return 42;
+})();
+    `,
+  },
+];
+
+// Different Scopes - Functions called in different contexts
+const validDifferentScopes = [
+  // Function called in different scopes
+  {
+    code: `
+function helper(x) { return x * 2; }
+if (true) { helper(5); }
+else { helper(10); }
+    `,
+  },
+  // Function called in loop
+  {
+    code: `
+function process(item) { return item.toUpperCase(); }
+const items = ['a', 'b'];
+for (const item of items) { process(item); }
+    `,
+  },
+];
+
+const invalidBasicTests = [
     // Basic trivial wrapper - function declaration
     {
       code: `function calculateTax(amount) {
@@ -317,5 +479,23 @@ formatUser({ name: 'Alice' });`,
         }],
       }],
     },
+];
+
+//------------------------------------------------------------------------------
+// Run All Tests
+//------------------------------------------------------------------------------
+
+ruleTester.run("no-unnecessary-abstraction", rule, {
+  valid: [
+    ...validBasicTests,
+    ...validRecursive,
+    ...validClosures,
+    ...validThisBinding,
+    ...validAsyncGenerator,
+    ...validIIFE,
+    ...validDifferentScopes
   ],
+  invalid: [
+    ...invalidBasicTests
+  ]
 });
