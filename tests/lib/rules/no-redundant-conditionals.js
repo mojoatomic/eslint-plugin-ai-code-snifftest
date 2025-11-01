@@ -32,10 +32,6 @@ const validBasicTests = [
     'if (value) { doWork(); }',
     'const result = x ? getValue() : getOther();',
     
-    // Intentional infinite loops
-    'while (true) { break; }',
-    'for (;;) { work(); }',
-    
     // Ternaries with different values
     'const x = condition ? 1 : 2;',
     'const y = test ? "yes" : "no";',
@@ -341,6 +337,44 @@ const invalidBasicTests = [
       code: 'const x = condition ? obj.prop : obj.prop;',
       errors: [{ messageId: 'redundantTernary' }],
       output: 'const x = obj.prop;',
+    },
+
+    // Loop support - WhileStatement
+    {
+      code: 'while (false) { unreachable(); }',
+      errors: [{ messageId: 'constantCondition' }],
+      output: ''
+    },
+    {
+      code: 'while (true) { work(); }',
+      errors: [{ messageId: 'constantCondition' }],
+    },
+    {
+      code: 'while (+0) { unreachable(); }',
+      errors: [{ messageId: 'constantCondition' }],
+      output: ''
+    },
+    {
+      code: 'while ([]) { work(); }',
+      errors: [{ messageId: 'constantCondition' }],
+    },
+
+    // Loop support - ForStatement
+    {
+      code: 'for (;;) { work(); }',
+      errors: [{ messageId: 'constantCondition' }],
+    },
+    {
+      code: 'for (; false; ) { unreachable(); }',
+      errors: [{ messageId: 'constantCondition' }],
+      output: ''
+    },
+
+    // Loop support - DoWhileStatement
+    {
+      code: 'do { once(); } while (false);',
+      errors: [{ messageId: 'constantCondition' }],
+      output: 'once();'
     },
 ];
 
