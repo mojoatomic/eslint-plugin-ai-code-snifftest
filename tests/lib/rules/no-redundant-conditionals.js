@@ -229,6 +229,32 @@ const invalidBasicTests = [
       errors: [{ messageId: 'constantCondition' }],
       output: '',
     },
+    // Else-clause optimization
+    {
+      code: 'if (true) { A(); } else { B(); }',
+      errors: [{ messageId: 'constantCondition' }],
+      output: 'A();',
+    },
+    {
+      code: 'if (false) { A(); } else { B(); }',
+      errors: [{ messageId: 'constantCondition' }],
+      output: 'B();',
+    },
+    {
+      code: 'if (false) A(); else B();',
+      errors: [{ messageId: 'constantCondition' }],
+      output: 'B();',
+    },
+    {
+      code: 'if (true) A(); else B();',
+      errors: [{ messageId: 'constantCondition' }],
+      output: 'A();',
+    },
+    {
+      code: 'if (false) { A1(); } else if (x) { B1(); }',
+      errors: [{ messageId: 'constantCondition' }],
+      output: 'if (x) { B1(); }',
+    },
     {
       code: 'if (1) { doSomething(); }',
       errors: [{ messageId: 'constantCondition' }],
