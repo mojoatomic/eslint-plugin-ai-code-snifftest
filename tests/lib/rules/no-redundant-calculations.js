@@ -325,6 +325,37 @@ const validModernJS = [
   // Empty - numeric separators are parsed away by JavaScript
 ];
 
+// Branch Coverage - Tests for uncovered code paths
+const invalidBranchCoverage = [
+  // Unary plus operator (line 77) - forces + branch
+  {
+    code: 'const x = +5 + +3;',
+    errors: [{ messageId: 'redundantCalculation' }],
+    output: 'const x = 8;'
+  },
+  // Mixed unary operators
+  {
+    code: 'const x = +10 - -5;',
+    errors: [{ messageId: 'redundantCalculation' }],
+    output: 'const x = 15;'
+  }
+];
+
+// Edge Case Coverage - Expression types that return null
+const validEdgeCoverage = [
+  // Unsupported unary operators (line 79) - forces default case
+  { code: 'const x = !true + 1;' }, // ! operator not supported
+  { code: 'const x = typeof 5 + 1;' }, // typeof not supported
+  { code: 'const x = ~5 + 1;' }, // bitwise NOT not supported
+  // Mixed expression types that cause null evaluation (lines 88-89)
+  { code: 'const x = (function(){}) + 1;' }, // Function expression
+  { code: 'const x = [] + 1;' }, // Array literal
+  { code: 'const x = {} + 1;' }, // Object literal
+  // Non-expression nodes (lines 108-109)
+  { code: 'const x = arguments + 1;' }, // Identifier
+  { code: 'const x = this + 1;' } // ThisExpression
+];
+
 const invalidModernJS = [
   // Numeric separators (parsed as regular numbers by JS)
   {
@@ -373,12 +404,14 @@ ruleTester.run("no-redundant-calculations", rule, {
     ...validBasicTests,
     ...validNumericBoundaries,
     ...validFalsePositives,
-    ...validModernJS
+    ...validModernJS,
+    ...validEdgeCoverage
   ],
   invalid: [
     ...invalidBasicTests,
     ...invalidNumericBoundaries,
     ...invalidOperatorPrecedence,
-    ...invalidModernJS
+    ...invalidModernJS,
+    ...invalidBranchCoverage
   ]
 });

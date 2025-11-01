@@ -385,10 +385,20 @@ function compute(x) { return x * 2; }
 wrapper(5);
     `,
   },
-  // Export const
+  // Export const (arrow)
   {
     code: `
 export const wrapper = (x) => compute(x);
+function compute(x) { return x * 2; }
+wrapper(5);
+    `,
+  },
+  // Export const (function expression) - should be skipped by rule (public API)
+  {
+    code: `
+export const wrapper = function(x) {
+  return compute(x);
+};
 function compute(x) { return x * 2; }
 wrapper(5);
     `,
@@ -671,6 +681,71 @@ formatUser({ name: 'Alice' });`,
     },
 ];
 
+// Fixer Whitespace/Suggestion Output - Validate fixer trimming behavior
+const invalidFixerWhitespace = [
+  // 1) Same-line preceding code: left-trim eats preceding space; newline after wrapper is removed
+  {
+    code: `const a = 1; function wrapper(x) { return compute(x); }\nfunction compute(x) { return x * 2; }\nwrapper(5);`,
+    errors: [{
+      messageId: 'unnecessaryWrapper',
+      data: { name: 'wrapper', wrappedName: 'compute' },
+      suggestions: [{
+        messageId: 'inlineFunction',
+        // Note: space before function is removed; newline after wrapper is removed
+        output: `const a = 1;function compute(x) { return x * 2; }\nwrapper(5);`
+      }]
+    }],
+  },
+  // 2) Trailing spaces + newline after wrapper: right-trim eats spaces and one newline
+  {
+    code: `function wrapper(x) { return compute(x); }    \nfunction compute(x) { return x * 2; }\nwrapper(5);`,
+    errors: [{
+      messageId: 'unnecessaryWrapper',
+      data: { name: 'wrapper', wrappedName: 'compute' },
+      suggestions: [{
+        messageId: 'inlineFunction',
+        output: `function compute(x) { return x * 2; }\nwrapper(5);`
+      }]
+    }],
+  },
+  // 3) Clean case: function at start of line
+  {
+    code: `function wrapper(x) { return compute(x); }\nfunction compute(x) { return x * 2; }\nwrapper(5);`,
+    errors: [{
+      messageId: 'unnecessaryWrapper',
+      data: { name: 'wrapper', wrappedName: 'compute' },
+      suggestions: [{
+        messageId: 'inlineFunction',
+        output: `function compute(x) { return x * 2; }\nwrapper(5);`
+      }]
+    }],
+  },
+  // 4) Next token on same line (no newline): right-trim eats spaces but not next token
+  {
+    code: `function wrapper(x) { return compute(x); }   console.log('x');\nfunction compute(x) { return x * 2; }\nwrapper(5);`,
+    errors: [{
+      messageId: 'unnecessaryWrapper',
+      data: { name: 'wrapper', wrappedName: 'compute' },
+      suggestions: [{
+        messageId: 'inlineFunction',
+        output: `console.log('x');\nfunction compute(x) { return x * 2; }\nwrapper(5);`
+      }]
+    }],
+  },
+  // 5) CRLF handling: trailing CRLF is removed as a single newline by the fixer loop
+  {
+    code: "function wrapper(x) { return compute(x); }\r\nfunction compute(x) { return x * 2; }\nwrapper(5);",
+    errors: [{
+      messageId: 'unnecessaryWrapper',
+      data: { name: 'wrapper', wrappedName: 'compute' },
+      suggestions: [{
+        messageId: 'inlineFunction',
+        output: `function compute(x) { return x * 2; }\nwrapper(5);`
+      }]
+    }],
+  },
+];
+
 //------------------------------------------------------------------------------
 // Run All Tests
 //------------------------------------------------------------------------------
@@ -693,6 +768,7 @@ ruleTester.run("no-unnecessary-abstraction", rule, {
     ...validNameCollisions
   ],
   invalid: [
-    ...invalidBasicTests
+    ...invalidBasicTests,
+    ...invalidFixerWhitespace
   ]
 });

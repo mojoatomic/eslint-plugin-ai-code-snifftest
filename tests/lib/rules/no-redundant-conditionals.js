@@ -165,6 +165,43 @@ const invalidComplexTernaries = [
   },
 ];
 
+// Coverage Gap Tests - Additional edge cases
+const invalidCoverageGaps = [
+  // CRITICAL: Non-block statement with constant condition (line 180-181)
+  {
+    code: 'if (true) doSomething();',
+    errors: [{ messageId: 'constantCondition' }],
+    output: 'doSomething();'
+  },
+  {
+    code: 'if (false) unreachable();',
+    errors: [{ messageId: 'constantCondition' }],
+    output: ''
+  },
+  // NICE-TO-HAVE: Unary plus operator (line 82-83)
+  {
+    code: 'if (+1) { alwaysRuns(); }',
+    errors: [{ messageId: 'constantCondition' }],
+    output: 'alwaysRuns();'
+  },
+  {
+    code: 'if (+0) { unreachable(); }',
+    errors: [{ messageId: 'constantCondition' }],
+    output: ''
+  },
+  // NICE-TO-HAVE: Negation operator (line 85-87)
+  {
+    code: 'if (!0) { alwaysRuns(); }',
+    errors: [{ messageId: 'constantCondition' }],
+    output: 'alwaysRuns();'
+  },
+  {
+    code: 'if (!1) { unreachable(); }',
+    errors: [{ messageId: 'constantCondition' }],
+    output: ''
+  }
+];
+
 // Nested Conditionals - Multiple levels
 const validNestedConditionals = [
   // Nested with different conditions
@@ -323,6 +360,7 @@ ruleTester.run("no-redundant-conditionals", rule, {
     ...invalidBasicTests,
     ...invalidFalsyValues,
     ...invalidTruthyValues,
-    ...invalidComplexTernaries
+    ...invalidComplexTernaries,
+    ...invalidCoverageGaps
   ]
 });
