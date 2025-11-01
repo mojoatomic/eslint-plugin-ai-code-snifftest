@@ -333,6 +333,33 @@ const invalidConstantFolding = [
     code: 'if (2 * 2 !== 4) { A(); } else { B(); }',
     errors: [{ messageId: 'constantCondition' }],
     output: 'B();'
+  },
+  // Undefined/NaN edge equality
+  {
+    code: 'if (undefined === undefined) { A(); } else { B(); }',
+    errors: [{ messageId: 'constantCondition' }],
+    output: 'A();'
+  },
+  {
+    code: 'if (NaN === NaN) { A(); } else { B(); }',
+    errors: [{ messageId: 'constantCondition' }],
+    output: 'B();'
+  },
+  {
+    code: 'if (NaN !== NaN) { A(); } else { B(); }',
+    errors: [{ messageId: 'constantCondition' }],
+    output: 'A();'
+  },
+  // Logical with literal truthy/falsy
+  {
+    code: 'if ({} || cond) { A(); } else { B(); }',
+    errors: [{ messageId: 'constantCondition' }],
+    output: 'A();'
+  },
+  {
+    code: 'if (false && []) { A(); } else { B(); }',
+    errors: [{ messageId: 'constantCondition' }],
+    output: 'B();'
   }
 ];
 
@@ -552,6 +579,35 @@ const invalidSwitchConstants = [
   {
     code: 'switch (0) { default: C(); case 1: D(); break; }',
     errors: [{ messageId: 'redundantSwitch' }],
+  },
+  // Last matching case without break (safe: last case)
+  {
+    code: 'switch (1) { case 1: A(); }',
+    errors: [{ messageId: 'redundantSwitch' }],
+    output: 'A();'
+  },
+  // Last default without break (safe: last case)
+  {
+    code: 'switch (0) { default: C(); }',
+    errors: [{ messageId: 'redundantSwitch' }],
+    output: 'C();'
+  },
+  // Empty switch → remove
+  {
+    code: 'switch (1) { }',
+    errors: [{ messageId: 'redundantSwitch' }],
+    output: ''
+  },
+  // Terminal statements (return/throw) are safe
+  {
+    code: 'function f(){ switch (1) { case 1: return A(); break; default: return B(); } }',
+    errors: [{ messageId: 'redundantSwitch' }],
+    output: 'function f(){ return A(); }'
+  },
+  {
+    code: 'function f(){ switch (2) { default: throw err; } }',
+    errors: [{ messageId: 'redundantSwitch' }],
+    output: 'function f(){ throw err; }'
   },
 ];
 
