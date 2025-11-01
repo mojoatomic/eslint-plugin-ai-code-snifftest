@@ -46,6 +46,7 @@ export default defineConfig([
 | :--------------------------------------------------------------------- | :---------------------------------------------------------------------- | :- | :- |
 | [no-equivalent-branches](docs/rules/no-equivalent-branches.md)         | Detect if/else branches that do the same thing                          | 🔧 |    |
 | [no-redundant-calculations](docs/rules/no-redundant-calculations.md)   | Detect redundant calculations that should be computed at compile time   | 🔧 |    |
+| [no-redundant-conditionals](docs/rules/no-redundant-conditionals.md)   | Simplify redundant conditional expressions                              | 🔧 |    |
 | [no-unnecessary-abstraction](docs/rules/no-unnecessary-abstraction.md) | Suggest inlining trivial single-use wrapper functions that add no value |    | 💡 |
 | [prefer-simpler-logic](docs/rules/prefer-simpler-logic.md)             | Simplify boolean expressions and remove redundant logic                 | 🔧 |    |
 
