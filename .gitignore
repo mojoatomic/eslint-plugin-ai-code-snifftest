@@ -38,7 +38,6 @@ Thumbs.db
 
 # Build
 dist/
-lib/
 *.tgz
 
 # Environment
