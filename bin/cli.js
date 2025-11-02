@@ -19,13 +19,44 @@ function parseArgs(argv) {
   return out;
 }
 
+function loadConstantsLib() {
+  try {
+    return require(path.join(__dirname, '../lib/constants'));
+  } catch {
+    return null;
+  }
+}
+
+function enrichConfigWithDomains(cfg) {
+  const lib = loadConstantsLib();
+  if (!lib || !lib.DOMAINS) return cfg;
+  const out = JSON.parse(JSON.stringify(cfg));
+  out.constants = out.constants || {};
+  const selected = [out.domains.primary, ...(out.domains.additional || [])].filter(Boolean);
+  for (const d of selected) {
+    const mod = lib.DOMAINS[d];
+    if (mod) {
+      if (Array.isArray(mod.constants) && mod.constants.length) {
+        out.constants[d] = Array.from(new Set(mod.constants)).slice(0, 50);
+      }
+    }
+  }
+  // sensible defaults for constantResolution
+  out.constantResolution = out.constantResolution || {};
+  if (selected.includes('geometry')) out.constantResolution['360'] = 'geometry';
+  if (selected.includes('astronomy')) out.constantResolution['365.25'] = 'astronomy';
+  if (selected.includes('math')) out.constantResolution['3.14159'] = 'math';
+  return out;
+}
+
 function writeConfig(cwd, cfg) {
   const file = path.join(cwd, '.ai-coding-guide.json');
   if (fs.existsSync(file) && !process.env.FORCE_AI_CONFIG) {
     console.log(`Found existing ${file} — use FORCE_AI_CONFIG=1 to overwrite.`);
     return 0;
   }
-  fs.writeFileSync(file, JSON.stringify(cfg, null, 2) + '\n');
+  const enriched = enrichConfigWithDomains(cfg);
+  fs.writeFileSync(file, JSON.stringify(enriched, null, 2) + '\n');
   console.log(`Wrote ${file}`);
   return 0;
 }
@@ -92,17 +123,56 @@ async function initInteractive(cwd) {
   }
 }
 
+function formatList(title, items) {
+  if (!items || !items.length) return '';
+  return `### ${title}\n` + items.map((x)=>`- ${x}`).join('\n') + '\n\n';
+}
+
 function writeGuideMd(cwd, cfg) {
   const file = path.join(cwd, '.ai-coding-guide.md');
-  const md = `# AI Coding Guide\n\nPrimary domain: ${cfg.domains.primary}\nAdditional domains: ${cfg.domains.additional.join(', ') || '(none)'}\nDomain priority: ${cfg.domainPriority.join(', ')}\n\nGuidance:\n- Use domain annotations (@domain/@domains) for ambiguous constants\n- Prefer constants and terms from active domains\n`;
+  const doms = [cfg.domains.primary, ...(cfg.domains.additional||[])].filter(Boolean);
+  const lib = loadConstantsLib();
+  let md = `# AI Coding Guide\n\nPrimary domain: ${cfg.domains.primary}\nAdditional domains: ${cfg.domains.additional.join(', ') || '(none)'}\nDomain priority: ${cfg.domainPriority.join(', ')}\n\n`;
+  md += `## Guidance\n- Use @domain/@domains annotations for ambiguous constants\n- Prefer constants and terms from active domains\n\n`;
+  if (lib && lib.DOMAINS) {
+    for (const d of doms) {
+      const mod = lib.DOMAINS[d];
+      if (!mod) continue;
+      md += `## Domain: ${d}\n\n`;
+      const cn = Array.isArray(mod.constants) ? mod.constants.slice(0, 20) : [];
+      const terms = Array.isArray(mod.terms) ? mod.terms.slice(0, 20) : [];
+      if (cn.length) {
+        md += '### Constants\n\n```javascript\n' + cn.map(v=>`const C_${String(v).replace(/[^A-Za-z0-9]+/g,'_')} = ${v};`).join('\n') + '\n```\n\n';
+      }
+      md += formatList('Terminology', terms);
+    }
+  }
+  md += `\n### Examples\n\n✅ const isOrbiting = true;\n✅ const orbitalPeriodDays = 365.25;\n❌ const data = calculate(); // too generic\n`;
   fs.writeFileSync(file, md);
   console.log(`Wrote ${file}`);
 }
 
 function writeAgentsMd(cwd, cfg) {
   const file = path.join(cwd, 'AGENTS.md');
-  const md = `# AI Rules\n\nPrimary domain: ${cfg.domains.primary}\nAdditional: ${cfg.domains.additional.join(', ') || '(none)'}\nPriority: ${cfg.domainPriority.join(', ')}\n\n## Naming\n- Style: ${cfg.naming.style}\n- Booleans: isX/hasX/shouldX/canX\n- Async: fetchX/loadX/saveX\n\n## Guidance\n- Use @domain/@domains annotations for ambiguous constants\n- Prefer constants/terms from active domains\n\n---\n*See .ai-coding-guide.md for details*\n`;
+  const doms = [cfg.domains.primary, ...(cfg.domains.additional||[])].filter(Boolean);
+  const lib = loadConstantsLib();
+  let md = `# AI Coding Rules\n\nDomains: ${doms.join(', ')}\nPriority: ${cfg.domainPriority.join(' > ')}\n\n## Naming\n- Style: ${cfg.naming.style}\n- Booleans: isX/hasX/shouldX/canX\n- Async: fetchX/loadX/saveX\n\n## Guidance\n- Use @domain/@domains annotations for ambiguous constants\n- Prefer constants/terms from active domains\n\n`;
+  if (lib && lib.DOMAINS) {
+    for (const d of doms) {
+      const mod = lib.DOMAINS[d];
+      if (!mod) continue;
+      md += `## Domain: ${d}\n`;
+      const cn = Array.isArray(mod.constants) ? mod.constants.slice(0, 10) : [];
+      if (cn.length) {
+        md += '\n### Constants\n```javascript\n' + cn.map(v=>`const K_${String(v).replace(/[^A-Za-z0-9]+/g,'_')} = ${v};`).join('\n') + '\n```\n\n';
+      }
+      const terms = Array.isArray(mod.terms) ? mod.terms.slice(0, 15) : [];
+      if (terms.length) md += formatList('Terminology', terms);
+    }
+  }
+  md += `---\n*See .ai-coding-guide.md for details*\n`;
   fs.writeFileSync(file, md);
+  console.log(`Wrote ${file}`);
   console.log(`Wrote ${file}`);
 }
 
@@ -112,7 +182,9 @@ function writeCursorRules(cwd, cfg) {
     rules: [
       `Primary domain: ${cfg.domains.primary}`,
       `Additional domains: ${cfg.domains.additional.join(', ')}`,
-      'Prefer explicit @domain annotations for ambiguous constants.'
+      'Prefer explicit @domain annotations for ambiguous constants.',
+      'Use UPPER_SNAKE_CASE for true constants; camelCase for variables.',
+      'Boolean vars must be prefixed: is/has/should/can/did/will.'
     ]
   };
   fs.writeFileSync(file, JSON.stringify(payload, null, 2) + '\n');
