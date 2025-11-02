@@ -23,6 +23,12 @@ describe('constants library', function () {
     assert.ok(DOMAINS.finance);
     assert.ok(DOMAINS.geometry);
     assert.ok(DOMAINS.statistics);
+    assert.ok(DOMAINS.biology);
+    assert.ok(DOMAINS.chemistry);
+    assert.ok(DOMAINS.cs);
+    assert.ok(DOMAINS.networking);
+    assert.ok(DOMAINS.graphics);
+    assert.ok(DOMAINS.geodesy);
   });
 
   it('detects physical constants', function () {
@@ -57,6 +63,12 @@ describe('constants library', function () {
     assert.strictEqual(getDomainForName('audioFrequency'), 'acoustics');
     assert.strictEqual(getDomainForName('standardGravity'), 'physics');
     assert.strictEqual(getDomainForName('unixEpochMs'), 'time');
+    assert.strictEqual(getDomainForName('avogadroConstant'), 'chemistry');
+    assert.strictEqual(getDomainForName('hashMap'), 'cs');
+    assert.strictEqual(getDomainForName('ipAddress'), 'networking');
+    assert.strictEqual(getDomainForName('rgbaColor'), 'graphics');
+    assert.strictEqual(getDomainForName('geodesicLatitude'), 'geodesy');
+    assert.strictEqual(getDomainForName('genomeSequence'), 'biology');
     assert.strictEqual(getDomainForName('fooBar'), null);
   });
 });
