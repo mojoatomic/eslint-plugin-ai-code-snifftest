@@ -277,7 +277,8 @@ function init(cwd, args) {
     constants: {},
     terms: { entities: [], properties: [], actions: [] },
     naming: { style: 'camelCase', booleanPrefix: ['is','has','should','can'], asyncPrefix: ['fetch','load','save'], pluralizeCollections: true },
-    antiPatterns: { forbiddenNames: [], forbiddenTerms: [] }
+antiPatterns: { forbiddenNames: [], forbiddenTerms: [] },
+    experimentalExternalConstants: false
   };
   const code = writeConfig(cwd, cfg);
   const hasWarp = fs.existsSync(path.join(cwd, 'WARP.md'));
