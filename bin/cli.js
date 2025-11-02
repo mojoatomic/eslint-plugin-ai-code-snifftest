@@ -69,10 +69,36 @@ async function initInteractive(cwd) {
       naming: { style: 'camelCase', booleanPrefix: ['is','has','should','can'], asyncPrefix: ['fetch','load','save'], pluralizeCollections: true },
       antiPatterns: { forbiddenNames: [], forbiddenTerms: [] }
     };
-    return writeConfig(cwd, cfg);
+    const code = writeConfig(cwd, cfg);
+    const gen = (await ask(rl, 'Generate .ai-coding-guide.md and .cursorrules? (Y/n): ')).trim().toLowerCase();
+    if (!gen || gen.startsWith('y')) {
+      writeGuideMd(cwd, cfg);
+      writeCursorRules(cwd, cfg);
+    }
+    return code;
   } finally {
     rl.close();
   }
+}
+
+function writeGuideMd(cwd, cfg) {
+  const file = path.join(cwd, '.ai-coding-guide.md');
+  const md = `# AI Coding Guide\n\nPrimary domain: ${cfg.domains.primary}\nAdditional domains: ${cfg.domains.additional.join(', ') || '(none)'}\nDomain priority: ${cfg.domainPriority.join(', ')}\n\nGuidance:\n- Use domain annotations (@domain/@domains) for ambiguous constants\n- Prefer constants and terms from active domains\n`;
+  fs.writeFileSync(file, md);
+  console.log(`Wrote ${file}`);
+}
+
+function writeCursorRules(cwd, cfg) {
+  const file = path.join(cwd, '.cursorrules');
+  const payload = {
+    rules: [
+      `Primary domain: ${cfg.domains.primary}`,
+      `Additional domains: ${cfg.domains.additional.join(', ')}`,
+      'Prefer explicit @domain annotations for ambiguous constants.'
+    ]
+  };
+  fs.writeFileSync(file, JSON.stringify(payload, null, 2) + '\n');
+  console.log(`Wrote ${file}`);
 }
 
 function init(cwd, args) {
@@ -87,7 +113,10 @@ function init(cwd, args) {
     naming: { style: 'camelCase', booleanPrefix: ['is','has','should','can'], asyncPrefix: ['fetch','load','save'], pluralizeCollections: true },
     antiPatterns: { forbiddenNames: [], forbiddenTerms: [] }
   };
-  return writeConfig(cwd, cfg);
+  const code = writeConfig(cwd, cfg);
+  if (args.md) writeGuideMd(cwd, cfg);
+  if (args.cursor) writeCursorRules(cwd, cfg);
+  return code;
 }
 
 function usage() {
