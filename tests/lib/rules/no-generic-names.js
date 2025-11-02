@@ -13,6 +13,9 @@ ruleTester.run("no-generic-names", rule, {
     { code: 'const track = getTrack();', options: [{ forbiddenNames: ['data','result'] }] },
     { code: 'function userProfile(){}', options: [{ forbiddenNames: ['temp','item'] }] },
     { code: 'const frequencyHz = 440;', options: [{ forbiddenTerms: ['song','audio','file'] }] },
+    // New: identifier contains recognized domain term; should not be flagged as generic
+    { code: 'const orbitalResult = 1;', options: [{ forbiddenNames: ['result'] }] },
+    { code: 'const audioData = 2;', options: [{ forbiddenNames: ['data'] }] },
   ],
   invalid: [
     {

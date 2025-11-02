@@ -4,6 +4,8 @@
 
 Flags generic identifiers like `data`, `result`, `temp`, or those containing forbidden domain terms (e.g., `song`) based on your project’s `.ai-coding-guide.json` or rule options.
 
+Note: Names that already include recognized domain terms (from the constants library/config) are skipped to avoid penalizing domain-rich identifiers (e.g., `orbitalResult`, `audioData`).
+
 ## Rule Details
 
 This rule aims to encourage descriptive, domain-appropriate names.
