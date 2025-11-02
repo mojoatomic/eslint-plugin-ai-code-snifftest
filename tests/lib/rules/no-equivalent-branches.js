@@ -315,6 +315,23 @@ const invalidBasicTests = [
     },
 ];
 
+// Multi-instance: multiple independent if/else blocks in one file
+const invalidMultiInstance = [
+  {
+    code: `
+if (a) { fn(); } else { fn(); }
+if (b) { fn(); } else { fn(); }
+if (c) { fn(); } else { fn(); }
+`,
+    errors: Array(3).fill({ messageId: 'equivalentBranches' }),
+    output: `
+fn();
+fn();
+fn();
+`
+  }
+];
+
 //------------------------------------------------------------------------------
 // Run All Tests
 //------------------------------------------------------------------------------
@@ -330,6 +347,7 @@ ruleTester.run("no-equivalent-branches", rule, {
   ],
   invalid: [
     ...invalidBasicTests,
-    ...invalidSideEffects
+    ...invalidSideEffects,
+    ...invalidMultiInstance
   ]
 });

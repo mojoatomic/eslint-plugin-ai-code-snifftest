@@ -357,6 +357,27 @@ const invalidBasicTests = [
     },
 ];
 
+// Multi-instance: multiple boolean comparisons simplified in one block
+const invalidMultiInstance = [
+  {
+    code: `
+if (x === true) {}
+if (isReady === true) {}
+if (flag === false) {}
+`,
+    errors: [
+      { messageId: 'unnecessaryComparison' },
+      { messageId: 'unnecessaryComparison' },
+      { messageId: 'unnecessaryComparison' }
+    ],
+    output: `
+if (x) {}
+if (isReady) {}
+if (!flag) {}
+`
+  }
+];
+
 //------------------------------------------------------------------------------
 // Run All Tests
 //------------------------------------------------------------------------------
@@ -373,6 +394,7 @@ ruleTester.run("prefer-simpler-logic", rule, {
   ],
   invalid: [
     ...invalidBasicTests,
-    ...invalidMixedTypes
+    ...invalidMixedTypes,
+    ...invalidMultiInstance
   ]
 });

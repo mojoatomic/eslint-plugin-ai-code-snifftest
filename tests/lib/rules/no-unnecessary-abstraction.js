@@ -746,6 +746,44 @@ const invalidFixerWhitespace = [
   },
 ];
 
+// Multi-instance: multiple trivial wrappers in one file (suggestions only)
+const invalidMultiInstance = [
+  {
+    code: `
+function w1(x) { return compute(x); }
+function w2(y) { return compute(y); }
+function compute(z) { return z * 2; }
+w1(1); w2(2);
+`,
+    errors: [
+      {
+        messageId: 'unnecessaryWrapper',
+        data: { name: 'w1', wrappedName: 'compute' },
+        suggestions: [{
+          messageId: 'inlineFunction',
+          output: `
+function w2(y) { return compute(y); }
+function compute(z) { return z * 2; }
+w1(1); w2(2);
+`
+        }]
+      },
+      {
+        messageId: 'unnecessaryWrapper',
+        data: { name: 'w2', wrappedName: 'compute' },
+        suggestions: [{
+          messageId: 'inlineFunction',
+          output: `
+function w1(x) { return compute(x); }
+function compute(z) { return z * 2; }
+w1(1); w2(2);
+`
+        }]
+      }
+    ]
+  }
+];
+
 //------------------------------------------------------------------------------
 // Run All Tests
 //------------------------------------------------------------------------------
@@ -769,6 +807,7 @@ ruleTester.run("no-unnecessary-abstraction", rule, {
   ],
   invalid: [
     ...invalidBasicTests,
-    ...invalidFixerWhitespace
+    ...invalidFixerWhitespace,
+    ...invalidMultiInstance
   ]
 });

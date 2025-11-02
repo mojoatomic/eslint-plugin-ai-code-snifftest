@@ -645,6 +645,69 @@ const invalidSwitchConstants = [
   },
 ];
 
+// Multi-instance: multiple constant conditions in one block
+const invalidMultiInstance = [
+  {
+    code: `
+if (true) A();
+if (false) B();
+if (1) C();
+`,
+    errors: [
+      { messageId: 'constantCondition' },
+      { messageId: 'constantCondition' },
+      { messageId: 'constantCondition' }
+    ],
+    output: `
+A();
+
+C();
+`
+  }
+];
+
+// Multi-instance: redundant ternaries in one block
+const invalidMultiInstanceTernaries = [
+  {
+    code: `
+const a = x ? true : false;
+const b = y ? false : true;
+const c = z ? value : value;
+`,
+    errors: [
+      { messageId: 'redundantTernary' },
+      { messageId: 'redundantTernary' },
+      { messageId: 'redundantTernary' }
+    ],
+    output: `
+const a = Boolean(x);
+const b = !y;
+const c = value;
+`
+  }
+];
+
+// Multi-instance: loop constants in one block
+const invalidMultiInstanceLoops = [
+  {
+    code: `
+while (false) { A(); }
+for (; false; ) { B(); }
+do { C(); } while (false);
+`,
+    errors: [
+      { messageId: 'constantCondition' },
+      { messageId: 'constantCondition' },
+      { messageId: 'constantCondition' }
+    ],
+    output: `
+
+
+C();
+`
+  }
+];
+
 //------------------------------------------------------------------------------
 // Run All Tests
 //------------------------------------------------------------------------------
@@ -664,6 +727,9 @@ ruleTester.run("no-redundant-conditionals", rule, {
     ...invalidComplexTernaries,
     ...invalidCoverageGaps,
     ...invalidConstantFolding,
-    ...invalidSwitchConstants
+    ...invalidSwitchConstants,
+    ...invalidMultiInstance,
+    ...invalidMultiInstanceTernaries,
+    ...invalidMultiInstanceLoops
   ]
 });
