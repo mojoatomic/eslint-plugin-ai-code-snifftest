@@ -276,6 +276,7 @@ function init(cwd, args) {
   const additional = (args.additional || '').split(',').map(s => s.trim()).filter(Boolean);
   const domainPriority = [primary, ...additional];
 const external = Boolean(args.external || args.experimentalExternalConstants);
+  const allowlist = (args.allowlist || '').split(',').map(s=>s.trim()).filter(Boolean);
   const cfg = {
     domains: { primary, additional },
     domainPriority,
@@ -283,8 +284,12 @@ const external = Boolean(args.external || args.experimentalExternalConstants);
     terms: { entities: [], properties: [], actions: [] },
     naming: { style: 'camelCase', booleanPrefix: ['is','has','should','can'], asyncPrefix: ['fetch','load','save'], pluralizeCollections: true },
     antiPatterns: { forbiddenNames: [], forbiddenTerms: [] },
-    experimentalExternalConstants: external
+    experimentalExternalConstants: external,
+    externalConstantsAllowlist: allowlist
   };
+  if (external && (!allowlist || allowlist.length === 0)) {
+    console.warn('Warning: --external used without allowlist; consider adding --allowlist to limit npm scope.');
+  }
   const code = writeConfig(cwd, cfg);
   const hasWarp = fs.existsSync(path.join(cwd, 'WARP.md'));
   if (args.md || args.yes) writeGuideMd(cwd, cfg);
