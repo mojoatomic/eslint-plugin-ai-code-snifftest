@@ -45,6 +45,7 @@ export default defineConfig([
 | Name                                                                   | Description                                                             | 🔧 | 💡 |
 | :--------------------------------------------------------------------- | :---------------------------------------------------------------------- | :- | :- |
 | [no-equivalent-branches](docs/rules/no-equivalent-branches.md)         | Detect if/else branches that do the same thing                          | 🔧 |    |
+| [no-generic-names](docs/rules/no-generic-names.md)                     | Flag generic names; enforce domain-specific naming                      |    |    |
 | [no-redundant-calculations](docs/rules/no-redundant-calculations.md)   | Detect redundant calculations that should be computed at compile time   | 🔧 | 💡 |
 | [no-redundant-conditionals](docs/rules/no-redundant-conditionals.md)   | Simplify redundant conditional expressions                              | 🔧 |    |
 | [no-unnecessary-abstraction](docs/rules/no-unnecessary-abstraction.md) | Suggest inlining trivial single-use wrapper functions that add no value |    | 💡 |
