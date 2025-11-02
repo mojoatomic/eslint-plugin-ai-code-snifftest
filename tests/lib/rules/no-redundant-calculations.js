@@ -416,6 +416,23 @@ const e = 19;
   }
 ];
 
+// Multi-instance (mixed contexts): array/object literals and function args in one block
+const invalidMultiInstanceMixed = [
+  {
+    code: `
+const arr = [1 + 2, 3 + 4, 5 - 5];
+const obj = { a: 6 * 7, b: 8 / 2, c: 9 % 4 };
+doSomething(1 + 1, 2 * 3, 4 - 1);
+`,
+    errors: Array(9).fill({ messageId: 'redundantCalculation' }),
+    output: `
+const arr = [3, 7, 0];
+const obj = { a: 42, b: 4, c: 1 };
+doSomething(2, 6, 3);
+`
+  }
+];
+
 //------------------------------------------------------------------------------
 // Run All Tests
 //------------------------------------------------------------------------------
@@ -434,6 +451,7 @@ ruleTester.run("no-redundant-calculations", rule, {
     ...invalidOperatorPrecedence,
     ...invalidModernJS,
     ...invalidBranchCoverage,
-    ...invalidMultiInstance
+    ...invalidMultiInstance,
+    ...invalidMultiInstanceMixed
   ]
 });
