@@ -170,6 +170,8 @@ function writeGuideMd(cwd, cfg) {
     }
   }
   md += `\n### Examples\n\n✅ const isOrbiting = true;\n✅ const orbitalPeriodDays = 365.25;\n❌ const data = calculate(); // too generic\n`;
+  // Append ambiguity guidance and precedence
+  md += `\n## Ambiguity and Disambiguation\nWhen a numeric literal could belong to multiple domains (e.g., 360 geometry vs 360 astronomy), disambiguate:\n\n1) Inline annotation\n\n\`\`\`js\n// @domain geometry\nconst fullCircle = 720 / 2; // 360°\n\`\`\`\n\n2) Name-based cue\n\n\`\`\`js\nconst circleAngleDegrees = 720 / 2;\n\`\`\`\n\n3) Config override (project-wide)\n\n\`\`\`json\n{\n  \"constantResolution\": {\n    \"360\": \"geometry\"\n  }\n}\n\`\`\`\n\n## Active-Domain Precedence\nWhen multiple domains match, the linter prefers the first in domainPriority. Adjust this order to shape suggestions.\n\nExample:\n\n\`\`\`json\n{\n  \"domains\": { \"primary\": \"${cfg.domains.primary}\", \"additional\": [${cfg.domains.additional.map(d=>`\"${d}\"`).join(', ')}] },\n  \"domainPriority\": [${cfg.domainPriority.map(d=>`\"${d}\"`).join(', ')}]\n}\n\`\`\`\n`;
   fs.writeFileSync(file, md);
   console.log(`Wrote ${file}`);
 }
@@ -195,10 +197,11 @@ function writeAgentsMd(cwd, cfg) {
       if (terms.length) md += formatList('Terminology', terms);
     }
   }
-  md += `---\n*See .ai-coding-guide.md for details*\n`;
+  // Ambiguity tactics
+  md += `\n## Ambiguity Tactics\n- Prefer explicit @domain/@domains on ambiguous constants\n- Use name cues (e.g., 'circleAngleDegrees')\n- Project-wide mapping via .ai-coding-guide.json → constantResolution\n\n---\n*See .ai-coding-guide.md for details*\n`;
   fs.writeFileSync(file, md);
   console.log(`Wrote ${file}`);
-  console.log(`Wrote ${file}`);
+}
 }
 
 function writeCursorRules(cwd, cfg) {
