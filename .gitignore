@@ -44,3 +44,6 @@ dist/
 .env
 .env.local
 .env.*.local
+
+# Local ideation (not tracked)
+domain_ideas/
