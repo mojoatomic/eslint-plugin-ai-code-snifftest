@@ -44,6 +44,7 @@ export default defineConfig([
 
 | Name                                                                   | Description                                                             | 🔧 | 💡 |
 | :--------------------------------------------------------------------- | :---------------------------------------------------------------------- | :- | :- |
+| [enforce-domain-terms](docs/rules/enforce-domain-terms.md)             | Encourage domain-specific naming using declared project terms           |    | 💡 |
 | [no-equivalent-branches](docs/rules/no-equivalent-branches.md)         | Detect if/else branches that do the same thing                          | 🔧 |    |
 | [no-generic-names](docs/rules/no-generic-names.md)                     | Flag generic names; enforce domain-specific naming                      |    |    |
 | [no-redundant-calculations](docs/rules/no-redundant-calculations.md)   | Detect redundant calculations that should be computed at compile time   | 🔧 | 💡 |
