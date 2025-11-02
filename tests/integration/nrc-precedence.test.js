@@ -48,8 +48,8 @@ tester.run('no-redundant-calculations (precedence)', rule, {
         constants: { geometry: [360], astronomy: [360] },
         domainPriority: []
       });
-      return {
-        code: 'const deg = 720/2;',
+return {
+        code: 'const x = 720/2;',
         filename: t.filename,
         errors: [{ messageId: 'ambiguousConstant' }]
       };

@@ -10,7 +10,7 @@ const { execFileSync } = require('child_process');
 
 function runCliInit(tmpDir, primary, extraArgs = []) {
   const cliPath = path.resolve(__dirname, '..', '..', 'bin', 'cli.js');
-  const env = { ...process.env, FORCE_AI_CONFIG: '1', FORCE_ESLINT_CONFIG: '1', SKIP_AI_REQUIREMENTS: '1' };
+const env = { ...process.env, FORCE_AI_CONFIG: '1', FORCE_ESLINT_CONFIG: '1', SKIP_AI_REQUIREMENTS: '1', NODE_ENV: 'test' };
   execFileSync('node', [cliPath, 'init', `--primary=${primary}`, '--yes', '--md', '--cursor', '--agents', '--eslint', ...extraArgs], {
     cwd: tmpDir,
     env,
