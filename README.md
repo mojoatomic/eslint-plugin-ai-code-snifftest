@@ -129,6 +129,8 @@ This ensures no conflicts! ✅
 
 ## Configurations
 
+See RFC: Extensible Domain Constants via Plugin Architecture (#64).
+
 ### Migration to v2 (Multi-domain)
 
 #### Warp Integration
