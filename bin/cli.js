@@ -236,13 +236,8 @@ const external = Boolean(args.external || args.experimentalExternalConstants);
     constants: {},
     terms: { entities: [], properties: [], actions: [] },
     naming: { style: 'camelCase', booleanPrefix: ['is','has','should','can'], asyncPrefix: ['fetch','load','save'], pluralizeCollections: true },
-<<<<<<< HEAD
-antiPatterns: { forbiddenNames: [], forbiddenTerms: [] },
-    experimentalExternalConstants: false
-=======
     antiPatterns: { forbiddenNames: [], forbiddenTerms: [] },
     experimentalExternalConstants: external
->>>>>>> f15210c (chore(cli): use dynamic requires for external discovery to pass lint before rebase)
   };
   const code = writeConfig(cwd, cfg);
   const hasWarp = fs.existsSync(path.join(cwd, 'WARP.md'));
