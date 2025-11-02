@@ -155,3 +155,13 @@ TODO: Run eslint-doc-generator to generate the configs list (or delete this sect
 - Wizard will summarize discovered domains (built-in, npm, local, custom) and list merged domains in `.ai-coding-guide.md`.
 - Behind a flag; defaults to disabled.
 
+#### Allowlist and cache
+- `externalConstantsAllowlist`: array of package names or regex strings (e.g., `"^@ai-constants/"`) to limit npm discovery.
+- CLI: `--allowlist="^@ai-constants/med,^eslint-constants-"` seeds the allowlist in generated config when used with `--external`.
+- Env:
+  - `DEBUG_AI_CONSTANTS=1` prints discovery warnings
+  - `AI_CONSTANTS_NO_CACHE=1` disables the in-process discovery cache
+- Enable in CLI: `--external` or set `experimentalExternalConstants: true` in `.ai-coding-guide.json`.
+- Wizard will summarize discovered domains (built-in, npm, local, custom) and list merged domains in `.ai-coding-guide.md`.
+- Behind a flag; defaults to disabled.
+
