@@ -44,16 +44,59 @@ function ask(rl, q) {
   return new Promise((resolve) => rl.question(q, (ans) => resolve(ans)));
 }
 
-async function initInteractive(cwd) {
+async function initInteractive(cwd, args) {
   const readline = require('readline');
   const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
   try {
-    const primary = (await ask(rl, 'Primary domain (default: general): ')).trim() || 'general';
+    let primary = (await ask(rl, 'Primary domain (default: general): ')).trim() || 'general';
     const suggested = suggestFor(primary);
     if (suggested.length) {
       console.log(`Suggested additional domains for ${primary}: ${suggested.join(', ')}`);
     }
-    const addAns = (await ask(rl, 'Additional domains (comma-separated, optional): ')).trim();
+    let addAns = (await ask(rl, 'Additional domains (comma-separated, optional): ')).trim();
+
+    // Optional: interactive external discovery listing
+    const external = Boolean(args && (args.external || args.experimentalExternalConstants));
+    if (external) {
+      try {
+        const { discoverConstants } = require(path.join(__dirname, '..', 'lib', 'utils', 'discover-constants'));
+        const { mergeConstants } = require(path.join(__dirname, '..', 'lib', 'utils', 'merge-constants'));
+        const discovered = discoverConstants(cwd);
+        const merged = mergeConstants(discovered);
+        const sourcesByDomain = {};
+        for (const [d, data] of Object.entries(merged || {})) {
+          const srcs = (data.sources || []).map(s => s.type);
+          sourcesByDomain[d] = Array.from(new Set(srcs)).join(',');
+        }
+        const domainList = Object.keys(sourcesByDomain).sort();
+        if (domainList.length) {
+          console.log('\nDiscovered domains (experimental):');
+          domainList.forEach((d, i) => console.log(`  [${i+1}] ${d} (${sourcesByDomain[d]})`));
+          const priPick = (await ask(rl, 'Pick primary by name or index (Enter to keep): ')).trim();
+          if (priPick) {
+            const idx = Number(priPick);
+            if (Number.isInteger(idx) && idx>=1 && idx<=domainList.length) {
+              primary = domainList[idx-1];
+            } else if (domainList.includes(priPick)) {
+              primary = priPick;
+            }
+          }
+          const addPick = (await ask(rl, 'Pick additional (comma-separated names or indices, Enter to keep): ')).trim();
+          if (addPick) {
+            const tokens = addPick.split(',').map(s=>s.trim()).filter(Boolean);
+            const chosen = [];
+            for (const t of tokens) {
+              const n = Number(t);
+              if (Number.isInteger(n) && n>=1 && n<=domainList.length) chosen.push(domainList[n-1]);
+              else if (domainList.includes(t)) chosen.push(t);
+            }
+            if (chosen.length) addAns = chosen.join(',');
+          }
+        }
+      } catch (err) {
+        console.warn(`(external discovery skipped: ${err && err.message})`);
+      }
+    }
     const additional = addAns ? addAns.split(',').map(s=>s.trim()).filter(Boolean) : [];
     const domainPriority = [primary, ...additional];
     console.log(`\nSummary:\n  primary: ${primary}\n  additional: ${additional.join(', ') || '(none)'}\n  domainPriority: ${domainPriority.join(', ')}`);
@@ -222,7 +265,7 @@ function main() {
   if (cmd === 'init') {
     if (!checkRequirements(process.cwd())) { process.exitCode = 1; return; }
     if (!args.primary && process.stdin.isTTY) {
-      initInteractive(cwd).then((code)=>{ process.exitCode = code; });
+      initInteractive(cwd, args).then((code)=>{ process.exitCode = code; });
       return;
     }
     process.exitCode = init(cwd, args);
