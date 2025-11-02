@@ -645,6 +645,27 @@ const invalidSwitchConstants = [
   },
 ];
 
+// Multi-instance: multiple constant conditions in one block
+const invalidMultiInstance = [
+  {
+    code: `
+if (true) A();
+if (false) B();
+if (1) C();
+`,
+    errors: [
+      { messageId: 'constantCondition' },
+      { messageId: 'constantCondition' },
+      { messageId: 'constantCondition' }
+    ],
+    output: `
+A();
+
+C();
+`
+  }
+];
+
 //------------------------------------------------------------------------------
 // Run All Tests
 //------------------------------------------------------------------------------
@@ -664,6 +685,7 @@ ruleTester.run("no-redundant-conditionals", rule, {
     ...invalidComplexTernaries,
     ...invalidCoverageGaps,
     ...invalidConstantFolding,
-    ...invalidSwitchConstants
+    ...invalidSwitchConstants,
+    ...invalidMultiInstance
   ]
 });

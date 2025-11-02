@@ -395,6 +395,27 @@ const invalidModernJS = [
   }
 ];
 
+// Multi-instance: multiple top-level constant calculations in one file
+const invalidMultiInstance = [
+  {
+    code: `
+const a = 1 + 2;
+const b = 3 + 4;
+const c = 5 + 6;
+const d = 7 + 8;
+const e = 9 + 10;
+`,
+    errors: Array(5).fill({ messageId: 'redundantCalculation' }),
+    output: `
+const a = 3;
+const b = 7;
+const c = 11;
+const d = 15;
+const e = 19;
+`
+  }
+];
+
 //------------------------------------------------------------------------------
 // Run All Tests
 //------------------------------------------------------------------------------
@@ -412,6 +433,7 @@ ruleTester.run("no-redundant-calculations", rule, {
     ...invalidNumericBoundaries,
     ...invalidOperatorPrecedence,
     ...invalidModernJS,
-    ...invalidBranchCoverage
+    ...invalidBranchCoverage,
+    ...invalidMultiInstance
   ]
 });
