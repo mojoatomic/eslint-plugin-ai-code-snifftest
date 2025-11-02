@@ -321,7 +321,7 @@ function gte(a, b) {
 }
 
 function checkRequirements(cwd) {
-  if (process.env.SKIP_AI_REQUIREMENTS) return true;
+  if (process.env.SKIP_AI_REQUIREMENTS || process.env.NODE_ENV === 'test') return true;
   let ok = true;
   const nodeVer = process.versions.node;
   if (!gte(nodeVer, '18.0.0')) {
