@@ -666,6 +666,48 @@ C();
   }
 ];
 
+// Multi-instance: redundant ternaries in one block
+const invalidMultiInstanceTernaries = [
+  {
+    code: `
+const a = x ? true : false;
+const b = y ? false : true;
+const c = z ? value : value;
+`,
+    errors: [
+      { messageId: 'redundantTernary' },
+      { messageId: 'redundantTernary' },
+      { messageId: 'redundantTernary' }
+    ],
+    output: `
+const a = Boolean(x);
+const b = !y;
+const c = value;
+`
+  }
+];
+
+// Multi-instance: loop constants in one block
+const invalidMultiInstanceLoops = [
+  {
+    code: `
+while (false) { A(); }
+for (; false; ) { B(); }
+do { C(); } while (false);
+`,
+    errors: [
+      { messageId: 'constantCondition' },
+      { messageId: 'constantCondition' },
+      { messageId: 'constantCondition' }
+    ],
+    output: `
+
+
+C();
+`
+  }
+];
+
 //------------------------------------------------------------------------------
 // Run All Tests
 //------------------------------------------------------------------------------
@@ -686,6 +728,8 @@ ruleTester.run("no-redundant-conditionals", rule, {
     ...invalidCoverageGaps,
     ...invalidConstantFolding,
     ...invalidSwitchConstants,
-    ...invalidMultiInstance
+    ...invalidMultiInstance,
+    ...invalidMultiInstanceTernaries,
+    ...invalidMultiInstanceLoops
   ]
 });
