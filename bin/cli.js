@@ -29,6 +29,52 @@ function writeConfig(cwd, cfg) {
   return 0;
 }
 
+function suggestFor(primary) {
+  const map = {
+    astronomy: ['geometry','math','units'],
+    music: ['math','cs'],
+    physics: ['math','units','cs'],
+    finance: ['math','statistics']
+  };
+  return map[primary] || [];
+}
+
+function ask(rl, q) {
+  return new Promise((resolve) => rl.question(q, (ans) => resolve(ans)));
+}
+
+async function initInteractive(cwd) {
+  const readline = require('readline');
+  const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+  try {
+    const primary = (await ask(rl, 'Primary domain (default: general): ')).trim() || 'general';
+    const suggested = suggestFor(primary);
+    if (suggested.length) {
+      console.log(`Suggested additional domains for ${primary}: ${suggested.join(', ')}`);
+    }
+    const addAns = (await ask(rl, 'Additional domains (comma-separated, optional): ')).trim();
+    const additional = addAns ? addAns.split(',').map(s=>s.trim()).filter(Boolean) : [];
+    const domainPriority = [primary, ...additional];
+    console.log(`\nSummary:\n  primary: ${primary}\n  additional: ${additional.join(', ') || '(none)'}\n  domainPriority: ${domainPriority.join(', ')}`);
+    const confirm = (await ask(rl, 'Write .ai-coding-guide.json with these settings? (Y/n): ')).trim().toLowerCase();
+    if (confirm && confirm.startsWith('n')) {
+      console.log('Aborted.');
+      return 1;
+    }
+    const cfg = {
+      domains: { primary, additional },
+      domainPriority,
+      constants: {},
+      terms: { entities: [], properties: [], actions: [] },
+      naming: { style: 'camelCase', booleanPrefix: ['is','has','should','can'], asyncPrefix: ['fetch','load','save'], pluralizeCollections: true },
+      antiPatterns: { forbiddenNames: [], forbiddenTerms: [] }
+    };
+    return writeConfig(cwd, cfg);
+  } finally {
+    rl.close();
+  }
+}
+
 function init(cwd, args) {
   const primary = (args.primary || 'general').trim();
   const additional = (args.additional || '').split(',').map(s => s.trim()).filter(Boolean);
@@ -57,6 +103,10 @@ function main() {
   const cmd = args._[0];
   const cwd = process.cwd();
   if (cmd === 'init') {
+    if (!args.primary && process.stdin.isTTY) {
+      initInteractive(cwd).then((code)=>{ process.exitCode = code; });
+      return;
+    }
     process.exitCode = init(cwd, args);
     return;
   }

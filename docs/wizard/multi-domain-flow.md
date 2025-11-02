@@ -10,3 +10,13 @@ This document outlines the planned steps for `npx eslint-plugin-ai-code-snifftes
 - Update ESLint config with presets
 
 Non-goals in this PR: code generation; tracked separately.
+
+CLI usage examples:
+
+```bash
+# Interactive
+eslint-plugin-ai-code-snifftest init
+
+# Non-interactive
+eslint-plugin-ai-code-snifftest init --primary=astronomy --additional=geometry,math,units
+```
