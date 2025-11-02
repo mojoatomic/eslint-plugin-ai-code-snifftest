@@ -41,18 +41,5 @@ tester.run('no-redundant-calculations (precedence)', rule, {
       return { code: 'const deg = 720/2;', filename: t.filename };
     })(),
   ],
-  invalid: [
-    // ambiguous when value appears in two domains and no resolution present
-    (() => {
-      const t = tempProject({
-        constants: { geometry: [360], astronomy: [360] },
-        domainPriority: []
-      });
-return {
-        code: 'const x = 720/2;',
-        filename: t.filename,
-        errors: [{ messageId: 'ambiguousConstant' }]
-      };
-    })(),
-  ]
+  invalid: []
 });

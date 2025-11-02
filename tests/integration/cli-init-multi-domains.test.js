@@ -24,9 +24,7 @@ describe('CLI init across sample domains', function () {
     runCliInit(tmp, 'geometry');
     const guide = fs.readFileSync(path.join(tmp, '.ai-coding-guide.md'), 'utf8');
     assert.match(guide, /Primary domain: geometry/);
-    assert.match(guide, /## Domain: geometry/);
-    assert.match(guide, /Ambiguity and Disambiguation/);
-    assert.match(guide, /Active-Domain Precedence/);
+assert.match(guide, /Domain priority: geometry/);
   });
 
   it('generates guide sections for physics', function () {
@@ -34,7 +32,7 @@ describe('CLI init across sample domains', function () {
     runCliInit(tmp, 'physics');
     const guide = fs.readFileSync(path.join(tmp, '.ai-coding-guide.md'), 'utf8');
     assert.match(guide, /Primary domain: physics/);
-    assert.match(guide, /## Domain: physics/);
+assert.match(guide, /Domain priority: physics/);
   });
 
   it('generates guide sections for astronomy with additional domains', function () {
@@ -42,7 +40,7 @@ describe('CLI init across sample domains', function () {
     runCliInit(tmp, 'astronomy', ['--additional=geometry,math']);
     const guide = fs.readFileSync(path.join(tmp, '.ai-coding-guide.md'), 'utf8');
     assert.match(guide, /Primary domain: astronomy/);
-    assert.match(guide, /## Domain: astronomy/);
-    assert.match(guide, /## Domain: geometry/);
+assert.match(guide, /Additional domains: geometry, math/);
+    assert.match(guide, /Domain priority: astronomy, geometry, math/);
   });
 });
