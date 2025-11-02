@@ -123,6 +123,13 @@ This ensures no conflicts! ✅
 
 ## Configurations
 
+### Migration to v2 (Multi-domain)
+See docs/migration/v2.md for details. For new projects, use the CLI wizard:
+
+```bash
+eslint-plugin-ai-code-snifftest init --primary=astronomy --additional=geometry,math,units --md --cursor
+```
+
 <!-- begin auto-generated configs list -->
 TODO: Run eslint-doc-generator to generate the configs list (or delete this section if no configs are offered).
 <!-- end auto-generated configs list -->
