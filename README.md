@@ -4,6 +4,12 @@ Does your AI-generated code pass the sniff test? Detect and fix AI code smell.
 
 ## Installation
 
+### Requirements
+- Node.js 18+
+- ESLint 9+
+
+See docs/MINIMUM_REQUIREMENTS.md for details.
+
 You'll first need to install [ESLint](https://eslint.org/):
 
 ```sh
