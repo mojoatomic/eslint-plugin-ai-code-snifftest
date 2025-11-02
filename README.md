@@ -124,6 +124,14 @@ This ensures no conflicts! ✅
 ## Configurations
 
 ### Migration to v2 (Multi-domain)
+
+#### Warp Integration
+Our wizard generates `AGENTS.md` which Warp reads automatically. We do not modify `WARP.md` (owned by Warp).
+
+Setup:
+1. Initialize Warp: `warp /init`
+2. Initialize linting: `npx eslint-plugin-ai-code-snifftest init --md --cursor --agents`
+3. Done — Warp reads AGENTS.md alongside WARP.md.
 See docs/migration/v2.md for details. For new projects, use the CLI wizard:
 
 ```bash
