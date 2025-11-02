@@ -433,6 +433,24 @@ doSomething(2, 6, 3);
   }
 ];
 
+// Scientific formulas that should be skipped (no report)
+const validScientificFormulas = [
+  // High precision results
+  { code: 'const meanMotion = 360 / 365.25;' },
+  { code: 'const nodeMotionPerDay = -19.3416 / 365.25;' },
+  { code: 'const daysPerSaros = 223 * 29.53059;' },
+
+  // Physical constants present in expression
+  { code: 'const yearMs = 365.25 * 24 * 3600 * 1000;' },
+  { code: 'const centuryMs = 100 * 365.25 * 24 * 3600 * 1000;' },
+
+  // Scientific variable names in owning identifier
+  { code: 'const meanLongitude = 1 + 2;' },
+  { code: 'const orbitalPeriod = 3 * 4;' },
+  { code: 'const nodeMotion = 5 / 6;' },
+
+];
+
 //------------------------------------------------------------------------------
 // Run All Tests
 //------------------------------------------------------------------------------
@@ -443,7 +461,8 @@ ruleTester.run("no-redundant-calculations", rule, {
     ...validNumericBoundaries,
     ...validFalsePositives,
     ...validModernJS,
-    ...validEdgeCoverage
+    ...validEdgeCoverage,
+    ...validScientificFormulas
   ],
   invalid: [
     ...invalidBasicTests,
