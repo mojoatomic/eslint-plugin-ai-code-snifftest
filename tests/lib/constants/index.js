@@ -29,6 +29,8 @@ describe('constants library', function () {
     assert.ok(DOMAINS.networking);
     assert.ok(DOMAINS.graphics);
     assert.ok(DOMAINS.geodesy);
+    assert.ok(DOMAINS.civil);
+    assert.ok(DOMAINS.photo);
   });
 
   it('detects physical constants', function () {
@@ -69,6 +71,8 @@ describe('constants library', function () {
     assert.strictEqual(getDomainForName('rgbaColor'), 'graphics');
     assert.strictEqual(getDomainForName('geodesicLatitude'), 'geodesy');
     assert.strictEqual(getDomainForName('genomeSequence'), 'biology');
+    assert.strictEqual(getDomainForName('shearStress'), 'civil');
+    assert.strictEqual(getDomainForName('apertureValue'), 'photo');
     assert.strictEqual(getDomainForName('fooBar'), null);
   });
 });
