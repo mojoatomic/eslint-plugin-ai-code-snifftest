@@ -6,6 +6,19 @@
   "additionalProperties": false,
   "properties": {
     "domain": { "type": "string" },
+    "domains": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "primary": { "type": "string" },
+        "additional": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "domainPriority": { "type": "array", "items": { "type": "string" } },
+    "constantResolution": {
+      "type": "object",
+      "additionalProperties": { "type": "string" }
+    },
     "version": { "type": "string" },
     "constants": {
       "type": "object",
