@@ -51,7 +51,8 @@ describe('discover-constants', function () {
   it('composes discovered sets', function () {
     const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'disc-all-'));
 write(path.join(dir, '.ai-constants', 'x.js'),
-      "module.exports = { domain: 'x', version: '1.0.0', constants: [{ value: 1, name: 'ONE', description: 'one' }] };\n");
+  "module.exports = { domain: 'x', version: '1.0.0', constants: [{ value: 1, name: 'ONE', description: 'the number one' }] };\n"
+);
     write(path.join(dir, '.ai-coding-guide.json'), JSON.stringify({
       customConstants: { y: [{ value: 2, name: 'TWO', description: 'two' }] }
     }, null, 2));
