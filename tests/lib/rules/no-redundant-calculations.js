@@ -211,7 +211,7 @@ const invalidNumericBoundaries = [
   {
     code: 'const x = 0.1 + 0.2;',
     errors: [{ messageId: 'redundantCalculation' }],
-    output: 'const x = 0.30000000000000004;' // Actual JS result
+    output: 'const x = 0.3;' // Smart rounded
   },
   // Division by zero
   {
@@ -247,7 +247,7 @@ const invalidNumericBoundaries = [
   {
     code: 'const x = 1e10 * 2;',
     errors: [{ messageId: 'redundantCalculation' }],
-    output: 'const x = 20000000000;'
+    output: 'const x = 2e+10;'
   },
   // Very small numbers
   {
@@ -286,7 +286,7 @@ const invalidOperatorPrecedence = [
   {
     code: 'const x = 1 + 2 - 3 * 4 / 5;',
     errors: [{ messageId: 'redundantCalculation' }],
-    output: 'const x = 0.6000000000000001;' // Actual JS result: 1 + 2 - (12/5)
+    output: 'const x = 0.6;' // Smart rounded
   },
   // Modulo with addition
   {
@@ -385,7 +385,7 @@ const invalidModernJS = [
   {
     code: 'const x = 1e6 + 2e6;',
     errors: [{ messageId: 'redundantCalculation' }],
-    output: 'const x = 3000000;'
+    output: 'const x = 3e+6;'
   },
   // Mixed bases
   {
@@ -417,6 +417,16 @@ const e = 19;
 ];
 
 // Multi-instance (mixed contexts): array/object literals and function args in one block
+// v1.1.1: Valid scientific/unit formulas that should be skipped
+const validV111Additions = [
+  { code: 'const mm = 2 * 25.4;' },
+  { code: 'const cm = 1 * 2.54;' },
+  { code: 'const feetToMeters = 3 * 0.3048;' },
+  { code: 'const weekMs = 7 * 86400e3;' },
+  // Music, strong context via variable name
+  { code: 'const frequency = 440 * 2;' },
+];
+
 const invalidMultiInstanceMixed = [
   {
     code: `
@@ -462,7 +472,8 @@ ruleTester.run("no-redundant-calculations", rule, {
     ...validFalsePositives,
     ...validModernJS,
     ...validEdgeCoverage,
-    ...validScientificFormulas
+    ...validScientificFormulas,
+    ...validV111Additions
   ],
   invalid: [
     ...invalidBasicTests,
