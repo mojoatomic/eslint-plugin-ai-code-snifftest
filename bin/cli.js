@@ -149,67 +149,25 @@ function formatList(title, items) {
 
 function writeGuideMd(cwd, cfg) {
   const file = path.join(cwd, '.ai-coding-guide.md');
-  const doms = [cfg.domains.primary, ...(cfg.domains.additional||[])].filter(Boolean);
-  const lib = loadConstantsLib();
-  let md = `# AI Coding Guide\n\nPrimary domain: ${cfg.domains.primary}\nAdditional domains: ${cfg.domains.additional.join(', ') || '(none)'}\nDomain priority: ${cfg.domainPriority.join(', ')}\n\n`;
-  md += `## Guidance\n- Use @domain/@domains annotations for ambiguous constants\n- Prefer constants and terms from active domains\n\n`;
-  if (lib && lib.DOMAINS) {
-    for (const d of doms) {
-      const mod = lib.DOMAINS[d];
-      if (!mod) continue;
-      md += `## Domain: ${d}\n\n`;
-      const meta = pickMetaForDomain(mod, 20);
-      const cn = Array.isArray(mod.constants) ? mod.constants.slice(0, 20) : [];
-      const terms = Array.isArray(mod.terms) ? mod.terms.slice(0, 20) : [];
-      if (meta.length) {
-        md += '### Constants\n\n```javascript\n' + meta.map(m=>`const ${m.name || ('C_'+String(m.value).replace(/[^A-Za-z0-9]+/g,'_'))} = ${m.value};${m.description ? ' // '+m.description : ''}`).join('\n') + '\n```\n\n';
-      } else if (cn.length) {
-        md += '### Constants\n\n```javascript\n' + cn.map(v=>`const C_${String(v).replace(/[^A-Za-z0-9]+/g,'_')} = ${v};`).join('\n') + '\n```\n\n';
-      }
-      md += formatList('Terminology', terms);
+  let md = `# AI Coding Guide\n\nPrimary domain: ${cfg.domains.primary}\nAdditional domains: ${cfg.domains.additional.join(', ') || '(none)'}\nDomain priority: ${cfg.domainPriority.join(', ')}\n\nGuidance:\n- Use domain annotations (@domain/@domains) for ambiguous constants\n- Prefer constants and terms from active domains\n`;
+  if (cfg.experimentalExternalConstants) {
+    try {
+      const { discoverConstants } = require(path.join(__dirname, '..', 'lib', 'utils', 'discover-constants'));
+      const { mergeConstants } = require(path.join(__dirname, '..', 'lib', 'utils', 'merge-constants'));
+      const discovered = discoverConstants(cwd);
+      const merged = mergeConstants(discovered);
+      const counts = {
+        builtin: Object.keys(discovered.builtin || {}).length,
+        npm: Object.keys(discovered.npm || {}).length,
+        local: Object.keys(discovered.local || {}).length,
+        custom: Object.keys(discovered.custom || {}).length,
+      };
+      const domains = Object.keys(merged || {});
+      md += `\n## External Constants Discovery (experimental)\nBuilt-in: ${counts.builtin}  NPM: ${counts.npm}  Local: ${counts.local}  Custom: ${counts.custom}\nDomains: ${domains.join(', ') || '(none)'}\n`;
+    } catch (err) {
+      md += `\n## External Constants Discovery (experimental)\nError: ${err && err.message}\n`;
     }
   }
-  md += `\n### Examples\n\n✅ const isOrbiting = true;\n✅ const orbitalPeriodDays = 365.25;\n❌ const data = calculate(); // too generic\n`;
-// Append ambiguity guidance and precedence
-  md += `
-## Ambiguity and Disambiguation
-When a numeric literal could belong to multiple domains (e.g., 360 geometry vs 360 astronomy), disambiguate:
-
-1) Inline annotation
-
-~~~js
-// @domain geometry
-const fullCircle = 720 / 2; // 360°
-~~~
-
-2) Name-based cue
-
-~~~js
-const circleAngleDegrees = 720 / 2;
-~~~
-
-3) Config override (project-wide)
-
-~~~json
-{
-  "constantResolution": {
-    "360": "geometry"
-  }
-}
-~~~
-
-## Active-Domain Precedence
-When multiple domains match, the linter prefers the first in domainPriority. Adjust this order to shape suggestions.
-
-Example:
-
-~~~json
-{
-  "domains": { "primary": "${cfg.domains.primary}", "additional": [${cfg.domains.additional.map(d=>`"${d}"`).join(', ')}] },
-  "domainPriority": [${cfg.domainPriority.map(d=>`"${d}"`).join(', ')}]
-}
-~~~
-`;
   fs.writeFileSync(file, md);
   console.log(`Wrote ${file}`);
 }
@@ -271,14 +229,20 @@ function init(cwd, args) {
   const primary = (args.primary || 'general').trim();
   const additional = (args.additional || '').split(',').map(s => s.trim()).filter(Boolean);
   const domainPriority = [primary, ...additional];
+const external = Boolean(args.external || args.experimentalExternalConstants);
   const cfg = {
     domains: { primary, additional },
     domainPriority,
     constants: {},
     terms: { entities: [], properties: [], actions: [] },
     naming: { style: 'camelCase', booleanPrefix: ['is','has','should','can'], asyncPrefix: ['fetch','load','save'], pluralizeCollections: true },
+<<<<<<< HEAD
 antiPatterns: { forbiddenNames: [], forbiddenTerms: [] },
     experimentalExternalConstants: false
+=======
+    antiPatterns: { forbiddenNames: [], forbiddenTerms: [] },
+    experimentalExternalConstants: external
+>>>>>>> f15210c (chore(cli): use dynamic requires for external discovery to pass lint before rebase)
   };
   const code = writeConfig(cwd, cfg);
   const hasWarp = fs.existsSync(path.join(cwd, 'WARP.md'));
