@@ -75,6 +75,12 @@ async function initInteractive(cwd) {
       writeGuideMd(cwd, cfg);
       writeCursorRules(cwd, cfg);
     }
+    const hasWarp = fs.existsSync(path.join(cwd, 'WARP.md'));
+    console.log(hasWarp ? 'Detected WARP.md — will not modify it.' : 'No WARP.md detected.');
+    const agents = (await ask(rl, 'Generate AGENTS.md (recommended)? (Y/n): ')).trim().toLowerCase();
+    if (!agents || agents.startsWith('y')) {
+      writeAgentsMd(cwd, cfg);
+    }
     return code;
   } finally {
     rl.close();
@@ -84,6 +90,13 @@ async function initInteractive(cwd) {
 function writeGuideMd(cwd, cfg) {
   const file = path.join(cwd, '.ai-coding-guide.md');
   const md = `# AI Coding Guide\n\nPrimary domain: ${cfg.domains.primary}\nAdditional domains: ${cfg.domains.additional.join(', ') || '(none)'}\nDomain priority: ${cfg.domainPriority.join(', ')}\n\nGuidance:\n- Use domain annotations (@domain/@domains) for ambiguous constants\n- Prefer constants and terms from active domains\n`;
+  fs.writeFileSync(file, md);
+  console.log(`Wrote ${file}`);
+}
+
+function writeAgentsMd(cwd, cfg) {
+  const file = path.join(cwd, 'AGENTS.md');
+  const md = `# AI Rules\n\nPrimary domain: ${cfg.domains.primary}\nAdditional: ${cfg.domains.additional.join(', ') || '(none)'}\nPriority: ${cfg.domainPriority.join(', ')}\n\n## Naming\n- Style: ${cfg.naming.style}\n- Booleans: isX/hasX/shouldX/canX\n- Async: fetchX/loadX/saveX\n\n## Guidance\n- Use @domain/@domains annotations for ambiguous constants\n- Prefer constants/terms from active domains\n\n---\n*See .ai-coding-guide.md for details*\n`;
   fs.writeFileSync(file, md);
   console.log(`Wrote ${file}`);
 }
@@ -114,8 +127,15 @@ function init(cwd, args) {
     antiPatterns: { forbiddenNames: [], forbiddenTerms: [] }
   };
   const code = writeConfig(cwd, cfg);
+  const hasWarp = fs.existsSync(path.join(cwd, 'WARP.md'));
   if (args.md) writeGuideMd(cwd, cfg);
   if (args.cursor) writeCursorRules(cwd, cfg);
+  if (args.agents || hasWarp || (!args.md && !args.cursor)) {
+    writeAgentsMd(cwd, cfg);
+    if (hasWarp) {
+      console.log('Found WARP.md — preserving it; generated AGENTS.md alongside.');
+    }
+  }
   return code;
 }
 
