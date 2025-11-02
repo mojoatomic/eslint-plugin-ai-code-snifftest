@@ -129,6 +129,8 @@ This ensures no conflicts! ✅
 
 ## Configurations
 
+See RFC: Extensible Domain Constants via Plugin Architecture (#64).
+
 ### Migration to v2 (Multi-domain)
 
 #### Warp Integration
@@ -148,4 +150,8 @@ eslint-plugin-ai-code-snifftest init --primary=astronomy --additional=geometry,m
 TODO: Run eslint-doc-generator to generate the configs list (or delete this section if no configs are offered).
 <!-- end auto-generated configs list -->
 
+### External constants (experimental)
+- Enable in CLI: `--external` or set `experimentalExternalConstants: true` in `.ai-coding-guide.json`.
+- Wizard will summarize discovered domains (built-in, npm, local, custom) and list merged domains in `.ai-coding-guide.md`.
+- Behind a flag; defaults to disabled.
 
