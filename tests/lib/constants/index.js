@@ -20,6 +20,9 @@ describe('constants library', function () {
     assert.ok(DOMAINS.physics);
     assert.ok(DOMAINS.time);
     assert.ok(DOMAINS.math);
+    assert.ok(DOMAINS.finance);
+    assert.ok(DOMAINS.geometry);
+    assert.ok(DOMAINS.statistics);
   });
 
   it('detects physical constants', function () {
@@ -28,6 +31,9 @@ describe('constants library', function () {
     assert.strictEqual(isPhysicalConstant(299792458), true);
     assert.strictEqual(isPhysicalConstant(86400), true);
     assert.strictEqual(isPhysicalConstant(3.14159), true);
+    assert.strictEqual(isPhysicalConstant(252), true);
+    assert.strictEqual(isPhysicalConstant(360), true);
+    assert.strictEqual(isPhysicalConstant(1.96), true);
     assert.strictEqual(isPhysicalConstant(123.456), false);
   });
 
