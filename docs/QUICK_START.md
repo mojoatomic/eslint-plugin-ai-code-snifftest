@@ -95,7 +95,7 @@ mkdir -p .github/workflows
 - 1+ external contributor
 - Zero critical bugs
 
-## 🔧 Usage Example
+## 🔧 Usage Examples
 
 ```javascript
 // eslint.config.js
@@ -109,6 +109,24 @@ export default [
     }
   }
 ];
+```
+
+### CLI: Initialize AI Coding Guide
+
+Interactive (accept defaults):
+```bash
+node bin/cli.js init
+# Prompts will appear; press Enter to accept defaults
+```
+
+Non-interactive:
+```bash
+node bin/cli.js init --primary=astronomy --additional=geometry,math --yes --md --cursor --agents --eslint
+```
+
+Scaffold an external constants package:
+```bash
+node bin/cli.js scaffold medical --dir=./examples/external/medical
 ```
 
 ## 📝 Package Details

@@ -401,7 +401,7 @@ function main() {
   const cwd = process.cwd();
   if (cmd === 'init') {
     if (!checkRequirements(process.cwd())) { process.exitCode = 1; return; }
-    if (!args.primary && process.stdin.isTTY) {
+    if (!args.primary && (process.stdin.isTTY || process.env.FORCE_CLI_INTERACTIVE)) {
       initInteractive(cwd, args).then((code)=>{ process.exitCode = code; });
       return;
     }
