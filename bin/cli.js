@@ -3,6 +3,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const { checkRequirements } = require('../lib/utils/requirements');
 
 function parseArgs(argv) {
   // simple parse; supports flags like --foo or --foo=bar
@@ -323,60 +324,92 @@ function scaffoldConstantsPkg(cwd, domainArg, outDirArg) {
   return 0;
 }
 
-function usage() {
-  console.log(`Usage:\n  eslint-plugin-ai-code-snifftest init [--primary=<domain>] [--additional=a,b,c]\n  eslint-plugin-ai-code-snifftest scaffold <domain> [--dir=path]\n\nExamples:\n  eslint-plugin-ai-code-snifftest init --primary=astronomy --additional=geometry,math,units\n  eslint-plugin-ai-code-snifftest scaffold medical --dir=./examples/external/medical\n`);
+function writeFingerprint(cwd, report) {
+  const dir = path.join(cwd, '.ai-constants');
+try { if (!fs.existsSync(dir)) fs.mkdirSync(dir); } catch { void 0; }
+  const file = path.join(dir, 'project-fingerprint.js');
+  const content = `export default ${JSON.stringify(report.result, null, 2)}\n`;
+  fs.writeFileSync(file, content, 'utf8');
+  console.log(`Wrote ${file}`);
 }
 
-function resolvePkgVersion(name, cwd) {
+function readJsonSafe(file) {
   try {
-    const pkg = require(require.resolve(`${name}/package.json`, { paths: [cwd] }));
-    return pkg.version || null;
+    if (!fs.existsSync(file)) return null;
+    return JSON.parse(fs.readFileSync(file, 'utf8'));
   } catch {
     return null;
   }
 }
 
-function gte(a, b) {
-  const pa = String(a).split('.').map(Number);
-  const pb = String(b).split('.').map(Number);
-  for (let i = 0; i < 3; i++) {
-    if ((pa[i] || 0) > (pb[i] || 0)) return true;
-    if ((pa[i] || 0) < (pb[i] || 0)) return false;
+function updateGuideConfig(cwd, patch) {
+  const file = path.join(cwd, '.ai-coding-guide.json');
+  const existing = readJsonSafe(file) || {};
+  const next = Object.assign({}, existing);
+  next.naming = Object.assign({}, existing.naming || {}, patch.naming || {});
+  if (patch.antiPatterns) {
+    const prevForbidden = (existing.antiPatterns && existing.antiPatterns.forbiddenNames) || [];
+    const addForbidden = patch.antiPatterns.forbiddenNames || [];
+    const merged = Array.from(new Set([...prevForbidden, ...addForbidden]));
+    next.antiPatterns = Object.assign({}, existing.antiPatterns || {}, { forbiddenNames: merged });
   }
-  return true;
+  fs.writeFileSync(file, JSON.stringify(next, null, 2) + '\n', 'utf8');
+  console.log(`Wrote ${file}`);
 }
 
-function checkRequirements(cwd) {
-  if (process.env.SKIP_AI_REQUIREMENTS || process.env.NODE_ENV === 'test') return true;
-  let ok = true;
-  const nodeVer = process.versions.node;
-  if (!gte(nodeVer, '18.0.0')) {
-    console.error(`❌ Node.js 18+ required. You have ${nodeVer}. Install Node 18+ (recommended 20+).`);
-    ok = false;
-  } else {
-    console.log(`✅ Node.js ${nodeVer}`);
+function learn(cwd, args) {
+const { extractFindings } = require(path.join(__dirname, '..', 'lib', 'scanner', 'extract'));
+  const { reconcile } = require(path.join(__dirname, '..', 'lib', 'scanner', 'reconcile'));
+  const mode = args.strict ? 'strict' : (args.permissive ? 'permissive' : 'adaptive');
+  const sanityRules = {
+    naming: { style: 'camelCase', booleanPrefix: ['is','has','should','can'], constants: 'UPPER_SNAKE_CASE' },
+    minimumConfidence: mode === 'strict' ? 0.9 : 0.7,
+    minimumMatch: mode === 'permissive' ? 0.5 : 0.6
+  };
+  const findings = extractFindings(cwd, { mode });
+  const report = reconcile(findings, sanityRules, { mode });
+  const out = path.join(cwd, 'learn-report.json');
+  fs.writeFileSync(out, JSON.stringify({ findings, ...report }, null, 2), 'utf8');
+  console.log(`Wrote ${out}`);
+  if (args.fingerprint) writeFingerprint(cwd, report);
+  if (args.interactive) {
+    if (args['accept-defaults']) {
+      updateGuideConfig(cwd, {
+        naming: report.result.naming,
+        antiPatterns: report.result.antiPatterns
+      });
+    } else {
+      const readline = require('readline');
+      const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+      const ask = (q) => new Promise((r)=> rl.question(q, (a)=> r(a.trim())));
+      (async () => {
+        console.log('\n=== Learn: Interactive Review ===');
+        console.log(`Recommended naming.style: ${report.result.naming.style}`);
+        const style = (await ask(`Enforce naming.style='${report.result.naming.style}'? (Y/n): `)).toLowerCase();
+        const applyStyle = !style || style.startsWith('y');
+        const prefixes = report.result.naming.booleanPrefix.join(', ');
+        const bp = (await ask(`Enforce booleanPrefix=[${prefixes}]? (Y/n): `)).toLowerCase();
+        const applyBP = !bp || bp.startsWith('y');
+        const forb = report.result.antiPatterns.forbiddenNames || [];
+        let applyForbidden = false;
+        if (forb.length) {
+          const ap = (await ask(`Add forbiddenNames [${forb.join(', ')}] to config? (Y/n): `)).toLowerCase();
+          applyForbidden = !ap || ap.startsWith('y');
+        }
+        const patch = { naming: {}, antiPatterns: { forbiddenNames: [] } };
+        if (applyStyle) patch.naming.style = report.result.naming.style;
+        if (applyBP) patch.naming.booleanPrefix = report.result.naming.booleanPrefix;
+        if (applyForbidden && forb.length) patch.antiPatterns.forbiddenNames = forb;
+        updateGuideConfig(cwd, patch);
+        rl.close();
+      })();
+    }
   }
-  const eslintVer = resolvePkgVersion('eslint', cwd);
-  if (!eslintVer || !gte(eslintVer, '9.0.0')) {
-    console.error(`❌ ESLint 9+ required. Your project: ${eslintVer || 'not installed'}.`);
-    console.error(`   Upgrade: npm install eslint@^9.0.0`);
-    ok = false;
-  } else {
-    console.log(`✅ ESLint ${eslintVer}`);
-  }
-  const reactVer = resolvePkgVersion('react', cwd);
-  if (reactVer && !gte(reactVer, '18.0.0')) {
-    console.warn(`⚠️ React 18+ recommended. Detected ${reactVer}.`);
-  }
-  const vueVer = resolvePkgVersion('vue', cwd);
-  if (vueVer && !gte(vueVer, '3.0.0')) {
-    console.warn(`⚠️ Vue 3+ recommended. Detected ${vueVer}.`);
-  }
-  const nextVer = resolvePkgVersion('next', cwd);
-  if (nextVer && !gte(nextVer, '13.0.0')) {
-    console.warn(`⚠️ Next.js 13+ recommended. Detected ${nextVer}.`);
-  }
-  return ok;
+  return 0;
+}
+
+function usage() {
+  console.log(`Usage:\n  eslint-plugin-ai-code-snifftest init [--primary=<domain>] [--additional=a,b,c]\n  eslint-plugin-ai-code-snifftest learn [--strict|--permissive|--interactive] [--fingerprint] [--accept-defaults]\n  eslint-plugin-ai-code-snifftest scaffold <domain> [--dir=path]\n\nExamples:\n  eslint-plugin-ai-code-snifftest init --primary=astronomy --additional=geometry,math,units\n  eslint-plugin-ai-code-snifftest learn --strict\n  eslint-plugin-ai-code-snifftest learn --interactive --accept-defaults\n  eslint-plugin-ai-code-snifftest scaffold medical --dir=./examples/external/medical\n`);
 }
 
 function main() {
@@ -390,6 +423,11 @@ function main() {
       return;
     }
     process.exitCode = init(cwd, args);
+    return;
+  }
+  if (cmd === 'learn') {
+    if (!checkRequirements(process.cwd(), { requireEslint: false })) { process.exitCode = 1; return; }
+    process.exitCode = learn(cwd, args);
     return;
   }
   if (cmd === 'scaffold' || cmd === 'create-constants') {
