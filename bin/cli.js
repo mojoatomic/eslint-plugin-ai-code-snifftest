@@ -103,6 +103,22 @@ async function initInteractive(cwd, args) {
     if (suggested.length) {
       console.log(`Suggested additional domains for ${primary}: ${suggested.join(', ')}`);
     }
+    // Show domain metadata via wizard helper
+    try {
+      const { buildDomainMetadata } = require(path.join(__dirname, '..', 'lib', 'wizard', 'domain-selector'));
+      const metas = buildDomainMetadata();
+      if (Array.isArray(metas) && metas.length) {
+        console.log('\nDiscovered domains:');
+        for (const m of metas) {
+          const src = m.sources && m.sources.length ? m.sources.join(', ') : 'internal';
+          console.log(`  - ${m.name} (constants: ${m.constantsCount}, terms: ${m.termsCount}, sources: ${src})`);
+        }
+        const sel = metas.find(d => d.name === primary);
+        if (sel && sel.constantsCount === 0) {
+          console.warn(`⚠️ Warning: selected primary '${primary}' has zero discovered constants.`);
+        }
+      }
+    } catch { /* ignore wizard metadata errors */ }
     let addAns = (await ask(rl, 'Additional domains (comma-separated, optional): ')).trim();
 
     // Optional: interactive external discovery listing
