@@ -21,15 +21,14 @@ function parseArgs(argv) {
 
 function loadConstantsLib() {
   try {
-    // Prefer local lib constants (works both in repo and when installed)
-    const lib = require(path.join(__dirname, '..', 'lib', 'constants'));
-    if (lib && lib.DOMAINS) return lib;
-} catch { /* ignore: constants lib not found */ }
-  return { DOMAINS: {} };
+    return require(path.join(__dirname, '..', 'lib', 'constants'));
+  } catch {
+    return null;
+  }
 }
 
 function domainMeta(constantsLib) {
-  const entries = Object.entries(constantsLib.DOMAINS || {});
+  const entries = Object.entries((constantsLib && constantsLib.DOMAINS) || {});
   return entries.map(([name, mod]) => {
     const constants = Array.isArray(mod && mod.constants) ? mod.constants : [];
     const terms = Array.isArray(mod && mod.terms) ? mod.terms : [];
@@ -38,13 +37,55 @@ function domainMeta(constantsLib) {
   });
 }
 
+function pickMetaForDomain(mod, max) {
+  const items = [];
+  if (Array.isArray(mod.constantMeta)) {
+    for (const m of mod.constantMeta) {
+      if (m && (typeof m.value === 'number' || typeof m.value === 'string')) {
+        items.push({ value: m.value, name: m.name, description: m.description });
+      }
+      if (items.length >= max) break;
+    }
+  }
+  return items;
+}
+
+function enrichConfigWithDomains(cfg) {
+  const lib = loadConstantsLib();
+  if (!lib || !lib.DOMAINS) return cfg;
+  const out = JSON.parse(JSON.stringify(cfg));
+  out.constants = out.constants || {};
+  const selected = [out.domains.primary, ...(out.domains.additional || [])].filter(Boolean);
+  for (const d of selected) {
+    const mod = lib.DOMAINS[d];
+    if (mod) {
+      if (Array.isArray(mod.constants) && mod.constants.length) {
+        out.constants[d] = Array.from(new Set(mod.constants)).slice(0, 50);
+      }
+      // attach metadata under a non-breaking field
+      const meta = pickMetaForDomain(mod, 50);
+      if (meta.length) {
+        out._constantMeta = out._constantMeta || {};
+        out._constantMeta[d] = meta;
+      }
+    }
+  }
+  // sensible defaults for constantResolution
+  out.constantResolution = out.constantResolution || {};
+  if (selected.includes('geometry')) out.constantResolution['360'] = 'geometry';
+  if (selected.includes('astronomy')) out.constantResolution['365.25'] = 'astronomy';
+  if (selected.includes('math')) out.constantResolution['3.14159'] = 'math';
+  return out;
+}
+
 function writeConfig(cwd, cfg) {
   const file = path.join(cwd, '.ai-coding-guide.json');
   if (fs.existsSync(file) && !process.env.FORCE_AI_CONFIG) {
     console.log(`Found existing ${file} — use FORCE_AI_CONFIG=1 to overwrite.`);
     return 0;
   }
-  fs.writeFileSync(file, JSON.stringify(cfg, null, 2) + '\n');
+  const enriched = enrichConfigWithDomains(cfg);
+  fs.writeFileSync(file, JSON.stringify(enriched, null, 2) + '\n');
   console.log(`Wrote ${file}`);
   return 0;
 }
@@ -63,11 +104,11 @@ function ask(rl, q) {
   return new Promise((resolve) => rl.question(q, (ans) => resolve(ans)));
 }
 
-async function initInteractive(cwd) {
+async function initInteractive(cwd, args) {
   const readline = require('readline');
   const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
   try {
-    const primary = (await ask(rl, 'Primary domain (default: general): ')).trim() || 'general';
+    let primary = (await ask(rl, 'Primary domain (default: general): ')).trim() || 'general';
     const suggested = suggestFor(primary);
     if (suggested.length) {
       console.log(`Suggested additional domains for ${primary}: ${suggested.join(', ')}`);
@@ -87,7 +128,51 @@ async function initInteractive(cwd) {
       console.warn(`⚠️ Warning: selected primary '${primary}' has zero discovered constants.`);
     }
 
-    const addAns = (await ask(rl, 'Additional domains (comma-separated, optional): ')).trim();
+    let addAns = (await ask(rl, 'Additional domains (comma-separated, optional): ')).trim();
+
+    // Optional: interactive external discovery listing (experimental)
+    const external = Boolean(args && (args.external || args.experimentalExternalConstants));
+    if (external) {
+      try {
+        const { discoverConstants } = require(path.join(__dirname, '..', 'lib', 'utils', 'discover-constants'));
+        const { mergeConstants } = require(path.join(__dirname, '..', 'lib', 'utils', 'merge-constants'));
+        const discovered = discoverConstants(cwd);
+        const merged = mergeConstants(discovered);
+        const sourcesByDomain = {};
+        for (const [d, data] of Object.entries(merged || {})) {
+          const srcs = (data.sources || []).map(s => s.type);
+          sourcesByDomain[d] = Array.from(new Set(srcs)).join(',');
+        }
+        const domainList = Object.keys(sourcesByDomain).sort();
+        if (domainList.length) {
+          console.log('\nDiscovered domains (experimental):');
+          domainList.forEach((d, i) => console.log(`  [${i+1}] ${d} (${sourcesByDomain[d]})`));
+          const priPick = (await ask(rl, 'Pick primary by name or index (Enter to keep): ')).trim();
+          if (priPick) {
+            const idx = Number(priPick);
+            if (Number.isInteger(idx) && idx>=1 && idx<=domainList.length) {
+              primary = domainList[idx-1];
+            } else if (domainList.includes(priPick)) {
+              primary = priPick;
+            }
+          }
+          const addPick = (await ask(rl, 'Pick additional (comma-separated names or indices, Enter to keep): ')).trim();
+          if (addPick) {
+            const tokens = addPick.split(',').map(s=>s.trim()).filter(Boolean);
+            const chosen = [];
+            for (const t of tokens) {
+              const n = Number(t);
+              if (Number.isInteger(n) && n>=1 && n<=domainList.length) chosen.push(domainList[n-1]);
+              else if (domainList.includes(t)) chosen.push(t);
+            }
+            if (chosen.length) addAns = chosen.join(',');
+          }
+        }
+      } catch (err) {
+        console.warn(`(external discovery skipped: ${err && err.message})`);
+      }
+    }
+
     const additional = addAns ? addAns.split(',').map(s=>s.trim()).filter(Boolean) : [];
     const domainPriority = [primary, ...additional];
     console.log(`\nSummary:\n  primary: ${primary}\n  additional: ${additional.join(', ') || '(none)'}\n  domainPriority: ${domainPriority.join(', ')}`);
@@ -126,28 +211,79 @@ async function initInteractive(cwd) {
   }
 }
 
+function formatList(title, items) {
+  if (!items || !items.length) return '';
+  return `### ${title}\n` + items.map((x)=>`- ${x}`).join('\n') + '\n\n';
+}
+
 function writeGuideMd(cwd, cfg) {
   const file = path.join(cwd, '.ai-coding-guide.md');
-  const header = `# AI Coding Guide\n\nPrimary domain: ${cfg.domains.primary}\nAdditional domains: ${cfg.domains.additional.join(', ') || '(none)'}\nDomain priority: ${cfg.domainPriority.join(', ')}\n\nGuidance:\n- Use domain annotations (@domain/@domains) for ambiguous constants\n- Prefer constants and terms from active domains\n`;
+  let md = `# AI Coding Guide\n\nPrimary domain: ${cfg.domains.primary}\nAdditional domains: ${cfg.domains.additional.join(', ') || '(none)'}\nDomain priority: ${cfg.domainPriority.join(', ')}\n\nGuidance:\n- Use domain annotations (@domain/@domains) for ambiguous constants\n- Prefer constants and terms from active domains\n`;
 
-  // Build per-domain sections from constants library
-  const { DOMAINS } = loadConstantsLib();
-  const sections = [];
-  for (const d of cfg.domainPriority) {
-    const mod = DOMAINS ? DOMAINS[d] : null;
-    const constants = Array.isArray(mod && mod.constants) ? mod.constants : [];
-    const terms = Array.isArray(mod && mod.terms) ? mod.terms : [];
-    const sources = Array.isArray(mod && mod.sources) ? mod.sources : [];
-    sections.push(`## Domain: ${d}\n\n- Sources: ${sources.length ? sources.join(', ') : 'internal'}\n- Constants (${constants.length}): ${constants.map(v => String(v)).join(', ') || '(none)'}\n- Terminology (${terms.length}): ${terms.join(', ') || '(none)'}\n`);
+  // Per-domain sections from constants library
+  const lib = loadConstantsLib();
+  const DOMAINS = lib && lib.DOMAINS;
+  if (DOMAINS) {
+    const sections = [];
+    for (const d of cfg.domainPriority) {
+      const mod = DOMAINS[d];
+      const constants = Array.isArray(mod && mod.constants) ? mod.constants : [];
+      const terms = Array.isArray(mod && mod.terms) ? mod.terms : [];
+      const sources = Array.isArray(mod && mod.sources) ? mod.sources : [];
+      sections.push(`## Domain: ${d}\n\n- Sources: ${sources.length ? sources.join(', ') : 'internal'}\n- Constants (${constants.length}): ${constants.map(v => String(v)).join(', ') || '(none)'}\n- Terminology (${terms.length}): ${terms.join(', ') || '(none)'}\n`);
+    }
+    if (sections.length) md += `\n${sections.join('\n')}`;
   }
-  const md = header + (sections.length ? `\n${sections.join('\n')}` : '');
+
+  // External constants discovery (experimental)
+  if (cfg.experimentalExternalConstants) {
+    try {
+      const { discoverConstants } = require(path.join(__dirname, '..', 'lib', 'utils', 'discover-constants'));
+      const { mergeConstants } = require(path.join(__dirname, '..', 'lib', 'utils', 'merge-constants'));
+      const discovered = discoverConstants(cwd);
+      const merged = mergeConstants(discovered);
+      const counts = {
+        builtin: Object.keys(discovered.builtin || {}).length,
+        npm: Object.keys(discovered.npm || {}).length,
+        local: Object.keys(discovered.local || {}).length,
+        custom: Object.keys(discovered.custom || {}).length,
+      };
+      const domains = Object.keys(merged || {});
+      md += `\n## External Constants Discovery (experimental)\nBuilt-in: ${counts.builtin}  NPM: ${counts.npm}  Local: ${counts.local}  Custom: ${counts.custom}\nDomains: ${domains.join(', ') || '(none)'}\n`;
+    } catch (err) {
+      md += `\n## External Constants Discovery (experimental)\nError: ${err && err.message}\n`;
+    }
+  }
+
+  // Ambiguity and precedence guidance
+  md += `\n## Ambiguity and Disambiguation\nWhen a numeric literal could belong to multiple domains (e.g., 360 geometry vs 360 astronomy), disambiguate:\n\n1) Inline annotation\n\n~~~js\n// @domain geometry\nconst fullCircle = 720 / 2; // 360°\n~~~\n\n2) Name-based cue\n\n~~~js\nconst circleAngleDegrees = 720 / 2;\n~~~\n\n3) Config override (project-wide)\n\n~~~json\n{\n  "constantResolution": {\n    "360": "geometry"\n  }\n}\n~~~\n\n## Active-Domain Precedence\nWhen multiple domains match, the linter prefers the first in domainPriority. Adjust this order to shape suggestions.\n\nExample:\n\n~~~json\n{\n  "domains": { "primary": "${cfg.domains.primary}", "additional": [${cfg.domains.additional.map(d=>`"${d}"`).join(', ')}] },\n  "domainPriority": [${cfg.domainPriority.map(d=>`"${d}"`).join(', ')}]\n}\n~~~\n`;
   fs.writeFileSync(file, md);
   console.log(`Wrote ${file}`);
 }
 
 function writeAgentsMd(cwd, cfg) {
   const file = path.join(cwd, 'AGENTS.md');
-  const md = `# AI Rules\n\nPrimary domain: ${cfg.domains.primary}\nAdditional: ${cfg.domains.additional.join(', ') || '(none)'}\nPriority: ${cfg.domainPriority.join(', ')}\n\n## Naming\n- Style: ${cfg.naming.style}\n- Booleans: isX/hasX/shouldX/canX\n- Async: fetchX/loadX/saveX\n\n## Guidance\n- Use @domain/@domains annotations for ambiguous constants\n- Prefer constants/terms from active domains\n\n---\n*See .ai-coding-guide.md for details*\n`;
+  const doms = [cfg.domains.primary, ...(cfg.domains.additional||[])].filter(Boolean);
+  const lib = loadConstantsLib();
+  let md = `# AI Coding Rules\n\nDomains: ${doms.join(', ')}\nPriority: ${cfg.domainPriority.join(' > ')}\n\n## Naming\n- Style: ${cfg.naming.style}\n- Booleans: isX/hasX/shouldX/canX\n- Async: fetchX/loadX/saveX\n\n## Guidance\n- Use @domain/@domains annotations for ambiguous constants\n- Prefer constants/terms from active domains\n\n`;
+  if (lib && lib.DOMAINS) {
+    for (const d of doms) {
+      const mod = lib.DOMAINS[d];
+      if (!mod) continue;
+      md += `## Domain: ${d}\n`;
+      const meta = pickMetaForDomain(mod, 10);
+      const cn = Array.isArray(mod.constants) ? mod.constants.slice(0, 10) : [];
+      if (meta.length) {
+        md += '\n### Constants\n```javascript\n' + meta.map(m=>`const ${m.name || ('K_'+String(m.value).replace(/[^A-Za-z0-9]+/g,'_'))} = ${m.value};${m.description ? ' // '+m.description : ''}`).join('\n') + '\n```\n\n';
+      } else if (cn.length) {
+        md += '\n### Constants\n```javascript\n' + cn.map(v=>`const K_${String(v).replace(/[^A-Za-z0-9]+/g,'_')} = ${v};`).join('\n') + '\n```\n\n';
+      }
+      const terms = Array.isArray(mod.terms) ? mod.terms.slice(0, 15) : [];
+      if (terms.length) md += formatList('Terminology', terms);
+    }
+  }
+  // Ambiguity tactics
+  md += `\n## Ambiguity Tactics\n- Prefer explicit @domain/@domains on ambiguous constants\n- Use name cues (e.g., 'circleAngleDegrees')\n- Project-wide mapping via .ai-coding-guide.json → constantResolution\n\n---\n*See .ai-coding-guide.md for details*\n`;
   fs.writeFileSync(file, md);
   console.log(`Wrote ${file}`);
 }
@@ -158,7 +294,9 @@ function writeCursorRules(cwd, cfg) {
     rules: [
       `Primary domain: ${cfg.domains.primary}`,
       `Additional domains: ${cfg.domains.additional.join(', ')}`,
-      'Prefer explicit @domain annotations for ambiguous constants.'
+      'Prefer explicit @domain annotations for ambiguous constants.',
+      'Use UPPER_SNAKE_CASE for true constants; camelCase for variables.',
+      'Boolean vars must be prefixed: is/has/should/can/did/will.'
     ]
   };
   fs.writeFileSync(file, JSON.stringify(payload, null, 2) + '\n');
@@ -171,7 +309,7 @@ function writeEslintConfig(cwd) {
     console.log(`Found existing ${file} — set FORCE_ESLINT_CONFIG=1 to overwrite.`);
     return;
   }
-  const content = `// Generated by eslint-plugin-ai-code-snifftest init\nimport aiSnifftest from 'eslint-plugin-ai-code-snifftest';\n\nexport default [\n  {\n    plugins: { 'ai-code-snifftest': aiSnifftest },\n    rules: {\n      'ai-code-snifftest/no-redundant-calculations': 'error',\n      'ai-code-snifftest/no-equivalent-branches': 'error',\n      'ai-code-snifftest/prefer-simpler-logic': 'error',\n      'ai-code-snifftest/no-redundant-conditionals': 'error',\n      'ai-code-snifftest/no-unnecessary-abstraction': 'warn',\n      'ai-code-snifftest/no-generic-names': 'warn',\n      'ai-code-snifftest/enforce-domain-terms': 'warn'\n    }\n  }\n];\n`;
+  const content = `// Generated by eslint-plugin-ai-code-snifftest init\nimport js from '@eslint/js';\nimport aiSnifftest from 'eslint-plugin-ai-code-snifftest';\n\nexport default [\n  js.configs.recommended,\n  {\n    files: ['**/*.js'],\n    plugins: { 'ai-code-snifftest': aiSnifftest },\n    rules: {\n      // Baseline\n      'no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],\n      'no-undef': 'error',\n      'prefer-const': 'warn',\n      'no-var': 'error',\n      // Consistency\n      'quotes': ['warn', 'single', { avoidEscape: true }],\n      'semi': ['warn', 'always'],\n      'eqeqeq': ['error', 'always'],\n      // AI-friendly\n      'complexity': ['warn', 15],\n      'max-depth': ['warn', 4],\n      'max-lines-per-function': ['warn', 100],\n      // Naming (basic)\n      'camelcase': ['error', { properties: 'always' }],\n      // Domain-specific\n      'ai-code-snifftest/no-redundant-calculations': 'warn',\n      'ai-code-snifftest/no-equivalent-branches': 'warn',\n      'ai-code-snifftest/prefer-simpler-logic': 'warn',\n      'ai-code-snifftest/no-redundant-conditionals': 'warn',\n      'ai-code-snifftest/no-unnecessary-abstraction': 'warn',\n      'ai-code-snifftest/no-generic-names': 'warn',\n      'ai-code-snifftest/enforce-domain-terms': 'warn'\n    }\n  },\n  {\n    files: ['**/*.test.js', '**/*.spec.js'],\n    rules: { 'max-lines-per-function': 'off', 'complexity': 'off' }\n  }\n];\n`;
   fs.writeFileSync(file, content);
   console.log(`Wrote ${file}`);
 }
@@ -180,14 +318,21 @@ function init(cwd, args) {
   const primary = (args.primary || 'general').trim();
   const additional = (args.additional || '').split(',').map(s => s.trim()).filter(Boolean);
   const domainPriority = [primary, ...additional];
+const external = Boolean(args.external || args.experimentalExternalConstants);
+  const allowlist = (args.allowlist || '').split(',').map(s=>s.trim()).filter(Boolean);
   const cfg = {
     domains: { primary, additional },
     domainPriority,
     constants: {},
     terms: { entities: [], properties: [], actions: [] },
     naming: { style: 'camelCase', booleanPrefix: ['is','has','should','can'], asyncPrefix: ['fetch','load','save'], pluralizeCollections: true },
-    antiPatterns: { forbiddenNames: [], forbiddenTerms: [] }
+    antiPatterns: { forbiddenNames: [], forbiddenTerms: [] },
+    experimentalExternalConstants: external,
+    externalConstantsAllowlist: allowlist
   };
+  if (external && (!allowlist || allowlist.length === 0)) {
+    console.warn('Warning: --external used without allowlist; consider adding --allowlist to limit npm scope.');
+  }
   const code = writeConfig(cwd, cfg);
   const hasWarp = fs.existsSync(path.join(cwd, 'WARP.md'));
   if (args.md || args.yes) writeGuideMd(cwd, cfg);
@@ -202,15 +347,36 @@ function init(cwd, args) {
   return code;
 }
 
+function scaffoldConstantsPkg(cwd, domainArg, outDirArg) {
+  const domain = String(domainArg || '').trim();
+  if (!domain) { console.error('Missing domain. Usage: eslint-plugin-ai-code-snifftest scaffold <domain> [--dir=path]'); return 1; }
+  const outDir = path.resolve(cwd, outDirArg || `./${domain}`);
+  fs.mkdirSync(outDir, { recursive: true });
+  const pkgName = `@ai-constants/${domain}`;
+  const indexJs = `module.exports = {\n  domain: '${domain}',\n  version: '1.0.0',\n  constants: [\n    { value: 42, name: 'EXAMPLE_CONSTANT', description: 'Example constant for ${domain}' }\n  ],\n  terms: { entities: ['Entity1'], properties: ['property1'], actions: ['action1'] },\n  naming: { style: 'camelCase', booleanPrefix: ['is','has','should'], constants: 'UPPER_SNAKE_CASE' }\n};\n`;
+  const pkgJson = { name: pkgName, version: '1.0.0', main: 'index.js', license: 'MIT' };
+  const readme = `# ${pkgName}\n\nExternal constants package for the ${domain} domain.\n`;
+  const testDir = path.join(outDir, 'test');
+  fs.writeFileSync(path.join(outDir, 'index.js'), indexJs);
+  fs.writeFileSync(path.join(outDir, 'package.json'), JSON.stringify(pkgJson, null, 2) + '\n');
+  fs.writeFileSync(path.join(outDir, 'README.md'), readme);
+  fs.mkdirSync(testDir, { recursive: true });
+  fs.writeFileSync(path.join(testDir, 'validate.test.js'), `/* placeholder tests */\n`);
+  console.log(`Scaffolded external constants package at ${outDir}`);
+  return 0;
+}
+
 function usage() {
   console.log(`Usage:
   eslint-plugin-ai-code-snifftest init [--primary=<domain>] [--additional=a,b,c]
   eslint-plugin-ai-code-snifftest learn [--strict|--permissive|--interactive] [--fingerprint] [--accept-defaults]
+  eslint-plugin-ai-code-snifftest scaffold <domain> [--dir=path]
 
 Examples:
   eslint-plugin-ai-code-snifftest init --primary=astronomy --additional=geometry,math,units
   eslint-plugin-ai-code-snifftest learn --strict
   eslint-plugin-ai-code-snifftest learn --interactive --accept-defaults
+  eslint-plugin-ai-code-snifftest scaffold medical --dir=./examples/external/medical
 `);
 }
 
@@ -234,6 +400,7 @@ function gte(a, b) {
 }
 
 function checkRequirements(cwd, opts = { requireEslint: true }) {
+  if (process.env.SKIP_AI_REQUIREMENTS || process.env.NODE_ENV === 'test') return true;
   let ok = true;
   const nodeVer = process.versions.node;
   if (!gte(nodeVer, '18.0.0')) {
@@ -358,15 +525,21 @@ function main() {
   if (cmd === 'init') {
     if (!checkRequirements(process.cwd())) { process.exitCode = 1; return; }
     if (!args.primary && process.stdin.isTTY) {
-      initInteractive(cwd).then((code)=>{ process.exitCode = code; });
+      initInteractive(cwd, args).then((code)=>{ process.exitCode = code; });
       return;
     }
     process.exitCode = init(cwd, args);
     return;
   }
-if (cmd === 'learn') {
+  if (cmd === 'learn') {
     if (!checkRequirements(process.cwd(), { requireEslint: false })) { process.exitCode = 1; return; }
     process.exitCode = learn(cwd, args);
+    return;
+  }
+  if (cmd === 'scaffold' || cmd === 'create-constants') {
+    const dom = args._[1];
+    const outDir = args.dir || args.out;
+    process.exitCode = scaffoldConstantsPkg(cwd, dom, outDir);
     return;
   }
   usage();
