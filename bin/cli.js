@@ -246,7 +246,13 @@ function writeAgentsMd(cwd, cfg) {
   const file = path.join(cwd, 'AGENTS.md');
   const doms = [cfg.domains.primary, ...(cfg.domains.additional||[])].filter(Boolean);
   const lib = loadConstantsLib();
-  let md = `# AI Coding Rules\n\nDomains: ${doms.join(', ')}\nPriority: ${cfg.domainPriority.join(' > ')}\n\n## Naming\n- Style: ${cfg.naming.style}\n- Booleans: isX/hasX/shouldX/canX\n- Async: fetchX/loadX/saveX\n\n## Guidance\n- Use @domain/@domains annotations for ambiguous constants\n- Prefer constants/terms from active domains\n\n`;
+  
+  // Detect project context
+  const { detectProjectContext } = require(path.join(__dirname, '..', 'lib', 'utils', 'project-detection'));
+  const projectCtx = detectProjectContext(cwd);
+  
+  // Header with project context
+  let md = `# AI Coding Rules\n\n**Project**: ${projectCtx.description}\n**Domains**: ${doms.join(', ')}\n**Priority**: ${cfg.domainPriority.join(' > ')}\n**Tech Stack**: ${projectCtx.techStack.join(', ') || 'Node.js'}\n\n---\n\n## Naming\n- Style: ${cfg.naming.style}\n- Booleans: isX/hasX/shouldX/canX\n- Async: fetchX/loadX/saveX\n\n## Guidance\n- Use @domain/@domains annotations for ambiguous constants\n- Prefer constants/terms from active domains\n\n`;
   if (lib && lib.DOMAINS) {
     for (const d of doms) {
       const mod = lib.DOMAINS[d];
@@ -268,9 +274,9 @@ function writeAgentsMd(cwd, cfg) {
     md += '\n## Architecture Guidelines\n\n';
     const arch = cfg.architecture;
     
-    // File organization
+    // File organization with concrete examples
     if (arch.fileStructure) {
-      md += `**File Organization:** ${arch.fileStructure.pattern}\n\n`;
+      md += `## File Organization\n\n**Pattern**: ${arch.fileStructure.pattern} (group by feature, not type)\n\n**Example Structure**:\n\`\`\`\n${projectCtx.type === 'cli' ? 'project/' : projectCtx.type === 'web-app' ? 'src/' : 'lib/'}\n  ${projectCtx.type === 'cli' ? 'bin/\n    cli.js              # Entry point (50-100 lines)\n  lib/\n    commands/           # CLI commands\n      init/\n        index.js        # Orchestrator\n        interactive.js  # User prompts\n      learn/\n        index.js\n        scanner.js\n    generators/         # File generators\n      eslint-config.js\n      agents-md.js\n    utils/              # Shared helpers\n      file-writer.js\n      version.js' : projectCtx.type === 'web-app' ? 'components/         # React/Vue components\n    auth/\n      LoginForm.jsx\n      AuthProvider.jsx\n    dashboard/\n      Dashboard.jsx\n      widgets/\n        Chart.jsx\n  hooks/              # Custom hooks\n    useAuth.js\n    useApi.js\n  utils/              # Shared utilities' : 'commands/           # Core commands\n    init/\n      index.js          # Orchestrator\n      config-builder.js # Business logic\n    validate/\n      index.js\n  generators/         # File generators\n  utils/              # Shared helpers'}\n  tests/              # Tests (co-located or here)\n\`\`\`\n\n**Avoid (Type-based)**:\n\`\`\`\n❌ lib/\n    controllers/        # Groups by layer\n    services/           # Hard to find features\n    models/\n    views/\n\`\`\`\n\n`;
     }
     
     // File length limits
