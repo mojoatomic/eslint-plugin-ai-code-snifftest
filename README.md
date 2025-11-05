@@ -263,6 +263,52 @@ eslint-plugin-ai-code-snifftest init
 - **Context-aware**: Different limits for different file types
 - **Test-friendly**: Lenient rules for test files
 
+## Troubleshooting
+
+### ESLint Config Issues
+
+**Module type warning:**
+```
+Module type of file:///...eslint.config.js is not specified
+```
+**Solution**: Add `"type": "module"` to your `package.json`
+
+**`no-undef` errors for Node.js globals:**
+```
+error  'require' is not defined  no-undef
+error  'process' is not defined  no-undef
+```
+**Solution**: Generated config already includes Node.js globals. If using a custom config, add:
+```js
+import globals from 'globals';
+
+export default [{
+  languageOptions: {
+    globals: { ...globals.node }
+  }
+}];
+```
+
+**Syntax errors in generated config:**
+
+This was a known issue (fixed in v0.0.1+). Update to the latest version:
+```bash
+npm update eslint-plugin-ai-code-snifftest
+```
+
+### Architecture Guardrails
+
+**Duplicate rule keys:**
+
+If you see errors like `Duplicate key 'complexity'`, this was fixed in v0.0.1+. The generator now skips overlapping AI-friendly rules when architecture guardrails are enabled.
+
+**Generated config issues:**
+
+To regenerate the config:
+```bash
+FORCE_ESLINT_CONFIG=1 eslint-plugin-ai-code-snifftest init
+```
+
 ## Configurations
 
 See RFC: Extensible Domain Constants via Plugin Architecture (#64).
