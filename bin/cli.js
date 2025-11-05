@@ -4,6 +4,13 @@
 const fs = require('fs');
 const path = require('path');
 
+// Generators
+const { writeConfig } = require(path.join(__dirname, '..', 'lib', 'generators', 'config-json'));
+const { writeGuideMd } = require(path.join(__dirname, '..', 'lib', 'generators', 'guide-md'));
+const { writeAgentsMd } = require(path.join(__dirname, '..', 'lib', 'generators', 'agents-md'));
+const { writeCursorRules } = require(path.join(__dirname, '..', 'lib', 'generators', 'cursorrules'));
+const { writeEslintConfig } = require(path.join(__dirname, '..', 'lib', 'generators', 'eslint-config'));
+
 function parseArgs(argv) {
   // simple parse; supports flags like --foo or --foo=bar
   const out = { _: [] };
@@ -19,66 +26,6 @@ function parseArgs(argv) {
   return out;
 }
 
-function loadConstantsLib() {
-  try {
-    return require(path.join(__dirname, '../lib/constants'));
-  } catch {
-    return null;
-  }
-}
-
-function pickMetaForDomain(mod, max) {
-  const items = [];
-  if (Array.isArray(mod.constantMeta)) {
-    for (const m of mod.constantMeta) {
-      if (m && (typeof m.value === 'number' || typeof m.value === 'string')) {
-        items.push({ value: m.value, name: m.name, description: m.description });
-      }
-      if (items.length >= max) break;
-    }
-  }
-  return items;
-}
-
-function enrichConfigWithDomains(cfg) {
-  const lib = loadConstantsLib();
-  if (!lib || !lib.DOMAINS) return cfg;
-  const out = JSON.parse(JSON.stringify(cfg));
-  out.constants = out.constants || {};
-  const selected = [out.domains.primary, ...(out.domains.additional || [])].filter(Boolean);
-  for (const d of selected) {
-    const mod = lib.DOMAINS[d];
-    if (mod) {
-      if (Array.isArray(mod.constants) && mod.constants.length) {
-        out.constants[d] = Array.from(new Set(mod.constants)).slice(0, 50);
-      }
-      // attach metadata under a non-breaking field
-      const meta = pickMetaForDomain(mod, 50);
-      if (meta.length) {
-        out._constantMeta = out._constantMeta || {};
-        out._constantMeta[d] = meta;
-      }
-    }
-  }
-  // sensible defaults for constantResolution
-  out.constantResolution = out.constantResolution || {};
-  if (selected.includes('geometry')) out.constantResolution['360'] = 'geometry';
-  if (selected.includes('astronomy')) out.constantResolution['365.25'] = 'astronomy';
-  if (selected.includes('math')) out.constantResolution['3.14159'] = 'math';
-  return out;
-}
-
-function writeConfig(cwd, cfg) {
-  const file = path.join(cwd, '.ai-coding-guide.json');
-  if (fs.existsSync(file) && !process.env.FORCE_AI_CONFIG) {
-    console.log(`Found existing ${file} — use FORCE_AI_CONFIG=1 to overwrite.`);
-    return 0;
-  }
-  const enriched = enrichConfigWithDomains(cfg);
-  fs.writeFileSync(file, JSON.stringify(enriched, null, 2) + '\n');
-  console.log(`Wrote ${file}`);
-  return 0;
-}
 
 function suggestFor(primary) {
   const map = {
@@ -209,185 +156,6 @@ async function initInteractive(cwd, args) {
   }
 }
 
-function formatList(title, items) {
-  if (!items || !items.length) return '';
-  return `### ${title}\n` + items.map((x)=>`- ${x}`).join('\n') + '\n\n';
-}
-
-function writeGuideMd(cwd, cfg) {
-  const file = path.join(cwd, '.ai-coding-guide.md');
-  let md = `# AI Coding Guide\n\nPrimary domain: ${cfg.domains.primary}\nAdditional domains: ${cfg.domains.additional.join(', ') || '(none)'}\nDomain priority: ${cfg.domainPriority.join(', ')}\n\nGuidance:\n- Use domain annotations (@domain/@domains) for ambiguous constants\n- Prefer constants and terms from active domains\n`;
-if (cfg.experimentalExternalConstants) {
-    try {
-      const { discoverConstants } = require(path.join(__dirname, '..', 'lib', 'utils', 'discover-constants'));
-      const { mergeConstants } = require(path.join(__dirname, '..', 'lib', 'utils', 'merge-constants'));
-      const discovered = discoverConstants(cwd);
-      const merged = mergeConstants(discovered);
-      const counts = {
-        builtin: Object.keys(discovered.builtin || {}).length,
-        npm: Object.keys(discovered.npm || {}).length,
-        local: Object.keys(discovered.local || {}).length,
-        custom: Object.keys(discovered.custom || {}).length,
-      };
-      const domains = Object.keys(merged || {});
-      md += `\n## External Constants Discovery (experimental)\nBuilt-in: ${counts.builtin}  NPM: ${counts.npm}  Local: ${counts.local}  Custom: ${counts.custom}\nDomains: ${domains.join(', ') || '(none)'}\n`;
-    } catch (err) {
-      md += `\n## External Constants Discovery (experimental)\nError: ${err && err.message}\n`;
-    }
-  }
-
-  // Ambiguity and precedence guidance
-md += `\n## Ambiguity and Disambiguation\nWhen a numeric literal could belong to multiple domains (e.g., 360 geometry vs 360 astronomy), disambiguate:\n\n1) Inline annotation\n\n~~~js\n// @domain geometry\nconst fullCircle = 720 / 2; // 360°\n~~~\n\n2) Name-based cue\n\n~~~js\nconst circleAngleDegrees = 720 / 2;\n~~~\n\n3) Config override (project-wide)\n\n~~~json\n{\n  "constantResolution": {\n    "360": "geometry"\n  }\n}\n~~~\n\n## Active-Domain Precedence\nWhen multiple domains match, the linter prefers the first in domainPriority. Adjust this order to shape suggestions.\n\nExample:\n\n~~~json\n{\n  "domains": { "primary": "${cfg.domains.primary}", "additional": [${cfg.domains.additional.map(d=>`"${d}"`).join(', ')}] },\n  "domainPriority": [${cfg.domainPriority.map(d=>`"${d}"`).join(', ')}]\n}\n~~~\n`;
-  fs.writeFileSync(file, md);
-  console.log(`Wrote ${file}`);
-}
-
-function writeAgentsMd(cwd, cfg) {
-  const file = path.join(cwd, 'AGENTS.md');
-  const doms = [cfg.domains.primary, ...(cfg.domains.additional||[])].filter(Boolean);
-  const lib = loadConstantsLib();
-  
-  // Detect project context
-  const { detectProjectContext } = require(path.join(__dirname, '..', 'lib', 'utils', 'project-detection'));
-  const projectCtx = detectProjectContext(cwd);
-  
-  // Header with project context
-  let md = `# AI Coding Rules\n\n**Project**: ${projectCtx.description}\n**Domains**: ${doms.join(', ')}\n**Priority**: ${cfg.domainPriority.join(' > ')}\n**Tech Stack**: ${projectCtx.techStack.join(', ') || 'Node.js'}\n\n---\n\n## Naming\n- Style: ${cfg.naming.style}\n- Booleans: isX/hasX/shouldX/canX\n- Async: fetchX/loadX/saveX\n\n## Guidance\n- Use @domain/@domains annotations for ambiguous constants\n- Prefer constants/terms from active domains\n\n`;
-  if (lib && lib.DOMAINS) {
-    for (const d of doms) {
-      const mod = lib.DOMAINS[d];
-      if (!mod) continue;
-      md += `## Domain: ${d}\n`;
-      const meta = pickMetaForDomain(mod, 10);
-      const cn = Array.isArray(mod.constants) ? mod.constants.slice(0, 10) : [];
-      if (meta.length) {
-        md += '\n### Constants\n```javascript\n' + meta.map(m=>`const ${m.name || ('K_'+String(m.value).replace(/[^A-Za-z0-9]+/g,'_'))} = ${m.value};${m.description ? ' // '+m.description : ''}`).join('\n') + '\n```\n\n';
-      } else if (cn.length) {
-        md += '\n### Constants\n```javascript\n' + cn.map(v=>`const K_${String(v).replace(/[^A-Za-z0-9]+/g,'_')} = ${v};`).join('\n') + '\n```\n\n';
-      }
-      const terms = Array.isArray(mod.terms) ? mod.terms.slice(0, 15) : [];
-      if (terms.length) md += formatList('Terminology', terms);
-    }
-  }
-  // Architecture guidelines
-  if (cfg.architecture) {
-    md += '\n## Architecture Guidelines\n\n';
-    const arch = cfg.architecture;
-    
-    // File organization with concrete examples
-    if (arch.fileStructure) {
-      md += `## File Organization\n\n**Pattern**: ${arch.fileStructure.pattern} (group by feature, not type)\n\n**Example Structure**:\n\`\`\`\n${projectCtx.type === 'cli' ? 'project/' : projectCtx.type === 'web-app' ? 'src/' : 'lib/'}\n  ${projectCtx.type === 'cli' ? 'bin/\n    cli.js              # Entry point (50-100 lines)\n  lib/\n    commands/           # CLI commands\n      init/\n        index.js        # Orchestrator\n        interactive.js  # User prompts\n      learn/\n        index.js\n        scanner.js\n    generators/         # File generators\n      eslint-config.js\n      agents-md.js\n    utils/              # Shared helpers\n      file-writer.js\n      version.js' : projectCtx.type === 'web-app' ? 'components/         # React/Vue components\n    auth/\n      LoginForm.jsx\n      AuthProvider.jsx\n    dashboard/\n      Dashboard.jsx\n      widgets/\n        Chart.jsx\n  hooks/              # Custom hooks\n    useAuth.js\n    useApi.js\n  utils/              # Shared utilities' : 'commands/           # Core commands\n    init/\n      index.js          # Orchestrator\n      config-builder.js # Business logic\n    validate/\n      index.js\n  generators/         # File generators\n  utils/              # Shared helpers'}\n  tests/              # Tests (co-located or here)\n\`\`\`\n\n**Avoid (Type-based)**:\n\`\`\`\n❌ lib/\n    controllers/        # Groups by layer\n    services/           # Hard to find features\n    models/\n    views/\n\`\`\`\n\n`;
-    }
-    
-    // File length limits as table (Task 3.9)
-    if (arch.maxFileLength) {
-      md += '## File Length Limits\n\n';
-      md += '| File Type | Max Lines | Rationale |\n';
-      md += '|-----------|-----------|-----------|\n';
-      md += `| CLI entry | ${arch.maxFileLength.cli || 100} | Routing only |\n`;
-      md += `| Commands  | ${arch.maxFileLength.command || 150} | Orchestration |\n`;
-      md += `| Utilities | ${arch.maxFileLength.util || 200} | Single purpose |\n`;
-      md += `| Generators| ${arch.maxFileLength.generator || 250} | Template logic |\n`;
-      md += `| Components| ${arch.maxFileLength.component || 300} | UI complexity |\n`;
-      md += `| Tests     | ∞ | No limit |\n`;
-      md += `| Default   | ${arch.maxFileLength.default || 250} | General files |\n\n`;
-    }
-    
-    // Function limits
-    if (arch.functions) {
-      md += '**Function Limits:**\n';
-      md += `- Max length: ${arch.functions.maxLength || 50} lines\n`;
-      md += `- Max complexity: ${arch.functions.maxComplexity || 10}\n`;
-      md += `- Max depth: ${arch.functions.maxDepth || 4}\n`;
-      md += `- Max parameters: ${arch.functions.maxParams || 4}\n`;
-      md += `- Max statements: ${arch.functions.maxStatements || 30}\n\n`;
-    }
-    
-    // Patterns
-    if (arch.patterns) {
-      md += '**Code Patterns:**\n';
-      md += `- CLI style: ${arch.patterns.cliStyle || 'orchestration-shell'}\n`;
-      md += `- Error handling: ${arch.patterns.errorHandling || 'explicit'}\n`;
-      md += `- Async style: ${arch.patterns.asyncStyle || 'async-await'}\n\n`;
-    }
-  }
-  
-  // Code Patterns with Examples (Task 3.3)
-  md += '\n## Code Patterns\n\n';
-  if (projectCtx.type === 'cli' || projectCtx.type === 'dev-tools') {
-    md += '### CLI Style\n```javascript\n// ✅ Good: Orchestration shell\nasync function main() {\n  const args = parseArgs(process.argv);\n  const command = commands[args._[0]];\n  await command(process.cwd(), args);\n}\n\n// ❌ Bad: Business logic in CLI\nasync function main() {\n  // 200 lines of logic here\n}\n```\n\n';
-  }
-  md += '### Error Handling\n```javascript\n// ✅ Explicit\ntry {\n  await riskyOperation();\n} catch (err) {\n  console.error(`Failed: ${err.message}`);\n  process.exit(1);\n}\n\n// ❌ Silent\ntry {\n  await riskyOperation();\n} catch {} // ❌ No error handling\n```\n\n';
-  md += '### Async Style\n```javascript\n// ✅ async/await\nasync function loadData() {\n  const data = await fetchData();\n  return process(data);\n}\n\n// ❌ Callbacks or raw promises\nfunction loadData(callback) {\n  fetchData().then(data => callback(null, data));\n}\n```\n\n';
-  
-  // Import/Export Conventions (Task 3.4)
-  md += '## Import/Export Conventions\n\n```javascript\n// ✅ Named imports (preferred)\nimport { foo, bar } from \'./utils.js\';\n\n// ✅ Default only for entry points\nexport default function main() {}\n\n// ❌ Default exports elsewhere\nexport default { foo, bar }; // ❌ Use named\n\n// ✅ Alphabetize\nimport { a, b, c } from \'./foo.js\';\nimport { x, y, z } from \'./bar.js\';\n```\n\n';
-  
-  // Test Conventions (Task 3.5)
-  md += '## Test Conventions\n\n**Location**: Co-locate or `tests/` directory\n```\nfoo.js\nfoo.test.js  ✅\n```\n\n**Naming**:\n```javascript\n// ✅ Descriptive\ntest(\'loads config from .ai-coding-guide.json\', () => {});\n\n// ❌ Vague\ntest(\'it works\', () => {});\n```\n\n**Note**: Test files exempt from line/complexity limits\n\n';
-  
-  // Documentation Requirements (Task 3.6)
-  md += '## Documentation\n\n**Required**:\n- JSDoc for public functions\n- README.md in feature directories\n- Examples for complex logic\n\n**Example**:\n```javascript\n/**\n * Generate ESLint config from domain configuration\n * @param {Object} config - Domain configuration\n * @param {Object} domains - Available domains\n * @returns {string} ESLint config file content\n */\nexport async function generateEslintConfig(config, domains) {\n  // ...\n}\n```\n\n';
-  
-  // Anti-Patterns (Task 3.8)
-  md += '## Anti-Patterns\n\n**Avoid:**\n- ❌ **Monolithic files** (>250 lines) - Split into smaller modules\n- ❌ **Long functions** (>50 lines) - Extract helper functions\n- ❌ **Deep nesting** (>4 levels) - Early returns or separate functions\n- ❌ **Silent errors** - Always log/handle errors explicitly\n- ❌ **Global state** - Use parameters and return values\n- ❌ **Magic numbers** - Use named constants\n\n';
-  
-  // Ambiguity tactics
-  md += `\n## Ambiguity Tactics\n- Prefer explicit @domain/@domains on ambiguous constants\n- Use name cues (e.g., 'circleAngleDegrees')\n- Project-wide mapping via .ai-coding-guide.json → constantResolution\n\n---\n*See .ai-coding-guide.md for details*\n`;
-  fs.writeFileSync(file, md);
-  console.log(`Wrote ${file}`);
-}
-
-function writeCursorRules(cwd, cfg) {
-  const file = path.join(cwd, '.cursorrules');
-  const payload = {
-    rules: [
-      `Primary domain: ${cfg.domains.primary}`,
-      `Additional domains: ${cfg.domains.additional.join(', ')}`,
-      'Prefer explicit @domain annotations for ambiguous constants.',
-      'Use UPPER_SNAKE_CASE for true constants; camelCase for variables.',
-      'Boolean vars must be prefixed: is/has/should/can/did/will.'
-    ]
-  };
-  fs.writeFileSync(file, JSON.stringify(payload, null, 2) + '\n');
-  console.log(`Wrote ${file}`);
-}
-
-function writeEslintConfig(cwd, cfg) {
-  const file = path.join(cwd, 'eslint.config.js');
-  if (fs.existsSync(file) && !process.env.FORCE_ESLINT_CONFIG) {
-    console.log(`Found existing ${file} — set FORCE_ESLINT_CONFIG=1 to overwrite.`);
-    return;
-  }
-  
-  // Check if architecture guardrails are enabled
-  let archRulesConfig = '';
-  const hasArchGuardrails = !!(cfg && cfg.architecture);
-  if (hasArchGuardrails) {
-    try {
-      const { generateArchitectureRules } = require(path.join(__dirname, '..', 'lib', 'generators', 'eslint-arch-config'));
-      const { rules } = generateArchitectureRules(cfg.architecture);
-      
-      // Convert rules to ESLint config format
-      const rulesStr = Object.entries(rules).map(([rule, config]) => {
-        return `      '${rule}': ${JSON.stringify(config)},`;
-      }).join('\n');
-      
-      archRulesConfig = `\n      // Architecture guardrails\n${rulesStr}`;
-    } catch (err) {
-      console.warn('Warning: Failed to generate architecture rules:', err.message);
-    }
-  }
-  
-  // When architecture guardrails are enabled, skip overlapping AI-friendly rules
-  const aiFriendlyRules = hasArchGuardrails
-    ? ''
-    : `      // AI-friendly\n      'complexity': ['warn', 15],\n      'max-depth': ['warn', 4],\n      'max-lines-per-function': ['warn', 100],\n`;
-  
-  const content = `// Generated by eslint-plugin-ai-code-snifftest init\n// NOTE: Add "type": "module" to package.json to avoid ESLint module warnings\nimport js from '@eslint/js';\nimport globals from 'globals';\nimport aiSnifftest from 'eslint-plugin-ai-code-snifftest';\n\nexport default [\n  js.configs.recommended,\n  {\n    files: ['**/*.js'],\n    languageOptions: {\n      globals: {\n        ...globals.node\n      }\n    },\n    plugins: { 'ai-code-snifftest': aiSnifftest },\n    rules: {\n      // Baseline\n      'no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],\n      'no-undef': 'error',\n      'prefer-const': 'warn',\n      'no-var': 'error',\n      // Consistency\n      'quotes': ['warn', 'single', { avoidEscape: true }],\n      'semi': ['warn', 'always'],\n      'eqeqeq': ['error', 'always'],\n${aiFriendlyRules}      // Naming (basic)\n      'camelcase': ['error', { properties: 'always' }],\n      // Domain-specific\n      'ai-code-snifftest/no-redundant-calculations': 'warn',\n      'ai-code-snifftest/no-equivalent-branches': 'warn',\n      'ai-code-snifftest/prefer-simpler-logic': 'warn',\n      'ai-code-snifftest/no-redundant-conditionals': 'warn',\n      'ai-code-snifftest/no-unnecessary-abstraction': 'warn',\n      'ai-code-snifftest/no-generic-names': 'warn',\n      'ai-code-snifftest/enforce-domain-terms': 'warn',${archRulesConfig}\n    }\n  },\n  {\n    files: ['**/*.test.js', '**/*.spec.js'],\n    rules: { 'max-lines-per-function': 'off', 'complexity': 'off' }\n  }\n];\n`;
-  fs.writeFileSync(file, content);
-  console.log(`Wrote ${file}`);
-}
 
 function loadFingerprint(cwd) {
   const fp = path.join(cwd, '.ai-constants', 'project-fingerprint.js');
