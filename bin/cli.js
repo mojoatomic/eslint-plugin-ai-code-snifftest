@@ -14,6 +14,8 @@ const { writeEslintConfig } = require(path.join(__dirname, '..', 'lib', 'generat
 // Utilities
 const { suggestFor } = require(path.join(__dirname, '..', 'lib', 'utils', 'domain-suggestions'));
 const { ask } = require(path.join(__dirname, '..', 'lib', 'utils', 'readline-utils'));
+const { applyFingerprintToConfig } = require(path.join(__dirname, '..', 'lib', 'utils', 'fingerprint'));
+const { deepMerge, loadProjectConfigFile, writeProjectConfigFile } = require(path.join(__dirname, '..', 'lib', 'utils', 'project-config'));
 
 function parseArgs(argv) {
   // simple parse; supports flags like --foo or --foo=bar
@@ -148,32 +150,6 @@ async function initInteractive(cwd, args) {
 }
 
 
-function loadFingerprint(cwd) {
-  const fp = path.join(cwd, '.ai-constants', 'project-fingerprint.js');
-  try {
-    const mod = require(fp);
-    if (!mod || !Array.isArray(mod.constants)) return null;
-    return mod.constants;
-  } catch {
-    return null;
-  }
-}
-
-function applyFingerprintToConfig(cwd, cfg) {
-  const items = loadFingerprint(cwd);
-  if (!items || !items.length) return;
-  cfg.constantResolution = cfg.constantResolution || {};
-  const seenDomains = new Set(cfg.domains.additional || []);
-  for (const c of items) {
-    if (c && typeof c.value === 'number' && c.domain) {
-      cfg.constantResolution[String(c.value)] = c.domain;
-      if (c.domain !== cfg.domains.primary && !seenDomains.has(c.domain)) {
-        cfg.domains.additional.push(c.domain);
-        seenDomains.add(c.domain);
-      }
-    }
-  }
-}
 
 function init(cwd, args) {
   const primary = (args.primary || 'general').trim();
@@ -290,37 +266,6 @@ function checkRequirements(cwd) {
 }
 
 // --- Learn implementation ---
-function deepMerge(base, override) {
-  if (override == null) return base;
-  const out = Array.isArray(base) ? base.slice() : { ...base };
-  for (const [k, v] of Object.entries(override)) {
-    if (v && typeof v === 'object' && !Array.isArray(v) && base && typeof base[k] === 'object' && !Array.isArray(base[k])) {
-      out[k] = deepMerge(base[k], v);
-    } else {
-      out[k] = v;
-    }
-  }
-  return out;
-}
-
-function loadProjectConfigFile(cwd) {
-  const file = path.join(cwd, '.ai-coding-guide.json');
-  try {
-    const raw = fs.readFileSync(file, 'utf8');
-    return { file, json: JSON.parse(raw) };
-  } catch {
-    try {
-      const { DEFAULTS } = require(path.join(__dirname, '..', 'lib', 'utils', 'project-config'));
-      return { file, json: DEFAULTS };
-    } catch {
-      return { file, json: { domains: { primary: 'general', additional: [] }, domainPriority: [], constants:{}, terms:{ entities:[], properties:[], actions:[] }, naming:{ style:'camelCase', booleanPrefix:['is','has','should','can'], asyncPrefix:['fetch','load','save'], pluralizeCollections:true }, antiPatterns:{ forbiddenNames:[], forbiddenTerms:[] } } };
-    }
-  }
-}
-
-function writeProjectConfigFile(file, json) {
-  fs.writeFileSync(file, JSON.stringify(json, null, 2) + '\n');
-}
 
 async function learnInteractive(cwd, args, findings, rec, currentCfg) {
   const readline = require('readline');
