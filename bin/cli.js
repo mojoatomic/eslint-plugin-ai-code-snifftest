@@ -309,6 +309,23 @@ function writeAgentsMd(cwd, cfg) {
     }
   }
   
+  // Code Patterns with Examples (Task 3.3)
+  md += '\n## Code Patterns\n\n';
+  if (projectCtx.type === 'cli' || projectCtx.type === 'dev-tools') {
+    md += '### CLI Style\n```javascript\n// ✅ Good: Orchestration shell\nasync function main() {\n  const args = parseArgs(process.argv);\n  const command = commands[args._[0]];\n  await command(process.cwd(), args);\n}\n\n// ❌ Bad: Business logic in CLI\nasync function main() {\n  // 200 lines of logic here\n}\n```\n\n';
+  }
+  md += '### Error Handling\n```javascript\n// ✅ Explicit\ntry {\n  await riskyOperation();\n} catch (err) {\n  console.error(`Failed: ${err.message}`);\n  process.exit(1);\n}\n\n// ❌ Silent\ntry {\n  await riskyOperation();\n} catch {} // ❌ No error handling\n```\n\n';
+  md += '### Async Style\n```javascript\n// ✅ async/await\nasync function loadData() {\n  const data = await fetchData();\n  return process(data);\n}\n\n// ❌ Callbacks or raw promises\nfunction loadData(callback) {\n  fetchData().then(data => callback(null, data));\n}\n```\n\n';
+  
+  // Import/Export Conventions (Task 3.4)
+  md += '## Import/Export Conventions\n\n```javascript\n// ✅ Named imports (preferred)\nimport { foo, bar } from \'./utils.js\';\n\n// ✅ Default only for entry points\nexport default function main() {}\n\n// ❌ Default exports elsewhere\nexport default { foo, bar }; // ❌ Use named\n\n// ✅ Alphabetize\nimport { a, b, c } from \'./foo.js\';\nimport { x, y, z } from \'./bar.js\';\n```\n\n';
+  
+  // Test Conventions (Task 3.5)
+  md += '## Test Conventions\n\n**Location**: Co-locate or `tests/` directory\n```\nfoo.js\nfoo.test.js  ✅\n```\n\n**Naming**:\n```javascript\n// ✅ Descriptive\ntest(\'loads config from .ai-coding-guide.json\', () => {});\n\n// ❌ Vague\ntest(\'it works\', () => {});\n```\n\n**Note**: Test files exempt from line/complexity limits\n\n';
+  
+  // Documentation Requirements (Task 3.6)
+  md += '## Documentation\n\n**Required**:\n- JSDoc for public functions\n- README.md in feature directories\n- Examples for complex logic\n\n**Example**:\n```javascript\n/**\n * Generate ESLint config from domain configuration\n * @param {Object} config - Domain configuration\n * @param {Object} domains - Available domains\n * @returns {string} ESLint config file content\n */\nexport async function generateEslintConfig(config, domains) {\n  // ...\n}\n```\n\n';
+  
   // Ambiguity tactics
   md += `\n## Ambiguity Tactics\n- Prefer explicit @domain/@domains on ambiguous constants\n- Use name cues (e.g., 'circleAngleDegrees')\n- Project-wide mapping via .ai-coding-guide.json → constantResolution\n\n---\n*See .ai-coding-guide.md for details*\n`;
   fs.writeFileSync(file, md);
