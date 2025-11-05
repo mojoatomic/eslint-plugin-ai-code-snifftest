@@ -52,7 +52,7 @@ describe('CLI init (interactive accept defaults)', function () {
     const guide = fs.readFileSync(path.join(tmp, '.ai-coding-guide.md'), 'utf8');
     assert.match(guide, /Primary domain: general/);
     const agents = fs.readFileSync(path.join(tmp, 'AGENTS.md'), 'utf8');
-    assert.match(agents, /Domains: general/);
+    assert.match(agents, /\*\*Domains\*\*: general/);
     const cursor = fs.readFileSync(path.join(tmp, '.cursorrules'), 'utf8');
     assert.match(cursor, /Primary domain: general/);
   });
