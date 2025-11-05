@@ -166,7 +166,42 @@ async function initInteractive(cwd, args) {
     const additional = addAns ? addAns.split(',').map(s=>s.trim()).filter(Boolean) : [];
     const domainPriority = [primary, ...additional];
     console.log(`\nSummary:\n  primary: ${primary}\n  additional: ${additional.join(', ') || '(none)'}\n  domainPriority: ${domainPriority.join(', ')}`);
-    const confirm = (await ask(rl, 'Write .ai-coding-guide.json with these settings? (Y/n): ')).trim().toLowerCase();
+    
+    // Architecture guardrails prompt
+    console.log('\n--- Architecture Guardrails ---');
+    console.log('Enable code quality guardrails (file length, function complexity limits)?');
+    const enableArch = (await ask(rl, 'Enable architectural guardrails? (Y/n): ')).trim().toLowerCase();
+    let architecture = null;
+    if (!enableArch || enableArch.startsWith('y')) {
+      const { DEFAULT_ARCHITECTURE } = require(path.join(__dirname, '..', 'lib', 'utils', 'arch-defaults'));
+      architecture = JSON.parse(JSON.stringify(DEFAULT_ARCHITECTURE));
+      
+      const customizeArch = (await ask(rl, 'Customize thresholds (file/function limits)? (y/N): ')).trim().toLowerCase();
+      if (customizeArch && customizeArch.startsWith('y')) {
+        console.log('\nCurrent defaults:');
+        console.log(`  - File length (CLI): ${architecture.maxFileLength.cli} lines`);
+        console.log(`  - File length (default): ${architecture.maxFileLength.default} lines`);
+        console.log(`  - Function length: ${architecture.functions.maxLength} lines`);
+        console.log(`  - Function complexity: ${architecture.functions.maxComplexity}`);
+        
+        const cliMax = (await ask(rl, `CLI file max lines [${architecture.maxFileLength.cli}]: `)).trim();
+        if (cliMax) architecture.maxFileLength.cli = parseInt(cliMax, 10);
+        
+        const defaultMax = (await ask(rl, `Default file max lines [${architecture.maxFileLength.default}]: `)).trim();
+        if (defaultMax) architecture.maxFileLength.default = parseInt(defaultMax, 10);
+        
+        const funcMax = (await ask(rl, `Function max lines [${architecture.functions.maxLength}]: `)).trim();
+        if (funcMax) architecture.functions.maxLength = parseInt(funcMax, 10);
+        
+        const complexMax = (await ask(rl, `Function max complexity [${architecture.functions.maxComplexity}]: `)).trim();
+        if (complexMax) architecture.functions.maxComplexity = parseInt(complexMax, 10);
+      }
+      console.log('✓ Architecture guardrails enabled');
+    } else {
+      console.log('✗ Architecture guardrails disabled');
+    }
+    
+    const confirm = (await ask(rl, '\nWrite .ai-coding-guide.json with these settings? (Y/n): ')).trim().toLowerCase();
     if (confirm && confirm.startsWith('n')) {
       console.log('Aborted.');
       return 1;
@@ -179,6 +214,9 @@ async function initInteractive(cwd, args) {
       naming: { style: 'camelCase', booleanPrefix: ['is','has','should','can'], asyncPrefix: ['fetch','load','save'], pluralizeCollections: true },
       antiPatterns: { forbiddenNames: [], forbiddenTerms: [] }
     };
+    if (architecture) {
+      cfg.architecture = architecture;
+    }
     const code = writeConfig(cwd, cfg);
     const gen = (await ask(rl, 'Generate .ai-coding-guide.md and .cursorrules? (Y/n): ')).trim().toLowerCase();
     if (!gen || gen.startsWith('y')) {
@@ -193,7 +231,7 @@ async function initInteractive(cwd, args) {
     }
     const genEslint = (await ask(rl, 'Generate eslint.config.js (Y/n): ')).trim().toLowerCase();
     if (!genEslint || genEslint.startsWith('y')) {
-      writeEslintConfig(cwd);
+      writeEslintConfig(cwd, cfg);
     }
     return code;
   } finally {
@@ -255,6 +293,46 @@ function writeAgentsMd(cwd, cfg) {
       if (terms.length) md += formatList('Terminology', terms);
     }
   }
+  // Architecture guidelines
+  if (cfg.architecture) {
+    md += '\n## Architecture Guidelines\n\n';
+    const arch = cfg.architecture;
+    
+    // File organization
+    if (arch.fileStructure) {
+      md += `**File Organization:** ${arch.fileStructure.pattern}\n\n`;
+    }
+    
+    // File length limits
+    if (arch.maxFileLength) {
+      md += '**File Length Limits:**\n';
+      md += `- CLI files: ${arch.maxFileLength.cli || 100} lines\n`;
+      md += `- Command files: ${arch.maxFileLength.command || 150} lines\n`;
+      md += `- Utility files: ${arch.maxFileLength.util || 200} lines\n`;
+      md += `- Generator files: ${arch.maxFileLength.generator || 250} lines\n`;
+      md += `- Component files: ${arch.maxFileLength.component || 300} lines\n`;
+      md += `- Default: ${arch.maxFileLength.default || 250} lines\n\n`;
+    }
+    
+    // Function limits
+    if (arch.functions) {
+      md += '**Function Limits:**\n';
+      md += `- Max length: ${arch.functions.maxLength || 50} lines\n`;
+      md += `- Max complexity: ${arch.functions.maxComplexity || 10}\n`;
+      md += `- Max depth: ${arch.functions.maxDepth || 4}\n`;
+      md += `- Max parameters: ${arch.functions.maxParams || 4}\n`;
+      md += `- Max statements: ${arch.functions.maxStatements || 30}\n\n`;
+    }
+    
+    // Patterns
+    if (arch.patterns) {
+      md += '**Code Patterns:**\n';
+      md += `- CLI style: ${arch.patterns.cliStyle || 'orchestration-shell'}\n`;
+      md += `- Error handling: ${arch.patterns.errorHandling || 'explicit'}\n`;
+      md += `- Async style: ${arch.patterns.asyncStyle || 'async-await'}\n\n`;
+    }
+  }
+  
   // Ambiguity tactics
   md += `\n## Ambiguity Tactics\n- Prefer explicit @domain/@domains on ambiguous constants\n- Use name cues (e.g., 'circleAngleDegrees')\n- Project-wide mapping via .ai-coding-guide.json → constantResolution\n\n---\n*See .ai-coding-guide.md for details*\n`;
   fs.writeFileSync(file, md);
@@ -276,13 +354,32 @@ function writeCursorRules(cwd, cfg) {
   console.log(`Wrote ${file}`);
 }
 
-function writeEslintConfig(cwd) {
+function writeEslintConfig(cwd, cfg) {
   const file = path.join(cwd, 'eslint.config.js');
   if (fs.existsSync(file) && !process.env.FORCE_ESLINT_CONFIG) {
     console.log(`Found existing ${file} — set FORCE_ESLINT_CONFIG=1 to overwrite.`);
     return;
   }
-  const content = `// Generated by eslint-plugin-ai-code-snifftest init\nimport js from '@eslint/js';\nimport aiSnifftest from 'eslint-plugin-ai-code-snifftest';\n\nexport default [\n  js.configs.recommended,\n  {\n    files: ['**/*.js'],\n    plugins: { 'ai-code-snifftest': aiSnifftest },\n    rules: {\n      // Baseline\n      'no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],\n      'no-undef': 'error',\n      'prefer-const': 'warn',\n      'no-var': 'error',\n      // Consistency\n      'quotes': ['warn', 'single', { avoidEscape: true }],\n      'semi': ['warn', 'always'],\n      'eqeqeq': ['error', 'always'],\n      // AI-friendly\n      'complexity': ['warn', 15],\n      'max-depth': ['warn', 4],\n      'max-lines-per-function': ['warn', 100],\n      // Naming (basic)\n      'camelcase': ['error', { properties: 'always' }],\n      // Domain-specific\n      'ai-code-snifftest/no-redundant-calculations': 'warn',\n      'ai-code-snifftest/no-equivalent-branches': 'warn',\n      'ai-code-snifftest/prefer-simpler-logic': 'warn',\n      'ai-code-snifftest/no-redundant-conditionals': 'warn',\n      'ai-code-snifftest/no-unnecessary-abstraction': 'warn',\n      'ai-code-snifftest/no-generic-names': 'warn',\n      'ai-code-snifftest/enforce-domain-terms': 'warn'\n    }\n  },\n  {\n    files: ['**/*.test.js', '**/*.spec.js'],\n    rules: { 'max-lines-per-function': 'off', 'complexity': 'off' }\n  }\n];\n`;
+  
+  // Check if architecture guardrails are enabled
+  let archRulesConfig = '';
+  if (cfg && cfg.architecture) {
+    try {
+      const { generateArchitectureRules } = require(path.join(__dirname, '..', 'lib', 'generators', 'eslint-arch-config'));
+      const { rules } = generateArchitectureRules(cfg.architecture);
+      
+      // Convert rules to ESLint config format
+      const rulesStr = Object.entries(rules).map(([rule, config]) => {
+        return `      '${rule}': ${JSON.stringify(config)},`;
+      }).join('\n');
+      
+      archRulesConfig = `\n      // Architecture guardrails\n${rulesStr}`;
+    } catch (err) {
+      console.warn('Warning: Failed to generate architecture rules:', err.message);
+    }
+  }
+  
+  const content = `// Generated by eslint-plugin-ai-code-snifftest init\nimport js from '@eslint/js';\nimport aiSnifftest from 'eslint-plugin-ai-code-snifftest';\n\nexport default [\n  js.configs.recommended,\n  {\n    files: ['**/*.js'],\n    plugins: { 'ai-code-snifftest': aiSnifftest },\n    rules: {\n      // Baseline\n      'no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],\n      'no-undef': 'error',\n      'prefer-const': 'warn',\n      'no-var': 'error',\n      // Consistency\n      'quotes': ['warn', 'single', { avoidEscape: true }],\n      'semi': ['warn', 'always'],\n      'eqeqeq': ['error', 'always'],\n      // AI-friendly\n      'complexity': ['warn', 15],\n      'max-depth': ['warn', 4],\n      'max-lines-per-function': ['warn', 100],\n      // Naming (basic)\n      'camelcase': ['error', { properties: 'always' }],\n      // Domain-specific\n      'ai-code-snifftest/no-redundant-calculations': 'warn',\n      'ai-code-snifftest/no-equivalent-branches': 'warn',\n      'ai-code-snifftest/prefer-simpler-logic': 'warn',\n      'ai-code-snifftest/no-redundant-conditionals': 'warn',\n      'ai-code-snifftest/no-unnecessary-abstraction': 'warn',\n      'ai-code-snifftest/no-generic-names': 'warn',\n      'ai-code-snifftest/enforce-domain-terms': 'warn'${archRulesConfig}\n    }\n  },\n  {\n    files: ['**/*.test.js', '**/*.spec.js'],\n    rules: { 'max-lines-per-function': 'off', 'complexity': 'off' }\n  }\n];\n`;
   fs.writeFileSync(file, content);
   console.log(`Wrote ${file}`);
 }
@@ -349,7 +446,7 @@ function init(cwd, args) {
       console.log('Found WARP.md — preserving it; generated AGENTS.md alongside.');
     }
   }
-  if (args.eslint || args.yes) writeEslintConfig(cwd);
+  if (args.eslint || args.yes) writeEslintConfig(cwd, cfg);
   return code;
 }
 

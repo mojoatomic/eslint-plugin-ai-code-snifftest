@@ -166,6 +166,103 @@ This ensures no conflicts! ✅
 
 **Verified:** All rules tested with Prettier 3.x compatibility suite (18 integration tests).
 
+## Architecture Guardrails
+
+Enforce code quality guardrails for file/function complexity to guide AI-generated code toward maintainable patterns.
+
+### Quick Start
+
+Enable during interactive init:
+
+```bash
+eslint-plugin-ai-code-snifftest init
+# Answer 'Y' when prompted for architectural guardrails
+```
+
+### What It Does
+
+Adds an `architecture` section to `.ai-coding-guide.json` with configurable limits:
+
+```json
+{
+  "architecture": {
+    "fileStructure": {
+      "pattern": "feature-based"
+    },
+    "maxFileLength": {
+      "cli": 100,
+      "command": 150,
+      "util": 200,
+      "generator": 250,
+      "component": 300,
+      "default": 250
+    },
+    "functions": {
+      "maxLength": 50,
+      "maxComplexity": 10,
+      "maxDepth": 4,
+      "maxParams": 4,
+      "maxStatements": 30
+    },
+    "patterns": {
+      "cliStyle": "orchestration-shell",
+      "errorHandling": "explicit",
+      "asyncStyle": "async-await"
+    }
+  }
+}
+```
+
+### Generated ESLint Rules
+
+When enabled, `eslint.config.js` includes:
+
+**Global rules:**
+- `max-lines`: Warn at 250 lines (configurable per file type)
+- `max-lines-per-function`: Warn at 50 lines
+- `complexity`: Warn at cyclomatic complexity 10
+- `max-depth`: Warn at nesting depth 4
+- `max-params`: Warn at 4 parameters
+- `max-statements`: Warn at 30 statements
+
+**Per-path overrides:**
+- CLI files (`bin/*.js`): **Error** at 100 lines (strict)
+- Commands: Warn at 150 lines
+- Utils: Warn at 200 lines
+- Generators: Warn at 250 lines
+- Components: Warn at 300 lines
+- Tests: Complexity/statements limits **disabled**
+
+### Customization
+
+**Interactive:**
+```bash
+eslint-plugin-ai-code-snifftest init
+# Answer 'y' to "Customize thresholds?"
+```
+
+**Manual (`.ai-coding-guide.json`):**
+```json
+{
+  "architecture": {
+    "maxFileLength": {
+      "cli": 80,
+      "default": 300
+    },
+    "functions": {
+      "maxComplexity": 15
+    }
+  }
+}
+```
+
+### Benefits
+
+- **AI-friendly constraints**: Guide AI toward modular, testable code
+- **Incremental adoption**: Warnings (not errors) for most rules
+- **Context-aware**: Different limits for different file types
+- **Test-friendly**: Lenient rules for test files
+
 ## Configurations
 
 See RFC: Extensible Domain Constants via Plugin Architecture (#64).
