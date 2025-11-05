@@ -11,6 +11,10 @@ const { writeAgentsMd } = require(path.join(__dirname, '..', 'lib', 'generators'
 const { writeCursorRules } = require(path.join(__dirname, '..', 'lib', 'generators', 'cursorrules'));
 const { writeEslintConfig } = require(path.join(__dirname, '..', 'lib', 'generators', 'eslint-config'));
 
+// Utilities
+const { suggestFor } = require(path.join(__dirname, '..', 'lib', 'utils', 'domain-suggestions'));
+const { ask } = require(path.join(__dirname, '..', 'lib', 'utils', 'readline-utils'));
+
 function parseArgs(argv) {
   // simple parse; supports flags like --foo or --foo=bar
   const out = { _: [] };
@@ -27,19 +31,6 @@ function parseArgs(argv) {
 }
 
 
-function suggestFor(primary) {
-  const map = {
-    astronomy: ['geometry','math','units'],
-    music: ['math','cs'],
-    physics: ['math','units','cs'],
-    finance: ['math','statistics']
-  };
-  return map[primary] || [];
-}
-
-function ask(rl, q) {
-  return new Promise((resolve) => rl.question(q, (ans) => resolve(ans)));
-}
 
 async function initInteractive(cwd, args) {
   const readline = require('readline');
