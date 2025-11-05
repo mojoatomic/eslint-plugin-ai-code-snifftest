@@ -24,7 +24,44 @@ npm install eslint-plugin-ai-code-snifftest --save-dev
 
 ## Usage
 
-See docs/learn.md for the Learn workflow (reconciliation, interactive review, fingerprint).
+### Learn Workflow
+
+The `learn` command analyzes your codebase and helps reconcile patterns to improve code quality:
+
+```bash
+# Interactive mode (recommended for first-time setup)
+eslint-plugin-ai-code-snifftest learn --interactive
+
+# Non-interactive with auto-apply
+eslint-plugin-ai-code-snifftest learn --apply --fingerprint
+```
+
+**What it does:**
+- Scans your codebase for naming patterns, constants, and generic names
+- Reconciles findings with sane defaults
+- Provides interactive review for constants with domain-aware suggestions
+- Generates `.ai-constants/project-fingerprint.js` with validated constants
+
+**Fingerprint consumption:**
+When you run `init`, it automatically consumes the fingerprint:
+- Merges discovered constants into `.ai-coding-guide.json`
+- Adds mapped domains to `domains.additional`
+- Seeds `constantResolution` mappings
+
+**Example workflow:**
+```bash
+# 1. Analyze your codebase
+eslint-plugin-ai-code-snifftest learn --interactive --sample=300
+
+# 2. Initialize config (consumes fingerprint)
+eslint-plugin-ai-code-snifftest init --primary=astronomy
+
+# 3. The init command merges fingerprint data automatically
+```
+
+See [docs/learn.md](docs/learn.md) for detailed documentation.
+
+### ESLint Configuration
 
 In your [configuration file](https://eslint.org/docs/latest/use/configure/configuration-files#configuration-file), import the plugin `eslint-plugin-ai-code-snifftest` and add `ai-code-snifftest` to the `plugins` key:
 
