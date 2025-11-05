@@ -67,6 +67,88 @@
       "maximum": 1,
       "default": 0.7,
       "description": "Minimum confidence threshold for constant detection (0-1, default: 0.7)"
+    },
+    "architecture": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Architectural guardrails and project structure guidelines",
+      "properties": {
+        "fileStructure": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "pattern": {
+              "type": "string",
+              "enum": ["feature-based", "layer-based", "domain-driven"],
+              "default": "feature-based",
+              "description": "Primary file organization pattern"
+            }
+          }
+        },
+        "maxFileLength": {
+          "type": "object",
+          "additionalProperties": { "type": "number" },
+          "description": "Maximum lines per file by type",
+          "properties": {
+            "cli": { "type": "number", "default": 100 },
+            "command": { "type": "number", "default": 150 },
+            "util": { "type": "number", "default": 200 },
+            "generator": { "type": "number", "default": 250 },
+            "component": { "type": "number", "default": 300 },
+            "default": { "type": "number", "default": 250 }
+          }
+        },
+        "organization": {
+          "type": "object",
+          "additionalProperties": { "type": "string" },
+          "description": "Standard paths for different module types",
+          "properties": {
+            "commands": { "type": "string", "default": "lib/commands/{command}/" },
+            "utils": { "type": "string", "default": "lib/utils/" },
+            "generators": { "type": "string", "default": "lib/generators/" },
+            "tests": { "type": "string", "default": "tests/" }
+          }
+        },
+        "functions": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Function complexity and length limits",
+          "properties": {
+            "maxLength": { "type": "number", "default": 50, "description": "Max lines per function" },
+            "maxComplexity": { "type": "number", "default": 10, "description": "Max cyclomatic complexity" },
+            "maxDepth": { "type": "number", "default": 4, "description": "Max nesting depth" },
+            "maxParams": { "type": "number", "default": 4, "description": "Max function parameters" },
+            "maxStatements": { "type": "number", "default": 30, "description": "Max statements per function" },
+            "singlePurpose": { "type": "boolean", "default": true, "description": "Functions should do one thing" },
+            "preferPure": { "type": "boolean", "default": true, "description": "Prefer pure functions" }
+          }
+        },
+        "patterns": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Code patterns and styles",
+          "properties": {
+            "cliStyle": {
+              "type": "string",
+              "enum": ["orchestration-shell", "monolithic", "hybrid"],
+              "default": "orchestration-shell",
+              "description": "CLI architecture pattern"
+            },
+            "errorHandling": {
+              "type": "string",
+              "enum": ["explicit", "implicit", "mixed"],
+              "default": "explicit",
+              "description": "Error handling approach"
+            },
+            "asyncStyle": {
+              "type": "string",
+              "enum": ["async-await", "promises", "callbacks"],
+              "default": "async-await",
+              "description": "Asynchronous code style"
+            }
+          }
+        }
+      }
     }
   }
 }
