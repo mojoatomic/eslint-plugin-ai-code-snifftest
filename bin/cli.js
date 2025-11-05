@@ -320,6 +320,8 @@ function init(cwd, args) {
   const domainPriority = [primary, ...additional];
   const external = Boolean(args.external || args.experimentalExternalConstants);
   const allowlist = (args.allowlist || '').split(',').map(s=>s.trim()).filter(Boolean);
+  const minimumMatch = args.minimumMatch ? parseFloat(args.minimumMatch) : 0.6;
+  const minimumConfidence = args.minimumConfidence ? parseFloat(args.minimumConfidence) : 0.7;
   const cfg = {
     domains: { primary, additional },
     domainPriority,
@@ -327,6 +329,8 @@ function init(cwd, args) {
     terms: { entities: [], properties: [], actions: [] },
     naming: { style: 'camelCase', booleanPrefix: ['is','has','should','can'], asyncPrefix: ['fetch','load','save'], pluralizeCollections: true },
     antiPatterns: { forbiddenNames: [], forbiddenTerms: [] },
+    minimumMatch,
+    minimumConfidence,
     experimentalExternalConstants: external,
     externalConstantsAllowlist: allowlist
   };
@@ -369,7 +373,7 @@ function scaffoldConstantsPkg(cwd, domainArg, outDirArg) {
 }
 
 function usage() {
-  console.log(`Usage:\n  eslint-plugin-ai-code-snifftest init [--primary=<domain>] [--additional=a,b,c]\n  eslint-plugin-ai-code-snifftest learn [--strict|--permissive|--interactive] [--sample=N] [--no-cache] [--apply] [--fingerprint]\n  eslint-plugin-ai-code-snifftest scaffold <domain> [--dir=path]\n\nExamples:\n  eslint-plugin-ai-code-snifftest init --primary=astronomy --additional=geometry,math,units\n  eslint-plugin-ai-code-snifftest learn --interactive --sample=300\n  eslint-plugin-ai-code-snifftest scaffold medical --dir=./examples/external/medical\n`);
+  console.log(`Usage:\n  eslint-plugin-ai-code-snifftest init [--primary=<domain>] [--additional=a,b,c] [--minimumMatch=0.6] [--minimumConfidence=0.7]\n  eslint-plugin-ai-code-snifftest learn [--strict|--permissive|--interactive] [--sample=N] [--no-cache] [--apply] [--fingerprint] [--minimumMatch=0.6] [--minimumConfidence=0.7]\n  eslint-plugin-ai-code-snifftest scaffold <domain> [--dir=path]\n\nExamples:\n  eslint-plugin-ai-code-snifftest init --primary=astronomy --additional=geometry,math,units --minimumMatch=0.65\n  eslint-plugin-ai-code-snifftest learn --interactive --sample=300 --minimumConfidence=0.75\n  eslint-plugin-ai-code-snifftest scaffold medical --dir=./examples/external/medical\n`);
 }
 
 function resolvePkgVersion(name, cwd) {
@@ -511,10 +515,25 @@ async function learnInteractive(cwd, args, findings, rec, currentCfg) {
     if (top.length) {
       console.log('\nDomain-aware constants (high-confidence):');
       const chosen = [];
+      const history = [];
       for (let i = 0; i < top.length; i++) {
         const c = top[i];
-        let action = (await ask(`  [${i+1}] ${c.value} → ${c.suggestedName || '(name?)'} ${c.domain ? '['+c.domain+']' : ''} (conf=${Math.round(c.confidence*100)}%) action [a]dd, [r]ename, [m]ap, [s]kip, [q]uit: `)).trim().toLowerCase();
+        let action = (await ask(`  [${i+1}/${top.length}] ${c.value} → ${c.suggestedName || '(name?)'} ${c.domain ? '['+c.domain+']' : ''} (conf=${Math.round(c.confidence*100)}%) [a]dd, [r]ename, [m]ap, [s]kip, [b]ack, skip-[A]ll, [q]uit: `)).trim().toLowerCase();
         if (action === 'q') break;
+        if (action === 'a' && i < top.length - 1) {
+          console.log('Skipping all remaining constants.');
+          break;
+        }
+        if (action === 'b' && i > 0) {
+          // Go back one step
+          i = Math.max(0, i - 2);
+          if (history.length > 0) {
+            const last = history.pop();
+            const idx = chosen.findIndex(ch => ch.value === last.value);
+            if (idx !== -1) chosen.splice(idx, 1);
+          }
+          continue;
+        }
         if (action === 'r') {
           const nn = (await ask('   New constant name (UPPER_SNAKE_CASE): ')).trim();
           if (nn) c.suggestedName = nn;
@@ -532,6 +551,7 @@ async function learnInteractive(cwd, args, findings, rec, currentCfg) {
         }
         if (action === 'a') {
           chosen.push({ value: c.value, suggestedName: c.suggestedName, domain: c.domain, confidence: c.confidence });
+          history.push(c);
         }
       }
       if (chosen.length) {
@@ -572,8 +592,15 @@ function learn(cwd, args) {
   const sample = args.sample ? Number(args.sample) : undefined;
   const useCache = args.cache === false || args['no-cache'] ? false : true;
 
+  console.log(`Scanning project (sample: ${sample || 400}, cache: ${useCache ? 'enabled' : 'disabled'})...`);
   const findings = scanProject(cwd, { sample: sample || 400, useCache });
-  const sane = DEFAULT_SANITY;
+  console.log('✓ Scan complete');
+  // Override defaults with CLI flags or config values
+  const sane = { ...DEFAULT_SANITY };
+  if (args.minimumMatch) sane.minimumMatch = parseFloat(args.minimumMatch);
+  else if (currentCfg.minimumMatch !== undefined) sane.minimumMatch = currentCfg.minimumMatch;
+  if (args.minimumConfidence) sane.minimumConfidence = parseFloat(args.minimumConfidence);
+  else if (currentCfg.minimumConfidence !== undefined) sane.minimumConfidence = currentCfg.minimumConfidence;
   const mode = args.strict ? 'strict' : (args.permissive ? 'permissive' : 'adaptive');
   const rec = reconcile(findings, sane, { config: currentCfg, mode });
 

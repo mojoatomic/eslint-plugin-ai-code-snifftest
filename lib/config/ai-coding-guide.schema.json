@@ -53,6 +53,20 @@
         "forbiddenNames": { "type": "array", "items": { "type": "string" } },
         "forbiddenTerms": { "type": "array", "items": { "type": "string" } }
       }
+    },
+    "minimumMatch": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "default": 0.6,
+      "description": "Minimum majority threshold for naming style adoption (0-1, default: 0.6)"
+    },
+    "minimumConfidence": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "default": 0.7,
+      "description": "Minimum confidence threshold for constant detection (0-1, default: 0.7)"
     }
   }
 }
