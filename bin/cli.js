@@ -279,15 +279,18 @@ function writeAgentsMd(cwd, cfg) {
       md += `## File Organization\n\n**Pattern**: ${arch.fileStructure.pattern} (group by feature, not type)\n\n**Example Structure**:\n\`\`\`\n${projectCtx.type === 'cli' ? 'project/' : projectCtx.type === 'web-app' ? 'src/' : 'lib/'}\n  ${projectCtx.type === 'cli' ? 'bin/\n    cli.js              # Entry point (50-100 lines)\n  lib/\n    commands/           # CLI commands\n      init/\n        index.js        # Orchestrator\n        interactive.js  # User prompts\n      learn/\n        index.js\n        scanner.js\n    generators/         # File generators\n      eslint-config.js\n      agents-md.js\n    utils/              # Shared helpers\n      file-writer.js\n      version.js' : projectCtx.type === 'web-app' ? 'components/         # React/Vue components\n    auth/\n      LoginForm.jsx\n      AuthProvider.jsx\n    dashboard/\n      Dashboard.jsx\n      widgets/\n        Chart.jsx\n  hooks/              # Custom hooks\n    useAuth.js\n    useApi.js\n  utils/              # Shared utilities' : 'commands/           # Core commands\n    init/\n      index.js          # Orchestrator\n      config-builder.js # Business logic\n    validate/\n      index.js\n  generators/         # File generators\n  utils/              # Shared helpers'}\n  tests/              # Tests (co-located or here)\n\`\`\`\n\n**Avoid (Type-based)**:\n\`\`\`\n❌ lib/\n    controllers/        # Groups by layer\n    services/           # Hard to find features\n    models/\n    views/\n\`\`\`\n\n`;
     }
     
-    // File length limits
+    // File length limits as table (Task 3.9)
     if (arch.maxFileLength) {
-      md += '**File Length Limits:**\n';
-      md += `- CLI files: ${arch.maxFileLength.cli || 100} lines\n`;
-      md += `- Command files: ${arch.maxFileLength.command || 150} lines\n`;
-      md += `- Utility files: ${arch.maxFileLength.util || 200} lines\n`;
-      md += `- Generator files: ${arch.maxFileLength.generator || 250} lines\n`;
-      md += `- Component files: ${arch.maxFileLength.component || 300} lines\n`;
-      md += `- Default: ${arch.maxFileLength.default || 250} lines\n\n`;
+      md += '## File Length Limits\n\n';
+      md += '| File Type | Max Lines | Rationale |\n';
+      md += '|-----------|-----------|-----------|\n';
+      md += `| CLI entry | ${arch.maxFileLength.cli || 100} | Routing only |\n`;
+      md += `| Commands  | ${arch.maxFileLength.command || 150} | Orchestration |\n`;
+      md += `| Utilities | ${arch.maxFileLength.util || 200} | Single purpose |\n`;
+      md += `| Generators| ${arch.maxFileLength.generator || 250} | Template logic |\n`;
+      md += `| Components| ${arch.maxFileLength.component || 300} | UI complexity |\n`;
+      md += `| Tests     | ∞ | No limit |\n`;
+      md += `| Default   | ${arch.maxFileLength.default || 250} | General files |\n\n`;
     }
     
     // Function limits
@@ -325,6 +328,9 @@ function writeAgentsMd(cwd, cfg) {
   
   // Documentation Requirements (Task 3.6)
   md += '## Documentation\n\n**Required**:\n- JSDoc for public functions\n- README.md in feature directories\n- Examples for complex logic\n\n**Example**:\n```javascript\n/**\n * Generate ESLint config from domain configuration\n * @param {Object} config - Domain configuration\n * @param {Object} domains - Available domains\n * @returns {string} ESLint config file content\n */\nexport async function generateEslintConfig(config, domains) {\n  // ...\n}\n```\n\n';
+  
+  // Anti-Patterns (Task 3.8)
+  md += '## Anti-Patterns\n\n**Avoid:**\n- ❌ **Monolithic files** (>250 lines) - Split into smaller modules\n- ❌ **Long functions** (>50 lines) - Extract helper functions\n- ❌ **Deep nesting** (>4 levels) - Early returns or separate functions\n- ❌ **Silent errors** - Always log/handle errors explicitly\n- ❌ **Global state** - Use parameters and return values\n- ❌ **Magic numbers** - Use named constants\n\n';
   
   // Ambiguity tactics
   md += `\n## Ambiguity Tactics\n- Prefer explicit @domain/@domains on ambiguous constants\n- Use name cues (e.g., 'circleAngleDegrees')\n- Project-wide mapping via .ai-coding-guide.json → constantResolution\n\n---\n*See .ai-coding-guide.md for details*\n`;
