@@ -16,21 +16,10 @@ const { suggestFor } = require(path.join(__dirname, '..', 'lib', 'utils', 'domai
 const { ask } = require(path.join(__dirname, '..', 'lib', 'utils', 'readline-utils'));
 const { applyFingerprintToConfig } = require(path.join(__dirname, '..', 'lib', 'utils', 'fingerprint'));
 const { deepMerge, loadProjectConfigFile, writeProjectConfigFile } = require(path.join(__dirname, '..', 'lib', 'utils', 'project-config'));
+const { parseArgs } = require(path.join(__dirname, '..', 'lib', 'utils', 'args-parser'));
+const { usage } = require(path.join(__dirname, '..', 'lib', 'utils', 'cli-help'));
+const { checkRequirements } = require(path.join(__dirname, '..', 'lib', 'utils', 'requirements'));
 
-function parseArgs(argv) {
-  // simple parse; supports flags like --foo or --foo=bar
-  const out = { _: [] };
-  for (let i = 2; i < argv.length; i++) {
-    const a = argv[i];
-    if (a.startsWith('--')) {
-      const [k, v] = a.replace(/^--/, '').split('=');
-      out[k] = v === undefined ? true : v;
-    } else {
-      out._.push(a);
-    }
-  }
-  return out;
-}
 
 
 
@@ -209,61 +198,6 @@ function scaffoldConstantsPkg(cwd, domainArg, outDirArg) {
   return 0;
 }
 
-function usage() {
-  console.log(`Usage:\n  eslint-plugin-ai-code-snifftest init [--primary=<domain>] [--additional=a,b,c] [--minimumMatch=0.6] [--minimumConfidence=0.7]\n  eslint-plugin-ai-code-snifftest learn [--strict|--permissive|--interactive] [--sample=N] [--no-cache] [--apply] [--fingerprint] [--minimumMatch=0.6] [--minimumConfidence=0.7]\n  eslint-plugin-ai-code-snifftest scaffold <domain> [--dir=path]\n\nExamples:\n  eslint-plugin-ai-code-snifftest init --primary=astronomy --additional=geometry,math,units --minimumMatch=0.65\n  eslint-plugin-ai-code-snifftest learn --interactive --sample=300 --minimumConfidence=0.75\n  eslint-plugin-ai-code-snifftest scaffold medical --dir=./examples/external/medical\n`);
-}
-
-function resolvePkgVersion(name, cwd) {
-  try {
-    const pkg = require(require.resolve(`${name}/package.json`, { paths: [cwd] }));
-    return pkg.version || null;
-  } catch {
-    return null;
-  }
-}
-
-function gte(a, b) {
-  const pa = String(a).split('.').map(Number);
-  const pb = String(b).split('.').map(Number);
-  for (let i = 0; i < 3; i++) {
-    if ((pa[i] || 0) > (pb[i] || 0)) return true;
-    if ((pa[i] || 0) < (pb[i] || 0)) return false;
-  }
-  return true;
-}
-
-function checkRequirements(cwd) {
-  if (process.env.SKIP_AI_REQUIREMENTS || process.env.NODE_ENV === 'test') return true;
-  let ok = true;
-  const nodeVer = process.versions.node;
-  if (!gte(nodeVer, '18.0.0')) {
-    console.error(`❌ Node.js 18+ required. You have ${nodeVer}. Install Node 18+ (recommended 20+).`);
-    ok = false;
-  } else {
-    console.log(`✅ Node.js ${nodeVer}`);
-  }
-  const eslintVer = resolvePkgVersion('eslint', cwd);
-  if (!eslintVer || !gte(eslintVer, '9.0.0')) {
-    console.error(`❌ ESLint 9+ required. Your project: ${eslintVer || 'not installed'}.`);
-    console.error(`   Upgrade: npm install eslint@^9.0.0`);
-    ok = false;
-  } else {
-    console.log(`✅ ESLint ${eslintVer}`);
-  }
-  const reactVer = resolvePkgVersion('react', cwd);
-  if (reactVer && !gte(reactVer, '18.0.0')) {
-    console.warn(`⚠️ React 18+ recommended. Detected ${reactVer}.`);
-  }
-  const vueVer = resolvePkgVersion('vue', cwd);
-  if (vueVer && !gte(vueVer, '3.0.0')) {
-    console.warn(`⚠️ Vue 3+ recommended. Detected ${vueVer}.`);
-  }
-  const nextVer = resolvePkgVersion('next', cwd);
-  if (nextVer && !gte(nextVer, '13.0.0')) {
-    console.warn(`⚠️ Next.js 13+ recommended. Detected ${nextVer}.`);
-  }
-  return ok;
-}
 
 // --- Learn implementation ---
 
