@@ -13,11 +13,11 @@ const { writeEslintConfig } = require(path.join(__dirname, '..', 'lib', 'generat
 
 // Commands
 const { scaffoldCommand } = require(path.join(__dirname, '..', 'lib', 'commands', 'scaffold'));
+const { initCommand } = require(path.join(__dirname, '..', 'lib', 'commands', 'init'));
 
 // Utilities
 const { suggestFor } = require(path.join(__dirname, '..', 'lib', 'utils', 'domain-suggestions'));
 const { ask } = require(path.join(__dirname, '..', 'lib', 'utils', 'readline-utils'));
-const { applyFingerprintToConfig } = require(path.join(__dirname, '..', 'lib', 'utils', 'fingerprint'));
 const { deepMerge, loadProjectConfigFile, writeProjectConfigFile } = require(path.join(__dirname, '..', 'lib', 'utils', 'project-config'));
 const { parseArgs } = require(path.join(__dirname, '..', 'lib', 'utils', 'args-parser'));
 const { usage } = require(path.join(__dirname, '..', 'lib', 'utils', 'cli-help'));
@@ -143,44 +143,6 @@ async function initInteractive(cwd, args) {
 
 
 
-function init(cwd, args) {
-  const primary = (args.primary || 'general').trim();
-  const additional = (args.additional || '').split(',').map(s => s.trim()).filter(Boolean);
-  const domainPriority = [primary, ...additional];
-  const external = Boolean(args.external || args.experimentalExternalConstants);
-  const allowlist = (args.allowlist || '').split(',').map(s=>s.trim()).filter(Boolean);
-  const minimumMatch = args.minimumMatch ? parseFloat(args.minimumMatch) : 0.6;
-  const minimumConfidence = args.minimumConfidence ? parseFloat(args.minimumConfidence) : 0.7;
-  const cfg = {
-    domains: { primary, additional },
-    domainPriority,
-    constants: {},
-    terms: { entities: [], properties: [], actions: [] },
-    naming: { style: 'camelCase', booleanPrefix: ['is','has','should','can'], asyncPrefix: ['fetch','load','save'], pluralizeCollections: true },
-    antiPatterns: { forbiddenNames: [], forbiddenTerms: [] },
-    minimumMatch,
-    minimumConfidence,
-    experimentalExternalConstants: external,
-    externalConstantsAllowlist: allowlist
-  };
-  // Merge fingerprint signals into config (domains + constantResolution)
-  applyFingerprintToConfig(cwd, cfg);
-  if (external && (!allowlist || allowlist.length === 0)) {
-    console.warn('Warning: --external used without allowlist; consider adding --allowlist to limit npm scope.');
-  }
-  const code = writeConfig(cwd, cfg);
-  const hasWarp = fs.existsSync(path.join(cwd, 'WARP.md'));
-  if (args.md || args.yes) writeGuideMd(cwd, cfg);
-  if (args.cursor || args.yes) writeCursorRules(cwd, cfg);
-  if (args.agents || hasWarp || args.yes || (!args.md && !args.cursor)) {
-    writeAgentsMd(cwd, cfg);
-    if (hasWarp) {
-      console.log('Found WARP.md — preserving it; generated AGENTS.md alongside.');
-    }
-  }
-  if (args.eslint || args.yes) writeEslintConfig(cwd, cfg);
-  return code;
-}
 
 
 
@@ -373,7 +335,7 @@ function main() {
       initInteractive(cwd, args).then((code)=>{ process.exitCode = code; });
       return;
     }
-    process.exitCode = init(cwd, args);
+    process.exitCode = initCommand(cwd, args);
     return;
   }
   if (cmd === 'learn') {
