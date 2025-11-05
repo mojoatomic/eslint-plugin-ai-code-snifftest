@@ -262,6 +262,7 @@ npm run lint:fix      # Auto-fix linting issues
 - `README.md` - Main documentation
 
 ### Resources
+- Learn workflow: see docs/learn.md
 - Full GitHub Issue: 1,257 lines of detailed planning
 - ESLint Docs: https://eslint.org/docs/latest/extend/plugins
 - AST Explorer: https://astexplorer.net/
