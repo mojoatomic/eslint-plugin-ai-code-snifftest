@@ -287,11 +287,38 @@ function writeEslintConfig(cwd) {
   console.log(`Wrote ${file}`);
 }
 
+function loadFingerprint(cwd) {
+  const fp = path.join(cwd, '.ai-constants', 'project-fingerprint.js');
+  try {
+    const mod = require(fp);
+    if (!mod || !Array.isArray(mod.constants)) return null;
+    return mod.constants;
+  } catch {
+    return null;
+  }
+}
+
+function applyFingerprintToConfig(cwd, cfg) {
+  const items = loadFingerprint(cwd);
+  if (!items || !items.length) return;
+  cfg.constantResolution = cfg.constantResolution || {};
+  const seenDomains = new Set(cfg.domains.additional || []);
+  for (const c of items) {
+    if (c && typeof c.value === 'number' && c.domain) {
+      cfg.constantResolution[String(c.value)] = c.domain;
+      if (c.domain !== cfg.domains.primary && !seenDomains.has(c.domain)) {
+        cfg.domains.additional.push(c.domain);
+        seenDomains.add(c.domain);
+      }
+    }
+  }
+}
+
 function init(cwd, args) {
   const primary = (args.primary || 'general').trim();
   const additional = (args.additional || '').split(',').map(s => s.trim()).filter(Boolean);
   const domainPriority = [primary, ...additional];
-const external = Boolean(args.external || args.experimentalExternalConstants);
+  const external = Boolean(args.external || args.experimentalExternalConstants);
   const allowlist = (args.allowlist || '').split(',').map(s=>s.trim()).filter(Boolean);
   const cfg = {
     domains: { primary, additional },
@@ -303,6 +330,8 @@ const external = Boolean(args.external || args.experimentalExternalConstants);
     experimentalExternalConstants: external,
     externalConstantsAllowlist: allowlist
   };
+  // Merge fingerprint signals into config (domains + constantResolution)
+  applyFingerprintToConfig(cwd, cfg);
   if (external && (!allowlist || allowlist.length === 0)) {
     console.warn('Warning: --external used without allowlist; consider adding --allowlist to limit npm scope.');
   }
@@ -340,7 +369,7 @@ function scaffoldConstantsPkg(cwd, domainArg, outDirArg) {
 }
 
 function usage() {
-  console.log(`Usage:\n  eslint-plugin-ai-code-snifftest init [--primary=<domain>] [--additional=a,b,c]\n  eslint-plugin-ai-code-snifftest scaffold <domain> [--dir=path]\n\nExamples:\n  eslint-plugin-ai-code-snifftest init --primary=astronomy --additional=geometry,math,units\n  eslint-plugin-ai-code-snifftest scaffold medical --dir=./examples/external/medical\n`);
+  console.log(`Usage:\n  eslint-plugin-ai-code-snifftest init [--primary=<domain>] [--additional=a,b,c]\n  eslint-plugin-ai-code-snifftest learn [--strict|--permissive|--interactive] [--sample=N] [--no-cache] [--apply] [--fingerprint]\n  eslint-plugin-ai-code-snifftest scaffold <domain> [--dir=path]\n\nExamples:\n  eslint-plugin-ai-code-snifftest init --primary=astronomy --additional=geometry,math,units\n  eslint-plugin-ai-code-snifftest learn --interactive --sample=300\n  eslint-plugin-ai-code-snifftest scaffold medical --dir=./examples/external/medical\n`);
 }
 
 function resolvePkgVersion(name, cwd) {
@@ -395,6 +424,193 @@ function checkRequirements(cwd) {
   return ok;
 }
 
+// --- Learn implementation ---
+function deepMerge(base, override) {
+  if (override == null) return base;
+  const out = Array.isArray(base) ? base.slice() : { ...base };
+  for (const [k, v] of Object.entries(override)) {
+    if (v && typeof v === 'object' && !Array.isArray(v) && base && typeof base[k] === 'object' && !Array.isArray(base[k])) {
+      out[k] = deepMerge(base[k], v);
+    } else {
+      out[k] = v;
+    }
+  }
+  return out;
+}
+
+function loadProjectConfigFile(cwd) {
+  const file = path.join(cwd, '.ai-coding-guide.json');
+  try {
+    const raw = fs.readFileSync(file, 'utf8');
+    return { file, json: JSON.parse(raw) };
+  } catch {
+    try {
+      const { DEFAULTS } = require(path.join(__dirname, '..', 'lib', 'utils', 'project-config'));
+      return { file, json: DEFAULTS };
+    } catch {
+      return { file, json: { domains: { primary: 'general', additional: [] }, domainPriority: [], constants:{}, terms:{ entities:[], properties:[], actions:[] }, naming:{ style:'camelCase', booleanPrefix:['is','has','should','can'], asyncPrefix:['fetch','load','save'], pluralizeCollections:true }, antiPatterns:{ forbiddenNames:[], forbiddenTerms:[] } } };
+    }
+  }
+}
+
+function writeProjectConfigFile(file, json) {
+  fs.writeFileSync(file, JSON.stringify(json, null, 2) + '\n');
+}
+
+async function learnInteractive(cwd, args, findings, rec, currentCfg) {
+  const readline = require('readline');
+  const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+  const ask = (q) => new Promise((resolve)=> rl.question(q, (ans)=> resolve(ans)));
+  try {
+    const nextCfg = JSON.parse(JSON.stringify(currentCfg));
+    console.log('\nLearn: Reconciliation Report');
+    console.log(`Score: ${rec.score.overall}/100`);
+    if (rec.score && rec.score.breakdown) {
+      console.log('Breakdown:', rec.score.breakdown);
+    }
+    if (Array.isArray(rec.warnings) && rec.warnings.length) {
+      console.log('Warnings:', rec.warnings);
+    }
+
+    // 1) Naming style
+    console.log(`\nNaming style: suggested '${rec.result.naming.style}' (majorities: ${Object.entries(findings.naming.casing).map(([k,v])=>`${k}:${v}`).join(', ')})`);
+    let ans = (await ask("[Naming] Enforce suggested style in config? [Y/n/r] (r=view report): ")).trim().toLowerCase();
+    if (ans === 'r') {
+      console.log(JSON.stringify({ casing: findings.naming.casing, booleanPrefixes: findings.naming.booleanPrefixes }, null, 2));
+      ans = (await ask('Apply suggested style? [Y/n]: ')).trim().toLowerCase();
+    }
+    if (!ans || ans.startsWith('y')) {
+      nextCfg.naming = nextCfg.naming || {};
+      nextCfg.naming.style = rec.result.naming.style;
+      const bp = Array.from(new Set(rec.result.naming.booleanPrefix || []));
+      // Offer inline edit of boolean prefixes
+      const edit = (await ask(`Edit boolean prefixes? current=[${bp.join(',')}] enter new comma-separated or press Enter to keep: `)).trim();
+      if (edit) {
+        const edited = edit.split(',').map(s=>s.trim()).filter(Boolean);
+        nextCfg.naming.booleanPrefix = edited.length ? edited : bp;
+      } else {
+        nextCfg.naming.booleanPrefix = bp;
+      }
+    }
+
+    // 2) Generic names → antiPatterns.forbiddenNames
+    const forb = rec.result.antiPatterns && rec.result.antiPatterns.forbiddenNames || [];
+    if (forb.length) {
+      console.log(`\nGeneric names detected (suggest forbid): ${forb.join(', ')}`);
+      const g = (await ask('[Generic] Add to antiPatterns.forbiddenNames? [Y/n]: ')).trim().toLowerCase();
+      if (!g || g.startsWith('y')) {
+        nextCfg.antiPatterns = nextCfg.antiPatterns || { forbiddenNames: [], forbiddenTerms: [] };
+        const set = new Set([...(nextCfg.antiPatterns.forbiddenNames||[]), ...forb]);
+        nextCfg.antiPatterns.forbiddenNames = Array.from(set);
+      }
+    }
+
+    // 3) Constants domain-aware suggestions
+    const consts = (rec.domain && rec.domain.constants) || [];
+    const top = consts.slice(0, 10);
+    if (top.length) {
+      console.log('\nDomain-aware constants (high-confidence):');
+      const chosen = [];
+      for (let i = 0; i < top.length; i++) {
+        const c = top[i];
+        let action = (await ask(`  [${i+1}] ${c.value} → ${c.suggestedName || '(name?)'} ${c.domain ? '['+c.domain+']' : ''} (conf=${Math.round(c.confidence*100)}%) action [a]dd, [r]ename, [m]ap, [s]kip, [q]uit: `)).trim().toLowerCase();
+        if (action === 'q') break;
+        if (action === 'r') {
+          const nn = (await ask('   New constant name (UPPER_SNAKE_CASE): ')).trim();
+          if (nn) c.suggestedName = nn;
+          action = 'a';
+        }
+        if (action === 'm') {
+          const dm = (await ask('   Map value to domain (e.g., time, astronomy, geometry): ')).trim();
+          if (dm) {
+            nextCfg.constantResolution = nextCfg.constantResolution || {};
+            nextCfg.constantResolution[String(c.value)] = dm;
+            c.domain = dm;
+          }
+          const yn = (await ask('   Also add to fingerprint? [Y/n]: ')).trim().toLowerCase();
+          if (!yn || yn.startsWith('y')) action = 'a'; else action = 's';
+        }
+        if (action === 'a') {
+          chosen.push({ value: c.value, suggestedName: c.suggestedName, domain: c.domain, confidence: c.confidence });
+        }
+      }
+      if (chosen.length) {
+        const h = (await ask('[Constants] Generate fingerprint file with selected items? [Y/n]: ')).trim().toLowerCase();
+        if (!h || h.startsWith('y')) {
+          const { generateDomain } = require(path.join(__dirname, '..', 'lib', 'scanner', 'reconcile'));
+          const content = generateDomain({ constants: chosen });
+          const outDir = path.join(cwd, '.ai-constants');
+          fs.mkdirSync(outDir, { recursive: true });
+          const outFile = path.join(outDir, 'project-fingerprint.js');
+          fs.writeFileSync(outFile, content);
+          console.log(`Wrote ${outFile}`);
+        }
+      }
+    }
+
+    // 4) Apply config changes
+    const apply = (await ask('\nApply changes to .ai-coding-guide.json? [Y/n]: ')).trim().toLowerCase();
+    if (!apply || apply.startsWith('y')) {
+      const { file } = loadProjectConfigFile(cwd);
+      writeProjectConfigFile(file, nextCfg);
+      console.log(`Updated ${file}`);
+    } else {
+      console.log('Skipped writing config.');
+    }
+
+    return 0;
+  } finally {
+    rl.close();
+  }
+}
+
+function learn(cwd, args) {
+  const { scanProject } = require(path.join(__dirname, '..', 'lib', 'scanner', 'extract'));
+  const { reconcile, DEFAULT_SANITY } = require(path.join(__dirname, '..', 'lib', 'scanner', 'reconcile'));
+  const { json: currentCfg } = loadProjectConfigFile(cwd);
+  const modeInteractive = Boolean(args.interactive) || (!args.strict && !args.permissive && process.stdin.isTTY);
+  const sample = args.sample ? Number(args.sample) : undefined;
+  const useCache = args.cache === false || args['no-cache'] ? false : true;
+
+  const findings = scanProject(cwd, { sample: sample || 400, useCache });
+  const sane = DEFAULT_SANITY;
+  const mode = args.strict ? 'strict' : (args.permissive ? 'permissive' : 'adaptive');
+  const rec = reconcile(findings, sane, { config: currentCfg, mode });
+
+  if (modeInteractive) {
+    return learnInteractive(cwd, args, findings, rec, currentCfg);
+  }
+
+  // Non-interactive: compute result and optionally apply
+  const nextCfg = deepMerge(currentCfg, { naming: rec.result.naming, antiPatterns: rec.result.antiPatterns, constantResolution: rec.result.constantResolution });
+  if (args.apply) {
+    if (mode === 'permissive') {
+      const reportFile = path.join(cwd, '.ai-learn-report.json');
+      fs.writeFileSync(reportFile, JSON.stringify({ mode, score: rec.score, result: rec.result, warnings: rec.warnings, domain: rec.domain.summary }, null, 2) + '\n');
+      console.log(`Wrote ${reportFile}`);
+    } else {
+      const { file } = loadProjectConfigFile(cwd);
+      writeProjectConfigFile(file, nextCfg);
+      console.log(`Updated ${file} (mode ${mode}, score ${rec.score.overall})`);
+    }
+  } else {
+    console.log(JSON.stringify({ mode, score: rec.score, result: rec.result, warnings: rec.warnings, domain: rec.domain.summary }, null, 2));
+  }
+  if (args.fingerprint) {
+    const top = (rec.domain && rec.domain.constants || []).slice(0, 10);
+    if (top.length) {
+      const { generateDomain } = require(path.join(__dirname, '..', 'lib', 'scanner', 'reconcile'));
+      const content = generateDomain({ constants: top });
+      const outDir = path.join(cwd, '.ai-constants');
+      fs.mkdirSync(outDir, { recursive: true });
+      const outFile = path.join(outDir, 'project-fingerprint.js');
+      fs.writeFileSync(outFile, content);
+      console.log(`Wrote ${outFile}`);
+    }
+  }
+  return 0;
+}
+
 function main() {
   const args = parseArgs(process.argv);
   const cmd = args._[0];
@@ -406,6 +622,11 @@ function main() {
       return;
     }
     process.exitCode = init(cwd, args);
+    return;
+  }
+  if (cmd === 'learn') {
+    if (!checkRequirements(process.cwd())) { process.exitCode = 1; return; }
+    Promise.resolve(learn(cwd, args)).then((code)=>{ process.exitCode = code; });
     return;
   }
   if (cmd === 'scaffold' || cmd === 'create-constants') {

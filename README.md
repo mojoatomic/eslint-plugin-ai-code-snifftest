@@ -24,6 +24,8 @@ npm install eslint-plugin-ai-code-snifftest --save-dev
 
 ## Usage
 
+See docs/learn.md for the Learn workflow (reconciliation, interactive review, fingerprint).
+
 In your [configuration file](https://eslint.org/docs/latest/use/configure/configuration-files#configuration-file), import the plugin `eslint-plugin-ai-code-snifftest` and add `ai-code-snifftest` to the `plugins` key:
 
 ```js
