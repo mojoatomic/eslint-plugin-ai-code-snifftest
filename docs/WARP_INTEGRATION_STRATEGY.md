@@ -1,7 +1,7 @@
 # Warp Integration Strategy
 
 - Generate AGENTS.md (condensed, cross-tool); never touch WARP.md; no symlinks
-- Wizard detects WARP.md and defaults to creating AGENTS.md, plus `.ai-coding-guide.{json,md}`, `.cursorrules`, and `eslint.config.js`
+- Wizard detects WARP.md and defaults to creating AGENTS.md, plus `.ai-coding-guide.{json,md}`, `.cursorrules`, and `eslint.config.mjs`
 - README documents setup; flags: `--agents`, `--md`, `--cursor`
 
 Why this works:

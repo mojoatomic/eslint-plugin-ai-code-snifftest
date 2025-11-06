@@ -36,7 +36,7 @@ See [DOGFOOD_TEST_PLAN.md](../../../DOGFOOD_TEST_PLAN.md) for full testing proto
 **Results:**
 - ✅/❌ `.ai-coding-guide.json` generated
 - ✅/❌ `AGENTS.md` generated with correct domain
-- ✅/❌ `eslint.config.js` generated and valid
+- ✅/❌ `eslint.config.mjs` generated and valid
 - ✅/❌ `.cursorrules` generated
 
 **Issues found:**
@@ -180,7 +180,7 @@ Total issues found:
 - [ ] `dogfood-results.md`
 - [ ] `.ai-coding-guide.json`
 - [ ] `AGENTS.md`
-- [ ] `eslint.config.js`
+- [ ] `eslint.config.mjs`
 - [ ] `.cursorrules`
 - [ ] Test files (`test-*.js`)
 

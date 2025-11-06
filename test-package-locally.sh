@@ -132,7 +132,7 @@ function doSomething() {}
 let isValid, condition, flag;
 EOF
 
-cat > eslint.config.js << 'EOF'
+cat > eslint.config.mjs << 'EOF'
 module.exports = [
   {
     languageOptions: { ecmaVersion: 2021 },

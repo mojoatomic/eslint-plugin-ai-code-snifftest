@@ -17,7 +17,7 @@
 - Project-wide mapping in `constantResolution` for recurring cases
 
 ## Wizard
-`eslint-plugin-ai-code-snifftest init` generates `.ai-coding-guide.json/.md`, `AGENTS.md`, `.cursorrules`, and `eslint.config.js`.
+`eslint-plugin-ai-code-snifftest init` generates `.ai-coding-guide.json/.md`, `AGENTS.md`, `.cursorrules`, and `eslint.config.mjs`.
 
 ## Link
 See RFC #64 for external constants packages and discovery.
