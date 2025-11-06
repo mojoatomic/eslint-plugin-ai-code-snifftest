@@ -46,6 +46,44 @@ npm install eslint-plugin-ai-code-snifftest --save-dev
 
 See full command and flag reference in [docs/CLI.md](docs/CLI.md).
 
+## Quick Start (2 Minutes)
+
+### Option 1: Analyze Your Code First (Recommended)
+```bash
+# Step 1: Analyze your codebase
+npx eslint-plugin-ai-code-snifftest learn --interactive
+
+# Step 2: Generate configuration files
+npx eslint-plugin-ai-code-snifftest init --agents --eslint
+
+# Step 3: Start linting!
+npx eslint .
+```
+
+### Option 2: Specify Your Domain Manually
+```bash
+# One command setup
+npx eslint-plugin-ai-code-snifftest init \
+  --primary=web-app \
+  --agents --eslint --yes
+
+# Start linting!
+npx eslint .
+```
+
+### What You Get
+
+After setup, you'll have:
+- ✅ AGENTS.md - AI coding guidelines (read by Warp, Cursor, Claude)
+- ✅ .ai-coding-guide.json - Project configuration
+- ✅ eslint.config.mjs - ESLint rules with architecture guardrails
+
+### Next Steps
+
+- Review `AGENTS.md` for coding guidelines
+- Run `npx eslint .` to check your code
+- Use AI assistants (they'll automatically read AGENTS.md)
+
 ## Quick Start
 
 ### Option 1: Interactive Setup
