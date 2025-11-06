@@ -20,11 +20,11 @@ export default [
       'prefer-const': 'warn',
       'no-var': 'error',
       // Consistency
-      'quotes': ['warn', 'single', { avoidEscape: true }],
+'quotes': ['warn', 'single', { avoidEscape: true }],
       'semi': ['warn', 'always'],
-      'eqeqeq': ['error', 'always'],
+      'eqeqeq': ['error', 'always', { null: 'ignore' }],
       // Naming (basic)
-      'camelcase': ['error', { properties: 'always' }],
+      'camelcase': ['error', { properties: 'never' }],
       // Domain-specific
       'ai-code-snifftest/no-redundant-calculations': 'warn',
       'ai-code-snifftest/no-equivalent-branches': 'warn',
@@ -78,7 +78,8 @@ export default [
       'max-lines-per-function': "off",
       'max-statements': "off",
       'complexity': "off",
-      'max-depth': "off"
+      'max-depth': "off",
+      'camelcase': "off"
     }
   }
 ];
