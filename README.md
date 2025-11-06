@@ -48,7 +48,12 @@ See full command and flag reference in [docs/CLI.md](docs/CLI.md).
 
 ## Quick Start (2 Minutes)
 
-### Option 1: Analyze Your Code First (Recommended)
+### Option 0: One-Command Setup (Recommended)
+```bash
+npx eslint-plugin-ai-code-snifftest setup --yes
+```
+
+### Option 1: Analyze Your Code First
 ```bash
 # Step 1: Analyze your codebase
 npx eslint-plugin-ai-code-snifftest learn --interactive
@@ -148,6 +153,12 @@ We tested this tool on its own codebase during a refactoring effort.
 - Quote style violations: 204 (auto-fixed)
 
 See [DOGFOOD_RESULTS.md](./docs/DOGFOOD_RESULTS.md) for complete analysis.
+
+---
+
+## Migration Notes
+
+See docs/MIGRATION.md for changes in defaults and new commands.
 
 ---
 
