@@ -16,9 +16,43 @@ The CLI verifies versions unless disabled with SKIP_AI_REQUIREMENTS=1.
 
 ## Commands
 
+- setup: Run learn then init (generate everything by default)
 - init: Generate configuration and docs
 - learn: Analyze your project and propose config updates
 - scaffold: Create a starter external constants package
+
+---
+
+## setup
+
+Run learn then init.
+
+### Synopsis
+
+```bash
+npx eslint-plugin-ai-code-snifftest setup [options]
+```
+
+### Behavior
+- Interactive by default: runs learn reconciliation wizard, then writes init outputs with defaults.
+- Non-interactive: `--yes` runs learn in strict apply mode and init with defaults (AGENTS.md + ESLint).
+- Skip learn with `--skip-learn` to only run init.
+
+### Common options
+- --skip-learn
+  - Skip the learn phase.
+- --yes
+  - Non-interactive; auto-apply in learn and defaults in init.
+- All init options apply (e.g., `--primary`, `--additional`, `--no-agents`, `--no-eslint`, `--cursor`, `--arch`, `--no-arch`).
+
+### Examples
+```bash
+# One-command setup (non-interactive)
+npx eslint-plugin-ai-code-snifftest setup --yes --primary=web-app
+
+# Skip learn, just initialize files
+npx eslint-plugin-ai-code-snifftest setup --yes --skip-learn --primary=cli --cursor
+```
 
 ---
 
