@@ -42,6 +42,10 @@ npm install eslint-plugin-ai-code-snifftest --save-dev
 
 ---
 
+## CLI Reference
+
+See full command and flag reference in [docs/CLI.md](docs/CLI.md).
+
 ## Quick Start
 
 ### Option 1: Interactive Setup
