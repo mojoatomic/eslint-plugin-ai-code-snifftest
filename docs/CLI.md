@@ -103,6 +103,8 @@ If `--primary` is omitted and stdin is TTY (or `FORCE_CLI_INTERACTIVE=1`), the w
 
 Note: `.ai-coding-guide.md` is not generated.
 
+In interactive learn, after reconciliation you’ll be offered to generate `AGENTS.md` and `eslint.config.mjs` immediately (defaults on; honor `--no-agents`, `--no-eslint`, and `--arch`/`--no-arch`).
+
 ### Architecture guardrails
 Enabled by default. Disable with `--no-arch` or `--arch=false`.
 Rules included when enabled:
