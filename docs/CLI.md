@@ -36,6 +36,7 @@ npx eslint-plugin-ai-code-snifftest setup [options]
 ### Behavior
 - Interactive by default: runs learn reconciliation wizard, then writes init outputs with defaults.
 - Non-interactive: `--yes` runs learn in strict apply mode and init with defaults (AGENTS.md + ESLint).
+  - Domain required: pass `--primary` or ensure project type can be inferred (eslint-plugin → dev-tools, CLI with `bin` → cli, React/Vue → web-app). If not inferable, setup exits with guidance.
 - Skip learn with `--skip-learn` to only run init.
 
 ### Common options
@@ -103,7 +104,9 @@ If `--primary` is omitted and stdin is TTY (or `FORCE_CLI_INTERACTIVE=1`), the w
 
 Note: `.ai-coding-guide.md` is not generated.
 
-In interactive learn, after reconciliation you’ll be offered to generate `AGENTS.md` and `eslint.config.mjs` immediately (defaults on; honor `--no-agents`, `--no-eslint`, and `--arch`/`--no-arch`).
+In interactive learn, after reconciliation you’ll be offered to:
+- Accept an inferred domain for `domains.primary` (e.g., dev-tools/cli/web-app)
+- Generate `AGENTS.md` and `eslint.config.mjs` immediately (defaults on; honor `--no-agents`, `--no-eslint`, and `--arch`/`--no-arch`).
 
 ### Architecture guardrails
 Enabled by default. Disable with `--no-arch` or `--arch=false`.
