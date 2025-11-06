@@ -1,6 +1,32 @@
 # eslint-plugin-ai-code-snifftest
 
-Does your AI-generated code pass the sniff test? Detect and fix AI code smell.
+ESLint plugin with AI agent configuration generator for JavaScript projects.
+
+**Validation:** Dogfooded on own codebase (769-line CLI → 50 lines, 338 violations detected)  
+**Method:** Static analysis + project-specific configuration generation  
+**Use Cases:** JavaScript/Node.js projects using AI coding assistants (Claude, Cursor, Copilot)
+
+---
+
+## What This Provides
+
+This plugin combines two functions:
+
+1. **ESLint rules** - 8 rules targeting AI-generated code patterns
+2. **Configuration generator** - CLI tool that creates AI agent guides and ESLint configs
+
+### Generated Files
+
+Running `init` creates:
+
+| File | Purpose | Size |
+|------|---------|------|
+| `.ai-coding-guide.json` | Machine-readable configuration | ~100 lines |
+| `AGENTS.md` | AI agent coding reference | ~200 lines |
+| `.cursorrules` | Cursor editor integration | ~50 lines |
+| `eslint.config.js` | ESLint configuration with architecture rules | ~150 lines |
+
+---
 
 ## Installation
 
@@ -8,193 +34,145 @@ Does your AI-generated code pass the sniff test? Detect and fix AI code smell.
 - Node.js 18+
 - ESLint 9+
 
-See docs/MINIMUM_REQUIREMENTS.md for details.
-
-You'll first need to install [ESLint](https://eslint.org/):
-
+See docs/MINIMUM_REQUIREMENTS.md for version compatibility.
 ```sh
 npm i eslint --save-dev
-```
-
-Next, install `eslint-plugin-ai-code-snifftest`:
-
-```sh
 npm install eslint-plugin-ai-code-snifftest --save-dev
 ```
 
-## Usage
+---
 
-### Learn Workflow
+## Quick Start
 
-The `learn` command analyzes your codebase and helps reconcile patterns to improve code quality:
-
+### Option 1: Interactive Setup
 ```bash
-# Interactive mode (recommended for first-time setup)
-eslint-plugin-ai-code-snifftest learn --interactive
+npx eslint-plugin-ai-code-snifftest init
 
-# Non-interactive with auto-apply
-eslint-plugin-ai-code-snifftest learn --apply --fingerprint
+# Prompts for:
+# - Primary domain (e.g., web-app, cli, data-science)
+# - Additional domains (optional)
+# - File generation preferences
 ```
 
-**What it does:**
-- Scans your codebase for naming patterns, constants, and generic names
-- Reconciles findings with sane defaults
-- Provides interactive review for constants with domain-aware suggestions
-- Generates `.ai-constants/project-fingerprint.js` with validated constants
-
-**Fingerprint consumption:**
-When you run `init`, it automatically consumes the fingerprint:
-- Merges discovered constants into `.ai-coding-guide.json`
-- Adds mapped domains to `domains.additional`
-- Seeds `constantResolution` mappings
-
-**Example workflow:**
+### Option 2: Non-Interactive
 ```bash
-# 1. Analyze your codebase
-eslint-plugin-ai-code-snifftest learn --interactive --sample=300
-
-# 2. Initialize config (consumes fingerprint)
-eslint-plugin-ai-code-snifftest init --primary=astronomy
-
-# 3. The init command merges fingerprint data automatically
+npx eslint-plugin-ai-code-snifftest init \
+  --primary=web-app \
+  --additional=react,api \
+  --md --cursor --eslint
 ```
 
-See [docs/learn.md](docs/learn.md) for detailed documentation.
+### Option 3: Learn-First Approach
+```bash
+# Analyze existing codebase patterns
+npx eslint-plugin-ai-code-snifftest learn --interactive
 
-### ESLint Configuration
-
-In your [configuration file](https://eslint.org/docs/latest/use/configure/configuration-files#configuration-file), import the plugin `eslint-plugin-ai-code-snifftest` and add `ai-code-snifftest` to the `plugins` key:
-
-```js
-import { defineConfig } from "eslint/config";
-import ai-code-snifftest from "eslint-plugin-ai-code-snifftest";
-
-export default defineConfig([
-    {
-        plugins: {
-            ai-code-snifftest
-        }
-    }
-]);
+# Generate config based on detected patterns
+npx eslint-plugin-ai-code-snifftest init --primary=auto
 ```
 
+---
 
+## Validation
 
-## Rules
+We tested this tool on its own codebase during a refactoring effort.
+
+### Test Parameters
+- **Codebase:** This plugin's source code
+- **Task:** Refactor 769-line CLI file
+- **Method:** Used generated AGENTS.md and architecture guardrails
+
+### Results
+- **CLI file:** 769 lines → 50 lines (93% reduction)
+- **Violations detected:** 338 (10 errors, 328 warnings)
+- **Auto-fixable:** 242 violations (72%)
+- **CLI complexity:** 1 warning (down from multiple violations)
+
+### Findings
+
+**Learn command:**
+- Score: 44/100
+- Naming detection: 97% accuracy (4,836 camelCase detected)
+- Generic name detection: 8 terms flagged correctly
+
+**Init command:**
+- Generated AGENTS.md with correct domain configuration
+- Created architecture section with file/function limits
+- ESLint config properly integrated
+
+**Lint results:**
+- Plugin rules detected real issues (prefer-simpler-logic: 27, no-redundant-conditionals: 10)
+- Architecture rules caught limit violations (complexity: 44, max-lines: 8)
+- Quote style violations: 204 (auto-fixed)
+
+See [DOGFOOD_RESULTS.md](./docs/DOGFOOD_RESULTS.md) for complete analysis.
+
+---
+
+## Learn Workflow
+
+The `learn` command analyzes your codebase to detect patterns:
+```bash
+# Interactive mode with code sampling
+npx eslint-plugin-ai-code-snifftest learn --interactive --sample=300
+```
+
+**Detection capabilities:**
+- Naming patterns (camelCase, snake_case, PascalCase detection)
+- Generic variable names
+- Boolean prefix patterns
+- Async function patterns
+
+**Limitations:**
+- Sample-based analysis (may miss patterns in unsampled files)
+- Requires minimum codebase size for pattern detection
+- Generic name detection threshold: 0.6 confidence minimum
+
+**Output:**
+- `.ai-coding-guide.json` updated with detected patterns
+- `learn-report.json` with detailed findings
+- Optional: `.ai-constants/project-fingerprint.js`
+
+See [docs/learn.md](docs/learn.md) for methodology details.
+
+---
+
+## ESLint Rules
 
 <!-- begin auto-generated rules list -->
 
-🔧 Automatically fixable by the [`--fix` CLI option](https://eslint.org/docs/user-guide/command-line-interface#--fix).\
+🔧 Automatically fixable by the [`--fix` CLI option](https://eslint.org/docs/user-guide/command-line-interface#--fix).  
 💡 Manually fixable by [editor suggestions](https://eslint.org/docs/latest/use/core-concepts#rule-suggestions).
 
-| Name                                                                   | Description                                                                                        | 🔧 | 💡 |
-| :--------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------- | :- | :- |
-| [enforce-domain-terms](docs/rules/enforce-domain-terms.md)             | Encourage domain-specific naming using declared project terms                                      |    | 💡 |
-| [enforce-naming-conventions](docs/rules/enforce-naming-conventions.md) | Enforce naming conventions from project config (style, boolean/async prefixes, plural collections) |    | 💡 |
-| [no-equivalent-branches](docs/rules/no-equivalent-branches.md)         | Detect if/else branches that do the same thing                                                     | 🔧 |    |
-| [no-generic-names](docs/rules/no-generic-names.md)                     | Flag generic names; enforce domain-specific naming                                                 |    |    |
-| [no-redundant-calculations](docs/rules/no-redundant-calculations.md)   | Detect redundant calculations that should be computed at compile time                              | 🔧 | 💡 |
-| [no-redundant-conditionals](docs/rules/no-redundant-conditionals.md)   | Simplify redundant conditional expressions                                                         | 🔧 |    |
-| [no-unnecessary-abstraction](docs/rules/no-unnecessary-abstraction.md) | Suggest inlining trivial single-use wrapper functions that add no value                            |    | 💡 |
-| [prefer-simpler-logic](docs/rules/prefer-simpler-logic.md)             | Simplify boolean expressions and remove redundant logic                                            | 🔧 |    |
+| Name | Description | 🔧 | 💡 |
+| :--- | :---------- | :- | :- |
+| [enforce-domain-terms](docs/rules/enforce-domain-terms.md) | Encourage domain-specific naming using declared project terms | | 💡 |
+| [enforce-naming-conventions](docs/rules/enforce-naming-conventions.md) | Enforce naming conventions from project config (style, boolean/async prefixes, plural collections) | | 💡 |
+| [no-equivalent-branches](docs/rules/no-equivalent-branches.md) | Detect if/else branches that do the same thing | 🔧 | |
+| [no-generic-names](docs/rules/no-generic-names.md) | Flag generic names; enforce domain-specific naming | | |
+| [no-redundant-calculations](docs/rules/no-redundant-calculations.md) | Detect redundant calculations that should be computed at compile time | 🔧 | 💡 |
+| [no-redundant-conditionals](docs/rules/no-redundant-conditionals.md) | Simplify redundant conditional expressions | 🔧 | |
+| [no-unnecessary-abstraction](docs/rules/no-unnecessary-abstraction.md) | Suggest inlining trivial single-use wrapper functions that add no value | | 💡 |
+| [prefer-simpler-logic](docs/rules/prefer-simpler-logic.md) | Simplify boolean expressions and remove redundant logic | 🔧 | |
 
 <!-- end auto-generated rules list -->
 
-## Usage with Prettier
-
-This plugin is **fully compatible with Prettier**. Our auto-fixes focus on logical simplification (not formatting), so they work seamlessly with Prettier's formatting.
-
-### Recommended Workflow
-
-Run ESLint before Prettier for best results:
-
-```json
-{
-  "scripts": {
-    "lint": "eslint --fix . && prettier --write .",
-    "lint:check": "eslint . && prettier --check ."
-  }
-}
-```
-
-### Integrated Setup (Alternative)
-
-For a seamless experience, use `eslint-plugin-prettier` to run both tools together:
-
-```bash
-npm install --save-dev eslint-plugin-prettier eslint-config-prettier prettier
-```
-
-```javascript
-// eslint.config.js
-import prettier from 'eslint-plugin-prettier';
-import aiSnifftest from 'eslint-plugin-ai-code-snifftest';
-
-export default [
-  {
-    plugins: {
-      'ai-code-snifftest': aiSnifftest,
-    },
-    rules: {
-      'ai-code-snifftest/no-redundant-calculations': 'error',
-      'ai-code-snifftest/no-equivalent-branches': 'error',
-      'ai-code-snifftest/prefer-simpler-logic': 'error',
-      'ai-code-snifftest/no-redundant-conditionals': 'error',
-      'ai-code-snifftest/no-unnecessary-abstraction': 'warn',
-    },
-  },
-  prettier.configs.recommended,  // Prettier runs after our rules
-];
-```
-
-Now a single command handles both:
-
-```bash
-eslint --fix .  # Fixes logic AND formats code
-```
-
-### How It Works
-
-Our plugin focuses on **logical simplification** (`type: 'suggestion'`), not formatting (`type: 'layout'`). 
-
-ESLint automatically applies fixes in this order:
-1. **Problem rules** (bugs)
-2. **Suggestion rules** ← Our plugin fixes logic here
-3. **Layout rules** (whitespace) ← Prettier formats here
-
-This ensures no conflicts! ✅
-
-**Verified:** All rules tested with Prettier 3.x compatibility suite (18 integration tests).
+---
 
 ## Architecture Guardrails
 
-Enforce code quality guardrails for file/function complexity to guide AI-generated code toward maintainable patterns.
+Optional feature that enforces file and function complexity limits.
 
-### Quick Start
+### Configuration
 
-Enable during interactive init:
-
-```bash
-eslint-plugin-ai-code-snifftest init
-# Answer 'Y' when prompted for architectural guardrails
-```
-
-### What It Does
-
-Adds an `architecture` section to `.ai-coding-guide.json` with configurable limits:
-
+Enabled via `init` command or by adding to `.ai-coding-guide.json`:
 ```json
 {
   "architecture": {
-    "fileStructure": {
-      "pattern": "feature-based"
-    },
     "maxFileLength": {
       "cli": 100,
       "command": 150,
       "util": 200,
-      "generator": 250,
-      "component": 300,
       "default": 250
     },
     "functions": {
@@ -203,11 +181,6 @@ Adds an `architecture` section to `.ai-coding-guide.json` with configurable limi
       "maxDepth": 4,
       "maxParams": 4,
       "maxStatements": 30
-    },
-    "patterns": {
-      "cliStyle": "orchestration-shell",
-      "errorHandling": "explicit",
-      "asyncStyle": "async-await"
     }
   }
 }
@@ -215,70 +188,112 @@ Adds an `architecture` section to `.ai-coding-guide.json` with configurable limi
 
 ### Generated ESLint Rules
 
-When enabled, `eslint.config.js` includes:
+When enabled, adds these rules to `eslint.config.js`:
 
-**Global rules:**
-- `max-lines`: Warn at 250 lines (configurable per file type)
-- `max-lines-per-function`: Warn at 50 lines
-- `complexity`: Warn at cyclomatic complexity 10
-- `max-depth`: Warn at nesting depth 4
-- `max-params`: Warn at 4 parameters
-- `max-statements`: Warn at 30 statements
+**Global (warnings):**
+- `max-lines`: 250 lines per file
+- `max-lines-per-function`: 50 lines
+- `complexity`: Cyclomatic complexity ≤10
+- `max-depth`: Nesting depth ≤4
+- `max-params`: Function parameters ≤4
+- `max-statements`: Statements per function ≤30
 
-**Per-path overrides:**
-- CLI files (`bin/*.js`): **Error** at 100 lines (strict)
-- Commands: Warn at 150 lines
-- Utils: Warn at 200 lines
-- Generators: Warn at 250 lines
-- Components: Warn at 300 lines
-- Tests: Complexity/statements limits **disabled**
+**Path-specific (errors):**
+- CLI files (`bin/*.js`): 100 lines maximum
+- Command files: 150 lines maximum
+- Test files: Complexity/statement limits disabled
 
-### Customization
+### Limitations
 
-**Interactive:**
+- Limits are suggestions, not enforced by language/runtime
+- May require adjustment for specific project needs
+- Test files excluded from most limits
+
+---
+
+## AI Agent Integration
+
+Generated files are consumed by AI coding assistants:
+
+### Supported Tools
+
+| Tool | Integration Method | File Read |
+|------|-------------------|-----------|
+| Warp | Automatic | `AGENTS.md` |
+| Cursor | Automatic | `.cursorrules` |
+| Claude Desktop | Manual reference | `AGENTS.md` |
+| GitHub Copilot | Manual reference | `AGENTS.md` |
+| Other AI assistants | Manual reference | `AGENTS.md` |
+
+### What AI Agents Receive
+
+From `AGENTS.md`:
+- Project domain context
+- File length limits by type
+- Function complexity limits
+- Naming conventions
+- Code pattern examples (good vs. problematic)
+- Architecture preferences
+
+### Limitations
+
+- AI agents may not always follow guidelines
+- Effectiveness depends on AI model and integration method
+- Manual reference tools require explicit prompting
+- No enforcement mechanism for AI compliance
+
+---
+
+## Compatibility
+
+### Prettier
+
+This plugin is compatible with Prettier. Auto-fixes focus on logical simplification (not formatting).
+
+**Recommended workflow:**
 ```bash
-eslint-plugin-ai-code-snifftest init
-# Answer 'y' to "Customize thresholds?"
+eslint --fix .    # Logical fixes
+prettier --write . # Formatting
 ```
 
-**Manual (`.ai-coding-guide.json`):**
-```json
-{
-  "architecture": {
-    "maxFileLength": {
-      "cli": 80,
-      "default": 300
+**Or use integrated setup:**
+```javascript
+// eslint.config.js
+import prettier from 'eslint-plugin-prettier';
+import aiSnifftest from 'eslint-plugin-ai-code-snifftest';
+
+export default [
+  {
+    plugins: { 'ai-code-snifftest': aiSnifftest },
+    rules: {
+      'ai-code-snifftest/no-redundant-calculations': 'error',
+      'ai-code-snifftest/prefer-simpler-logic': 'error',
     },
-    "functions": {
-      "maxComplexity": 15
-    }
-  }
-}
+  },
+  prettier.configs.recommended,
+];
 ```
 
-### Benefits
+Verified with Prettier 3.x compatibility suite (18 integration tests).
 
-- **AI-friendly constraints**: Guide AI toward modular, testable code
-- **Incremental adoption**: Warnings (not errors) for most rules
-- **Context-aware**: Different limits for different file types
-- **Test-friendly**: Lenient rules for test files
+---
 
 ## Troubleshooting
 
-### ESLint Config Issues
-
-**Module type warning:**
+### Module Type Warning
 ```
 Module type of file:///...eslint.config.js is not specified
 ```
-**Solution**: Add `"type": "module"` to your `package.json`
 
-**`no-undef` errors for Node.js globals:**
+**Solution:** Add `"type": "module"` to `package.json`
+
+### No-undef Errors for Node.js Globals
 ```
 error  'require' is not defined  no-undef
 error  'process' is not defined  no-undef
 ```
-**Solution**: Generated config already includes Node.js globals. If using a custom config, add:
+
+**Solution:** Generated config includes Node.js globals. For custom configs:
 ```js
 import globals from 'globals';
 
@@ -289,61 +304,73 @@ export default [{
 }];
 ```
 
-**Syntax errors in generated config:**
+### Duplicate Rule Keys
 
-This was a known issue (fixed in v0.0.1+). Update to the latest version:
+Fixed in v0.0.1+. Update to latest version:
 ```bash
 npm update eslint-plugin-ai-code-snifftest
 ```
 
-### Architecture Guardrails
-
-**Duplicate rule keys:**
-
-If you see errors like `Duplicate key 'complexity'`, this was fixed in v0.0.1+. The generator now skips overlapping AI-friendly rules when architecture guardrails are enabled.
-
-**Generated config issues:**
-
-To regenerate the config:
+### Regenerate Configuration
 ```bash
-FORCE_ESLINT_CONFIG=1 eslint-plugin-ai-code-snifftest init
+FORCE_ESLINT_CONFIG=1 npx eslint-plugin-ai-code-snifftest init
 ```
 
-## Configurations
+---
 
-See RFC: Extensible Domain Constants via Plugin Architecture (#64).
+## Limitations
 
-### Migration to v2 (Multi-domain)
+This tool is designed for JavaScript/Node.js projects and is currently in active development.
 
-#### Warp Integration
-Our wizard generates `AGENTS.md` which Warp reads automatically. We do not modify `WARP.md` (owned by Warp).
+**Not suitable for:**
+- TypeScript projects (limited support)
+- Projects using ESLint <9.0
+- Languages other than JavaScript
+- Projects requiring JSDoc-based type checking
+- Projects with custom ESLint plugin conflicts
 
-Setup:
-1. Initialize Warp: `warp /init`
-2. Initialize linting: `npx eslint-plugin-ai-code-snifftest init --md --cursor --agents`
-3. Done — Warp reads AGENTS.md alongside WARP.md.
-See docs/migration/v2.md for details. For new projects, use the CLI wizard:
+**Known limitations:**
+- Learn command requires minimum codebase size for pattern detection
+- Generic name detection may have false positives in domain-specific contexts
+- Architecture limits are suggestions only, not runtime-enforced
+- AI agent compliance not guaranteed
 
+---
+
+## External Constants (Experimental)
+
+Optional feature for discovering domain-specific constants from npm packages.
+
+**Enable:**
 ```bash
-eslint-plugin-ai-code-snifftest init --primary=astronomy --additional=geometry,math,units --md --cursor
+npx eslint-plugin-ai-code-snifftest init --external
 ```
 
-<!-- begin auto-generated configs list -->
-TODO: Run eslint-doc-generator to generate the configs list (or delete this section if no configs are offered).
-<!-- end auto-generated configs list -->
+Or in `.ai-coding-guide.json`:
+```json
+{
+  "experimentalExternalConstants": true,
+  "externalConstantsAllowlist": ["^@ai-constants/"]
+}
+```
 
-### External constants (experimental)
-- Enable in CLI: `--external` or set `experimentalExternalConstants: true` in `.ai-coding-guide.json`.
-- Wizard will summarize discovered domains (built-in, npm, local, custom) and list merged domains in `.ai-coding-guide.md`.
-- Behind a flag; defaults to disabled.
+**Status:** Experimental, disabled by default
 
-#### Allowlist and cache
-- `externalConstantsAllowlist`: array of package names or regex strings (e.g., `"^@ai-constants/"`) to limit npm discovery.
-- CLI: `--allowlist="^@ai-constants/med,^eslint-constants-"` seeds the allowlist in generated config when used with `--external`.
-- Env:
-  - `DEBUG_AI_CONSTANTS=1` prints discovery warnings
-  - `AI_CONSTANTS_NO_CACHE=1` disables the in-process discovery cache
-- Enable in CLI: `--external` or set `experimentalExternalConstants: true` in `.ai-coding-guide.json`.
-- Wizard will summarize discovered domains (built-in, npm, local, custom) and list merged domains in `.ai-coding-guide.md`.
-- Behind a flag; defaults to disabled.
+**Limitations:**
+- Requires specific npm package structure
+- Discovery cache may need manual clearing
+- Not all domain packages supported
 
+---
+
+## License
+
+[Your License]
+
+## Contributing
+
+[Contribution guidelines]
+
+---
+
+**Note:** This documentation describes capabilities validated through self-testing. Results may vary based on project structure, codebase patterns, and AI assistant behavior.
