@@ -1,0 +1,172 @@
+# CLI Reference
+
+This document describes all commands, options, and environment variables for `eslint-plugin-ai-code-snifftest`.
+
+Note: .ai-coding-guide.md generation has been removed. Sources of truth are:
+- .ai-coding-guide.json (machine‑readable config)
+- AGENTS.md (human‑readable guidance for AI tools)
+
+## Requirements
+- Node.js ≥ 18
+- ESLint ≥ 9
+
+The CLI verifies versions unless disabled with SKIP_AI_REQUIREMENTS=1.
+
+---
+
+## Commands
+
+- init: Generate configuration and docs
+- learn: Analyze your project and propose config updates
+- scaffold: Create a starter external constants package
+
+---
+
+## init
+
+Generate `.ai-coding-guide.json`, optional `.cursorrules`, `AGENTS.md`, and `eslint.config.mjs`.
+
+### Synopsis
+
+```bash
+npx eslint-plugin-ai-code-snifftest init [options]
+```
+
+### Common options
+
+- --primary=<domain>
+  - Set primary domain (e.g., web-app, cli, astronomy). Default: `general`.
+- --additional=a,b,c
+  - Comma‑separated additional domains.
+- --yes
+  - Non‑interactive mode; accept defaults for file generation.
+- --cursor
+  - Generate `.cursorrules`.
+- --agents
+  - Generate `AGENTS.md`.
+- --eslint
+  - Generate `eslint.config.mjs` (ES module). Architecture guardrails included if enabled.
+- --no-arch
+  - Disable architecture guardrails.
+- --arch[=true|false]
+  - Explicitly enable/disable architecture guardrails. Default: enabled.
+- --external
+  - Enable experimental external constants discovery.
+- --allowlist="@scope1,@scope2"
+  - Limit external discovery to a comma‑separated list of npm scopes.
+- --minimumMatch=<0..1>
+  - Override minimum match threshold for name detection (default 0.6).
+- --minimumConfidence=<0..1>
+  - Override minimum confidence for rules/learn integration (default 0.7).
+- --debug
+  - Write `.ai-init-debug.json` snapshot (same as AI_DEBUG_INIT=1).
+
+### Interactive mode
+If `--primary` is omitted and stdin is TTY (or `FORCE_CLI_INTERACTIVE=1`), the wizard prompts for:
+- Primary/additional domains
+- Architecture thresholds
+- Whether to generate `.cursorrules`, `AGENTS.md`, and `eslint.config.mjs`
+
+Note: `.ai-coding-guide.md` is not generated.
+
+### Architecture guardrails
+Enabled by default. Disable with `--no-arch` or `--arch=false`.
+Rules included when enabled:
+- max-lines, max-lines-per-function, complexity, max-depth, max-params, max-statements
+- Test files are exempted from complexity/statement/depth limits.
+
+### Examples
+```bash
+# Non-interactive with defaults
+npx eslint-plugin-ai-code-snifftest init --primary=web-app --additional=react,api --yes --cursor --agents --eslint
+
+# Disable architecture guardrails
+npx eslint-plugin-ai-code-snifftest init --primary=cli --yes --eslint --no-arch
+
+# Use external constants discovery for whitelisted scopes
+npx eslint-plugin-ai-code-snifftest init --primary=general --yes --agents --external --allowlist=@ai-constants,@company
+```
+
+---
+
+## learn
+
+Analyze your project and propose updates to `.ai-coding-guide.json`.
+
+### Synopsis
+```bash
+npx eslint-plugin-ai-code-snifftest learn [--interactive|--strict|--permissive] [options]
+```
+
+### Modes
+- --interactive (default if TTY)
+  - Guided reconciliation of naming/anti-patterns/constants.
+- --strict
+  - Non‑interactive; compute and print or apply results.
+- --permissive
+  - Non‑interactive; when used with `--apply`, writes `.ai-learn-report.json` instead of updating config.
+
+### Options
+- --sample=<N>
+  - Sample size for scanning (default ~400 when unspecified).
+- --no-cache
+  - Disable scan cache.
+- --apply
+  - Apply suggested changes to `.ai-coding-guide.json` (or write `.ai-learn-report.json` in `--permissive`).
+- --fingerprint
+  - Write `.ai-constants/project-fingerprint.js` with top suggested constants.
+- --minimumMatch=<0..1>
+  - Override name match threshold (default 0.6).
+- --minimumConfidence=<0..1>
+  - Override minimum confidence (default 0.7).
+
+### Examples
+```bash
+npx eslint-plugin-ai-code-snifftest learn --interactive --sample=300 --minimumConfidence=0.75
+npx eslint-plugin-ai-code-snifftest learn --strict --apply
+npx eslint-plugin-ai-code-snifftest learn --permissive --apply --fingerprint
+```
+
+---
+
+## scaffold
+
+Create a starter external constants package for a given domain.
+
+### Synopsis
+```bash
+npx eslint-plugin-ai-code-snifftest scaffold <domain> [--dir=./path]
+```
+
+### Example
+```bash
+npx eslint-plugin-ai-code-snifftest scaffold medical --dir=./examples/external/medical
+```
+
+---
+
+## Environment variables
+
+- SKIP_AI_REQUIREMENTS=1
+  - Skip Node/ESLint version checks.
+- FORCE_AI_CONFIG=1
+  - Overwrite existing `.ai-coding-guide.json` when running `init`.
+- FORCE_ESLINT_CONFIG=1
+  - Overwrite existing `eslint.config.mjs` when running `init`.
+- FORCE_CLI_INTERACTIVE=1
+  - Force interactive wizard for `init` even when flags are provided.
+- AI_DEBUG_INIT=1
+  - Write `.ai-init-debug.json` with parsed flags, architecture decision, and file summary.
+
+---
+
+## Exit codes
+- 0: Success
+- 1: Failure (invalid usage, unmet requirements, or internal error)
+
+---
+
+## Notes & Changes
+- `.ai-coding-guide.md` generation removed; use `AGENTS.md` for human‑readable guidance.
+- `eslint.config.mjs` is generated as an ES module to avoid Node module‑type warnings.
+- Architecture guardrails are enabled by default; disable with `--no-arch` or `--arch=false`.

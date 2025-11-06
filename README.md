@@ -42,6 +42,10 @@ npm install eslint-plugin-ai-code-snifftest --save-dev
 
 ---
 
+## CLI Reference
+
+See full command and flag reference in [docs/CLI.md](docs/CLI.md).
+
 ## Quick Start
 
 ### Option 1: Interactive Setup
@@ -59,7 +63,7 @@ npx eslint-plugin-ai-code-snifftest init
 npx eslint-plugin-ai-code-snifftest init \
   --primary=web-app \
   --additional=react,api \
-  --md --cursor --eslint
+  --cursor --eslint
 ```
 
 ### Option 3: Learn-First Approach
