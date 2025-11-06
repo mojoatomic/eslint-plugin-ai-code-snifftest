@@ -10,7 +10,7 @@ const { execFileSync } = require('child_process');
 
 function runCliInit(tmpDir, args = []) {
   const cliPath = path.resolve(__dirname, '..', '..', 'bin', 'cli.js');
-  const env = { ...process.env, FORCE_AI_CONFIG: '1', FORCE_ESLINT_CONFIG: '1', SKIP_AI_REQUIREMENTS: '1' };
+  const env = { ...process.env, FORCE_AI_CONFIG: '1', FORCE_ESLINT_CONFIG: '1', SKIP_AI_REQUIREMENTS: '1', AI_DEBUG_INIT: '1' };
   execFileSync('node', [cliPath, 'init', '--primary=general', '--yes', '--eslint', ...args], {
     cwd: tmpDir,
     env,
@@ -18,8 +18,18 @@ function runCliInit(tmpDir, args = []) {
   });
 }
 
+function printDebug(tmp) {
+  const p = path.join(tmp, '.ai-init-debug.json');
+  if (fs.existsSync(p)) {
+    const j = fs.readFileSync(p, 'utf8');
+     
+    console.log('\n[ai-init-debug]', j);
+  }
+}
+
 describe('CLI init with architecture guardrails', function () {
   it('includes architecture in config by default (new default behavior)', function () {
+    this.timeout(5000);
     const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'cli-arch-enabled-'));
     runCliInit(tmp);
     
@@ -27,8 +37,13 @@ describe('CLI init with architecture guardrails', function () {
     assert.ok(fs.existsSync(cfgPath), 'Config file should exist');
     
     const cfg = JSON.parse(fs.readFileSync(cfgPath, 'utf8'));
-    assert.ok(cfg.architecture, 'Should have architecture section by default');
-    assert.ok(cfg.architecture.maxFileLength, 'Should have maxFileLength in architecture');
+    try {
+      assert.ok(cfg.architecture, 'Should have architecture section by default');
+      assert.ok(cfg.architecture.maxFileLength, 'Should have maxFileLength in architecture');
+    } catch (e) {
+      printDebug(tmp);
+      throw e;
+    }
   });
 
   it('generates ESLint config with architecture guardrails by default', function () {
@@ -39,8 +54,13 @@ describe('CLI init with architecture guardrails', function () {
     assert.ok(fs.existsSync(eslintPath), 'ESLint config should exist');
     
     const eslintContent = fs.readFileSync(eslintPath, 'utf8');
-    assert.ok(eslintContent.includes('Architecture guardrails'), 'Should have architecture guardrails comment');
-    assert.ok(eslintContent.includes("'max-lines'"), 'Should have max-lines rule');
+    try {
+      assert.ok(eslintContent.includes('Architecture guardrails'), 'Should have architecture guardrails comment');
+      assert.ok(eslintContent.includes("'max-lines'"), 'Should have max-lines rule');
+    } catch (e) {
+      printDebug(tmp);
+      throw e;
+    }
   });
 
   it('generates AGENTS.md with architecture section by default', function () {
@@ -50,7 +70,12 @@ describe('CLI init with architecture guardrails', function () {
     const agentsPath = path.join(tmp, 'AGENTS.md');
     assert.ok(fs.existsSync(agentsPath), 'AGENTS.md should exist');
     const content = fs.readFileSync(agentsPath, 'utf8');
-    assert.ok(content.includes('Architecture Guidelines'), 'Should have architecture section');
+    try {
+      assert.ok(content.includes('Architecture Guidelines'), 'Should have architecture section');
+    } catch (e) {
+      printDebug(tmp);
+      throw e;
+    }
   });
 
   it('does not include architecture when --no-arch flag is used', function () {
