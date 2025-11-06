@@ -1,6 +1,6 @@
 /* eslint-env mocha */
 /* global describe, it */
-"use strict";
+'use strict';
 
 const assert = require('assert');
 const fs = require('fs');
@@ -35,7 +35,7 @@ describe('CLI init with architecture guardrails', function () {
     const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'cli-arch-eslint-enabled-'));
     runCliInit(tmp);
     
-    const eslintPath = path.join(tmp, 'eslint.config.js');
+    const eslintPath = path.join(tmp, 'eslint.config.mjs');
     assert.ok(fs.existsSync(eslintPath), 'ESLint config should exist');
     
     const eslintContent = fs.readFileSync(eslintPath, 'utf8');
@@ -61,7 +61,7 @@ describe('CLI init with architecture guardrails', function () {
     const cfg = JSON.parse(fs.readFileSync(cfgPath, 'utf8'));
     assert.strictEqual(cfg.architecture, undefined, 'Should not have architecture with --no-arch');
     
-    const eslintPath = path.join(tmp, 'eslint.config.js');
+    const eslintPath = path.join(tmp, 'eslint.config.mjs');
     const eslintContent = fs.readFileSync(eslintPath, 'utf8');
     assert.ok(!eslintContent.includes('Architecture guardrails'), 'Should not have architecture guardrails with --no-arch');
     assert.ok(!eslintContent.includes("'max-lines'"), 'Should not have max-lines rule with --no-arch');

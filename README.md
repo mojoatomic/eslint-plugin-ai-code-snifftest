@@ -24,7 +24,7 @@ Running `init` creates:
 | `.ai-coding-guide.json` | Machine-readable configuration | ~100 lines |
 | `AGENTS.md` | AI agent coding reference | ~200 lines |
 | `.cursorrules` | Cursor editor integration | ~50 lines |
-| `eslint.config.js` | ESLint configuration with architecture rules | ~150 lines |
+| `eslint.config.mjs` | ESLint configuration with architecture rules | ~150 lines |
 
 ---
 
@@ -188,7 +188,7 @@ Enabled via `init` command or by adding to `.ai-coding-guide.json`:
 
 ### Generated ESLint Rules
 
-When enabled, adds these rules to `eslint.config.js`:
+When enabled, adds these rules to `eslint.config.mjs`:
 
 **Global (warnings):**
 - `max-lines`: 250 lines per file
@@ -258,7 +258,7 @@ prettier --write . # Formatting
 
 **Or use integrated setup:**
 ```javascript
-// eslint.config.js
+// eslint.config.mjs
 import prettier from 'eslint-plugin-prettier';
 import aiSnifftest from 'eslint-plugin-ai-code-snifftest';
 
@@ -282,7 +282,7 @@ Verified with Prettier 3.x compatibility suite (18 integration tests).
 
 ### Module Type Warning
 ```
-Module type of file:///...eslint.config.js is not specified
+Module type of file:///...eslint.config.mjs is not specified
 ```
 
 **Solution:** Add `"type": "module"` to `package.json`

@@ -98,7 +98,7 @@ mkdir -p .github/workflows
 ## 🔧 Usage Examples
 
 ```javascript
-// eslint.config.js
+// eslint.config.mjs
 import aiSnifftest from 'eslint-plugin-ai-code-snifftest';
 
 export default [

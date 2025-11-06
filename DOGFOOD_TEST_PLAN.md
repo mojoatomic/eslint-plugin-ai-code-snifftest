@@ -29,7 +29,7 @@ git status  # Should be clean
 # 3. Backup current configs (if any exist)
 mkdir -p .backup
 cp .ai-coding-guide.json .backup/ 2>/dev/null || true
-cp eslint.config.js .backup/ 2>/dev/null || true
+cp eslint.config.mjs .backup/ 2>/dev/null || true
 cp AGENTS.md .backup/ 2>/dev/null || true
 ```
 
@@ -130,23 +130,23 @@ node bin/cli.js init --primary=dev-tools --additional=cli,linting
 
 **Verify generated files:**
 ```bash
-ls -la .ai-coding-guide.json AGENTS.md .cursorrules eslint.config.js
+ls -la .ai-coding-guide.json AGENTS.md .cursorrules eslint.config.mjs
 
 # Check content
 cat AGENTS.md  # Should show dev-tools domain
-cat eslint.config.js  # Should have all rules
+cat eslint.config.mjs  # Should have all rules
 ```
 
 **Expected:**
 - ✅ All 4 files generated
 - ✅ `AGENTS.md` has correct domain (dev-tools, not "general")
-- ✅ `eslint.config.js` includes architecture rules
+- ✅ `eslint.config.mjs` includes architecture rules
 - ✅ `.ai-coding-guide.json` has merged fingerprint data
 
 **If issues:**
 - Missing files → Issue: "Init doesn't generate [file]"
 - Wrong domain in AGENTS.md → Issue: "AGENTS.md shows wrong domain"
-- eslint.config.js syntax errors → Issue: "Generated ESLint config invalid"
+- eslint.config.mjs syntax errors → Issue: "Generated ESLint config invalid"
 
 ---
 
