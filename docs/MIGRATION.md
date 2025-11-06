@@ -19,9 +19,14 @@ This document summarizes breaking/behavioral changes introduced across UX issue 
   - `--skip-learn` to only run `init`
 
 ### Learn Enhancements
+- Interactive `learn` suggests an inferred domain (dev-tools/cli/web-app) and applies on accept
 - Interactive `learn` offers to generate AGENTS.md and eslint.config.mjs at the end
   - Default-on; honors `--no-agents` and `--no-eslint`
   - Honors `--arch` / `--no-arch` by updating `.ai-coding-guide.json` first
+
+### Fixes
+- Architecture + domainPriority persistence in `.ai-coding-guide.json` when running `setup` after `learn`
+- `AGENTS.md` footer updated to reference `.ai-coding-guide.json`
 
 ### Deprecations (soft)
 - `--agents` and `--eslint` are no longer required (defaults are on)
