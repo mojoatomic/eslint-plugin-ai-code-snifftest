@@ -121,6 +121,7 @@ describe('eslint-arch-config generator', function () {
       assert.strictEqual(testOverride.rules['max-lines-per-function'], 'off');
       assert.strictEqual(testOverride.rules['max-statements'], 'off');
       assert.strictEqual(testOverride.rules['complexity'], 'off');
+      assert.strictEqual(testOverride.rules['max-depth'], 'off');
     });
   });
 
