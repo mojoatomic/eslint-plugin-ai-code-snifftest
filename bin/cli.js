@@ -7,21 +7,12 @@ const path = require('path');
 const { scaffoldCommand } = require(path.join(__dirname, '..', 'lib', 'commands', 'scaffold'));
 const { initCommand, initInteractiveCommand } = require(path.join(__dirname, '..', 'lib', 'commands', 'init'));
 const { learnCommand } = require(path.join(__dirname, '..', 'lib', 'commands', 'learn'));
+const { setupCommand } = require(path.join(__dirname, '..', 'lib', 'commands', 'setup'));
 
 // Utilities
 const { parseArgs } = require(path.join(__dirname, '..', 'lib', 'utils', 'args-parser'));
 const { usage } = require(path.join(__dirname, '..', 'lib', 'utils', 'cli-help'));
 const { checkRequirements } = require(path.join(__dirname, '..', 'lib', 'utils', 'requirements'));
-
-
-
-
-
-
-
-
-
-
 
 function main() {
   const args = parseArgs(process.argv);
@@ -41,6 +32,11 @@ function main() {
     Promise.resolve(learnCommand(cwd, args)).then((code)=>{ process.exitCode = code; });
     return;
   }
+  if (cmd === 'setup') {
+    if (!checkRequirements(process.cwd())) { process.exitCode = 1; return; }
+    Promise.resolve(setupCommand(cwd, args)).then((code)=>{ process.exitCode = code; });
+    return;
+  }
   if (cmd === 'scaffold' || cmd === 'create-constants') {
     const dom = args._[1];
     const outDir = args.dir || args.out;
@@ -50,4 +46,5 @@ function main() {
   usage();
 }
 
+main();
 main();
