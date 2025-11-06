@@ -54,7 +54,7 @@ See full command and flag reference in [docs/CLI.md](docs/CLI.md).
 npx eslint-plugin-ai-code-snifftest learn --interactive
 
 # Step 2: Generate configuration files
-npx eslint-plugin-ai-code-snifftest init --agents --eslint
+npx eslint-plugin-ai-code-snifftest init
 
 # Step 3: Start linting!
 npx eslint .
@@ -65,7 +65,7 @@ npx eslint .
 # One command setup
 npx eslint-plugin-ai-code-snifftest init \
   --primary=web-app \
-  --agents --eslint --yes
+  --yes
 
 # Start linting!
 npx eslint .
@@ -101,7 +101,7 @@ npx eslint-plugin-ai-code-snifftest init
 npx eslint-plugin-ai-code-snifftest init \
   --primary=web-app \
   --additional=react,api \
-  --cursor --eslint
+  --cursor
 ```
 
 ### Option 3: Learn-First Approach

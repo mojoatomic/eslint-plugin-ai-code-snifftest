@@ -24,7 +24,7 @@ The CLI verifies versions unless disabled with SKIP_AI_REQUIREMENTS=1.
 
 ## init
 
-Generate `.ai-coding-guide.json`, optional `.cursorrules`, `AGENTS.md`, and `eslint.config.mjs`.
+Generate `.ai-coding-guide.json`, `AGENTS.md`, and `eslint.config.mjs` by default. `.cursorrules` is optional.
 
 ### Synopsis
 
@@ -42,10 +42,10 @@ npx eslint-plugin-ai-code-snifftest init [options]
   - Non‑interactive mode; accept defaults for file generation.
 - --cursor
   - Generate `.cursorrules`.
-- --agents
-  - Generate `AGENTS.md`.
-- --eslint
-  - Generate `eslint.config.mjs` (ES module). Architecture guardrails included if enabled.
+- --no-agents
+  - Do not generate `AGENTS.md` (default: generated).
+- --no-eslint
+  - Do not generate `eslint.config.mjs` (default: generated; ES module). Architecture guardrails included if enabled.
 - --no-arch
   - Disable architecture guardrails.
 - --arch[=true|false]
@@ -78,13 +78,13 @@ Rules included when enabled:
 ### Examples
 ```bash
 # Non-interactive with defaults
-npx eslint-plugin-ai-code-snifftest init --primary=web-app --additional=react,api --yes --cursor --agents --eslint
+npx eslint-plugin-ai-code-snifftest init --primary=web-app --additional=react,api --yes --cursor
 
 # Disable architecture guardrails
-npx eslint-plugin-ai-code-snifftest init --primary=cli --yes --eslint --no-arch
+npx eslint-plugin-ai-code-snifftest init --primary=cli --yes --no-arch
 
 # Use external constants discovery for whitelisted scopes
-npx eslint-plugin-ai-code-snifftest init --primary=general --yes --agents --external --allowlist=@ai-constants,@company
+npx eslint-plugin-ai-code-snifftest init --primary=general --yes --external --allowlist=@ai-constants,@company
 ```
 
 ---

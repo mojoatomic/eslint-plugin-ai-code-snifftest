@@ -16,7 +16,7 @@ function write(file, content) {
 function runCliInit(tmpDir, args = []) {
   const cliPath = path.resolve(__dirname, '..', '..', 'bin', 'cli.js');
   const env = { ...process.env, FORCE_AI_CONFIG: '1', FORCE_ESLINT_CONFIG: '1', SKIP_AI_REQUIREMENTS: '1', NODE_ENV: 'test' };
-  execFileSync('node', [cliPath, 'init', '--primary=general', '--yes', '--agents', '--external', ...args], {
+  execFileSync('node', [cliPath, 'init', '--primary=general', '--yes', '--external', ...args], {
     cwd: tmpDir,
     env,
     stdio: 'pipe'
