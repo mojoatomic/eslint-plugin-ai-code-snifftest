@@ -316,6 +316,28 @@ npm update eslint-plugin-ai-code-snifftest
 FORCE_ESLINT_CONFIG=1 npx eslint-plugin-ai-code-snifftest init
 ```
 
+### Architecture guardrails missing
+If `eslint.config.mjs` doesn’t include “Architecture guardrails” or test files aren’t exempted:
+
+1) Generate a debug snapshot
+```bash
+AI_DEBUG_INIT=1 npx eslint-plugin-ai-code-snifftest init --yes --eslint
+# or
+npx eslint-plugin-ai-code-snifftest init --yes --eslint --debug
+```
+
+2) Inspect `.ai-init-debug.json` in your project root. It includes:
+- args: parsed CLI flags (e.g., `--no-arch`, `--arch=false`, `--yes`, `--eslint`)
+- enableArch: whether architecture was enabled
+- cfgHasArchitecture: whether architecture config was added
+- files.eslintConfig: path to generated config
+- files.eslintHasGuardrails: whether guardrail rules were written
+- files.agentsHasArchitectureSection: whether `AGENTS.md` includes the section
+
+3) Share `.ai-init-debug.json` in your GitHub issue if you need help (it contains no secrets).
+
+Tip: Add `.ai-init-debug.json` to `.gitignore` (this repo does).
+
 ---
 
 ## Limitations
