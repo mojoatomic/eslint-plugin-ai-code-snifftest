@@ -11,7 +11,7 @@ const { execFileSync } = require('child_process');
 function runCliInit(tmpDir, args = []) {
   const cliPath = path.resolve(__dirname, '..', '..', 'bin', 'cli.js');
   const env = { ...process.env, FORCE_AI_CONFIG: '1', FORCE_ESLINT_CONFIG: '1', SKIP_AI_REQUIREMENTS: '1', AI_DEBUG_INIT: '1' };
-  execFileSync('node', [cliPath, 'init', '--primary=general', '--yes', '--eslint', ...args], {
+  execFileSync('node', [cliPath, 'init', '--primary=general', '--yes', ...args], {
     cwd: tmpDir,
     env,
     stdio: 'pipe'
@@ -65,7 +65,7 @@ describe('CLI init with architecture guardrails', function () {
 
   it('generates AGENTS.md with architecture section by default', function () {
     const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'cli-arch-agents-enabled-'));
-    runCliInit(tmp, ['--agents']);
+    runCliInit(tmp);
     
     const agentsPath = path.join(tmp, 'AGENTS.md');
     assert.ok(fs.existsSync(agentsPath), 'AGENTS.md should exist');
