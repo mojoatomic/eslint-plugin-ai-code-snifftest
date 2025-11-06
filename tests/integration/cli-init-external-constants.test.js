@@ -1,6 +1,6 @@
 /* eslint-env mocha */
 /* global describe, it */
-"use strict";
+'use strict';
 
 const assert = require('assert');
 const fs = require('fs');
@@ -16,7 +16,7 @@ function write(file, content) {
 function runCliInit(tmpDir, args = []) {
   const cliPath = path.resolve(__dirname, '..', '..', 'bin', 'cli.js');
   const env = { ...process.env, FORCE_AI_CONFIG: '1', FORCE_ESLINT_CONFIG: '1', SKIP_AI_REQUIREMENTS: '1', NODE_ENV: 'test' };
-  execFileSync('node', [cliPath, 'init', '--primary=general', '--yes', '--md', '--external', ...args], {
+  execFileSync('node', [cliPath, 'init', '--primary=general', '--yes', '--agents', '--external', ...args], {
     cwd: tmpDir,
     env,
     stdio: 'pipe'
@@ -24,14 +24,14 @@ function runCliInit(tmpDir, args = []) {
 }
 
 describe('CLI init with external constants (experimental)', function () {
-  it('includes discovery summary and domains list', function () {
+  it('generates AGENTS.md (guide removed) with external discovery enabled', function () {
     const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'cli-ext-'));
     write(path.join(tmp, '.ai-constants', 'x.js'),
       "module.exports = { domain: 'x', version: '1.0.0', constants: [{ value: 3, name: 'THREE', description: 'the number three' }], terms: { entities: ['X'] } };\n");
     runCliInit(tmp);
-    const guide = fs.readFileSync(path.join(tmp, '.ai-coding-guide.md'), 'utf8');
-    assert.match(guide, /External Constants Discovery/);
-    assert.match(guide, /Local: 1/);
-    assert.match(guide, /Domains: .*x/);
+    // Guide removed
+    assert.strictEqual(fs.existsSync(path.join(tmp, '.ai-coding-guide.md')), false);
+    // AGENTS.md should be present when --agents is passed
+    assert.strictEqual(fs.existsSync(path.join(tmp, 'AGENTS.md')), true);
   });
 });

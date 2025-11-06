@@ -1,6 +1,6 @@
 /* eslint-env mocha */
 /* global describe, it */
-"use strict";
+'use strict';
 
 const assert = require('assert');
 const fs = require('fs');
@@ -19,28 +19,26 @@ const env = { ...process.env, FORCE_AI_CONFIG: '1', FORCE_ESLINT_CONFIG: '1', SK
 }
 
 describe('CLI init across sample domains', function () {
-  it('generates guide sections for geometry', function () {
+  it('generates AGENTS.md domain sections for geometry', function () {
     const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'cli-geom-'));
     runCliInit(tmp, 'geometry');
-    const guide = fs.readFileSync(path.join(tmp, '.ai-coding-guide.md'), 'utf8');
-    assert.match(guide, /Primary domain: geometry/);
-assert.match(guide, /Domain priority: geometry/);
+    const agents = fs.readFileSync(path.join(tmp, 'AGENTS.md'), 'utf8');
+    assert.match(agents, /## Domain: geometry/);
   });
 
-  it('generates guide sections for physics', function () {
+  it('generates AGENTS.md domain sections for physics', function () {
     const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'cli-phys-'));
     runCliInit(tmp, 'physics');
-    const guide = fs.readFileSync(path.join(tmp, '.ai-coding-guide.md'), 'utf8');
-    assert.match(guide, /Primary domain: physics/);
-assert.match(guide, /Domain priority: physics/);
+    const agents = fs.readFileSync(path.join(tmp, 'AGENTS.md'), 'utf8');
+    assert.match(agents, /## Domain: physics/);
   });
 
-  it('generates guide sections for astronomy with additional domains', function () {
+  it('generates AGENTS.md domain sections for astronomy with additional domains', function () {
     const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'cli-astro-'));
     runCliInit(tmp, 'astronomy', ['--additional=geometry,math']);
-    const guide = fs.readFileSync(path.join(tmp, '.ai-coding-guide.md'), 'utf8');
-    assert.match(guide, /Primary domain: astronomy/);
-assert.match(guide, /Additional domains: geometry, math/);
-    assert.match(guide, /Domain priority: astronomy, geometry, math/);
+    const agents = fs.readFileSync(path.join(tmp, 'AGENTS.md'), 'utf8');
+    assert.match(agents, /## Domain: astronomy/);
+    assert.match(agents, /## Domain: geometry/);
+    assert.match(agents, /## Domain: math/);
   });
 });

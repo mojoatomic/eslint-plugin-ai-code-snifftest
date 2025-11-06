@@ -59,7 +59,7 @@ npx eslint-plugin-ai-code-snifftest init
 npx eslint-plugin-ai-code-snifftest init \
   --primary=web-app \
   --additional=react,api \
-  --md --cursor --eslint
+  --cursor --eslint
 ```
 
 ### Option 3: Learn-First Approach

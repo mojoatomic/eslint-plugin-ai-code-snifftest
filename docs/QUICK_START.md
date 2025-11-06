@@ -121,7 +121,7 @@ node bin/cli.js init
 
 Non-interactive:
 ```bash
-node bin/cli.js init --primary=astronomy --additional=geometry,math --yes --md --cursor --agents --eslint
+node bin/cli.js init --primary=astronomy --additional=geometry,math --yes --cursor --agents --eslint
 ```
 
 Scaffold an external constants package:

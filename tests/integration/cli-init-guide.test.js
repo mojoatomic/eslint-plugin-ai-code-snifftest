@@ -1,6 +1,6 @@
 /* eslint-env mocha */
 /* global describe, it */
-"use strict";
+'use strict';
 
 const assert = require('assert');
 const fs = require('fs');
@@ -19,12 +19,14 @@ const env = { ...process.env, FORCE_AI_CONFIG: '1', FORCE_ESLINT_CONFIG: '1', SK
 }
 
 describe('CLI init guide content', function () {
-  it('writes .ai-coding-guide.md with ambiguity and precedence sections', function () {
+  it('writes AGENTS.md with domain sections (guide removed)', function () {
     const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'cli-guide-'));
     runCliInit(tmp);
-    const guide = fs.readFileSync(path.join(tmp, '.ai-coding-guide.md'), 'utf8');
-    assert.match(guide, /Ambiguity and Disambiguation/);
-    assert.match(guide, /Active-Domain Precedence/);
-    assert.match(guide, /constantResolution/);
+    // Guide should NOT be present anymore
+    assert.strictEqual(fs.existsSync(path.join(tmp, '.ai-coding-guide.md')), false);
+    // Validate AGENTS.md includes core sections
+    const agents = fs.readFileSync(path.join(tmp, 'AGENTS.md'), 'utf8');
+    assert.match(agents, /## Domain:/);
+    assert.match(agents, /## Ambiguity Tactics/);
   });
 });
