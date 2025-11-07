@@ -412,24 +412,24 @@ This tool is designed for JavaScript/Node.js projects and is currently in active
 
 ---
 
-## External Constants (Experimental)
+## External Constants
 
-Optional feature for discovering domain-specific constants from npm packages.
+Built-in feature for discovering domain-specific constants from npm packages.
 
-**Enable:**
+**Disable (opt-out):**
 ```bash
-npx eslint-plugin-ai-code-snifftest init --external
+npx eslint-plugin-ai-code-snifftest init --no-external
 ```
 
 Or in `.ai-coding-guide.json`:
 ```json
 {
-  "experimentalExternalConstants": true,
+"experimentalExternalConstants": true, // default
   "externalConstantsAllowlist": ["^@ai-constants/"]
 }
 ```
 
-**Status:** Experimental, disabled by default
+**Status:** Enabled by default; use `--no-external` or set `experimentalExternalConstants: false` to opt out
 
 **Limitations:**
 - Requires specific npm package structure
