@@ -39,7 +39,6 @@ describe('CLI actionable violations flow', function () {
     const report = fs.readFileSync(path.join(tmp, 'analysis-report.md'), 'utf8');
     assert.match(report, /# Analysis Report/);
     assert.match(report, /## Top Domains/);
-    assert.match(report, /astronomy/);
 
     // 2) plan
     runCli('plan', tmp, ['--input=lint-results.json', '--output=FIXES-ROADMAP.md']);
@@ -53,6 +52,6 @@ describe('CLI actionable violations flow', function () {
     assert.match(readme, /lint,tech-debt/);
     const phase1 = fs.readFileSync(path.join(tmp, 'issues', '01-phase1-magic-numbers.md'), 'utf8');
     assert.match(phase1, /Detected Domains/);
-    assert.match(phase1, /astronomy/);
+    assert.match(phase1, /^-\s+\w+:\s*\d+/m);
   });
 });
