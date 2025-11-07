@@ -54,6 +54,17 @@
         "forbiddenTerms": { "type": "array", "items": { "type": "string" } }
       }
     },
+    "experimentalExternalConstants": {
+      "type": "boolean",
+      "default": false,
+      "description": "Enable experimental discovery/use of external constants"
+    },
+    "externalConstantsAllowlist": {
+      "type": "array",
+      "items": { "type": "string" },
+      "default": [],
+      "description": "Package names or patterns allowed for external constants discovery"
+    },
     "minimumMatch": {
       "type": "number",
       "minimum": 0,
