@@ -53,5 +53,9 @@ describe('CLI actionable violations flow', function () {
     const phase1 = fs.readFileSync(path.join(tmp, 'issues', '01-phase1-magic-numbers.md'), 'utf8');
     assert.match(phase1, /Configured Domains/);
     assert.match(phase1, /^-\s+\w+\s+\((primary|additional)\)/m);
+    // Rich sections
+    assert.match(phase1, /^## Summary/m);
+    assert.match(phase1, /^## Top Files Affected/m);
+    assert.match(phase1, /^## Acceptance Criteria/m);
   });
 });

@@ -228,14 +228,21 @@ Generate issue markdown files from ESLint JSON analysis. Files-only: does NOT cr
 
 ### Synopsis
 ```bash
-npx eslint-plugin-ai-code-snifftest create-issues [--input=lint-results.json] [--output=issues] [--format=markdown|json] [--include-commands=github-cli|gitlab-cli] [--labels="lint,tech-debt"] [--top-files=10] [--min-count=1]
+npx eslint-plugin-ai-code-snifftest create-issues [--input=lint-results.json] [--output=issues] [--format=markdown|json] [--include-commands=github-cli|gitlab-cli] [--labels='lint,tech-debt'] [--top-files=10] [--min-count=1] [--max-examples=5]
 ```
 
 ### Behavior
 - Produces `issues/` directory with phase-oriented markdown files.
-- Includes detected domain context (Top Domains) derived from the constants catalog via `getDomain()`.
-- Adds phase-specific "Examples" sections with best‑effort code snippets derived from violations (domain terms, complexity, architecture).
-- When configured domains have zero counts, includes "Domain Hints" inferred from violations to guide domain setup (hints do not override configured domains).
+- Shows "Configured Domains" (primary/additional) from `.ai-coding-guide.json`; suppresses "Domain Hints" when configured.
+- Rich markdown in each phase file:
+  - "## Summary": total violations, unique files, effort estimate (if `analysis.json` present)
+  - "## Violations Breakdown": top rules; for domain terms, "By Generic Name" with domain-aware suggestions
+  - "## Top Files Affected": top files with counts and first few violations per file
+  - "### Examples": 3–5 examples with file:line, rule, message, and code snippet
+  - "## Fix Strategy": category-specific remediation steps
+  - "## Verification": commands to re-lint and re-analyze
+  - "## Acceptance Criteria": concrete targets (e.g., reduce to ≤20% of current or 0)
+- When no configured domains exist, includes "Detected Domains" and (only when all zero) "Domain Hints" inferred from violations.
 - Adds a `00-README.md` with manual and optional CLI bulk-creation instructions.
 - Platform-agnostic by default; optional `--include-commands` provides CLI snippets.
 
@@ -244,9 +251,10 @@ npx eslint-plugin-ai-code-snifftest create-issues [--input=lint-results.json] [-
 - --output, -o: Output directory (default: issues)
 - --format: markdown (default) | json
 - --include-commands: github-cli (default) | gitlab-cli
-- --labels: Labels to apply in CLI examples (default: "lint,tech-debt")
+- --labels: Labels to apply in CLI examples (default: 'lint,tech-debt')
 - --top-files: limit for hotspot lists (default: 10)
 - --min-count: minimum occurrences to include in lists (default: 1)
+- --max-examples: maximum examples/snippets per section (default: 5)
 
 ---
 
