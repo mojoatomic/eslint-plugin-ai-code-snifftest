@@ -20,6 +20,9 @@ The CLI verifies versions unless disabled with SKIP_AI_REQUIREMENTS=1.
 - init: Generate configuration and docs
 - learn: Analyze your project and propose config updates
 - scaffold: Create a starter external constants package
+- analyze: Summarize ESLint JSON into domain-aware insights
+- plan: Create a phased roadmap from analysis
+- create-issues: Generate issue markdown files (files-only, no API calls)
 
 ---
 
@@ -171,6 +174,69 @@ npx eslint-plugin-ai-code-snifftest learn --interactive --sample=300 --minimumCo
 npx eslint-plugin-ai-code-snifftest learn --strict --apply
 npx eslint-plugin-ai-code-snifftest learn --permissive --apply --fingerprint
 ```
+
+---
+
+## analyze
+
+Summarize ESLint JSON results with categories, domain context, and a rough effort estimate.
+
+### Synopsis
+```bash
+npx eslint-plugin-ai-code-snifftest analyze [--input=lint-results.json] [--output=analysis-report.md] [--format=markdown|json|html]
+```
+
+### Behavior
+- Reads ESLint JSON (e.g., `eslint -f json . > lint-results.json`).
+- Categorizes violations (magic numbers, domain terms, complexity, architecture).
+- Infers domain context using your `.ai-coding-guide.json` and the constants catalog (no hard-coded domain lists).
+- Writes `analysis-report.md` by default.
+
+### Options
+- --input, -i: Path to ESLint JSON (default: lint-results.json)
+- --output, -o: Output file (default: analysis-report.md)
+- --format: markdown (default) | json | html
+
+---
+
+## plan
+
+Create a phased roadmap (Quick Wins, Domain Cleanup, Refactoring, Polish) from analysis categories.
+
+### Synopsis
+```bash
+npx eslint-plugin-ai-code-snifftest plan [--input=lint-results.json] [--output=FIXES-ROADMAP.md] [--phases=4] [--team-size=1]
+```
+
+### Options
+- --input, -i: Path to ESLint JSON (default: lint-results.json)
+- --output, -o: Output file (default: FIXES-ROADMAP.md)
+- --phases: Number of phases to include (default: 4)
+- --team-size: Reserved for future capacity planning (default: 1)
+
+---
+
+## create-issues
+
+Generate issue markdown files from ESLint JSON analysis. Files-only: does NOT create tracker issues via API.
+
+### Synopsis
+```bash
+npx eslint-plugin-ai-code-snifftest create-issues [--input=lint-results.json] [--output=issues] [--format=markdown|json] [--include-commands=github-cli|gitlab-cli] [--labels="lint,tech-debt"]
+```
+
+### Behavior
+- Produces `issues/` directory with phase-oriented markdown files.
+- Includes detected domain context (Top Domains) derived from the constants catalog via `getDomain()`.
+- Adds a `00-README.md` with manual and optional CLI bulk-creation instructions.
+- Platform-agnostic by default; optional `--include-commands` provides CLI snippets.
+
+### Options
+- --input, -i: Path to ESLint JSON (default: lint-results.json)
+- --output, -o: Output directory (default: issues)
+- --format: markdown (default) | json
+- --include-commands: github-cli (default) | gitlab-cli
+- --labels: Labels to apply in CLI examples (default: "lint,tech-debt")
 
 ---
 
