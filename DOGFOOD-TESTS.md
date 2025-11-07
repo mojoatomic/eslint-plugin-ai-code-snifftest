@@ -259,13 +259,10 @@ EOF
 
 npx eslint-plugin-ai-code-snifftest analyze --input=lint-results.json --output=domain-test.md
 
-# Top Domains section should list only astronomy/physics/math
-awk '/^## Top Domains/{f=1;next} /^$|^###/{f=0} f' domain-test.md | sed 's/^[- ]\{1,\}//' | cut -d: -f1 | tr -d ' ' > .top_domains
+# Configured Domains section should list only astronomy/physics/math with roles, no extras
+awk '/^## Configured Domains/{f=1;next} /^$|^###/{f=0} f' domain-test.md | sed 's/^[- ]\{1,\}//' | sed 's/ (.*)$//' > .cfg_domains
 
-comm -3 <(printf "astronomy\nmath\nphysics\n" | sort) <(sort .top_domains) | wc -l | awk '{ if($1==0) print "✅ Uses config domains"; else print "❌ Unexpected domains in Top Domains" }'
-
-# Ensure no detected domains (e.g., biology/graphics) appear in Top Domains
-grep -qiE "^[-] (biology|graphics)" domain-test.md && echo "❌ Detected domains leaked into Top Domains" || echo "✅ No leaked detected domains"
+comm -3 <(printf "astronomy\nmath\nphysics\n" | sort) <(sort .cfg_domains) | wc -l | awk '{ if($1==0) print "✅ Uses configured domains"; else print "❌ Unexpected domains in Configured Domains" }'
 ```
 
 ---
@@ -439,13 +436,21 @@ run_test "Plan" "npx eslint-plugin-ai-code-snifftest plan --input=lint-results.j
 run_test "Create issues" "npx eslint-plugin-ai-code-snifftest create-issues --input=lint-results.json && test -f issues/00-README.md"
 
 # 6) Domain enforcement (Top Domains from config)
-run_test "Top Domains come from config (not violations)" "awk '/^## Top Domains/{f=1;next} /^$|^###/{f=0} f' analysis-report.md | sed 's/^[- ]\{1,\}//' | cut -d: -f1 | tr -d ' ' > .top && grep -qx 'dev-tools' .top && grep -qx 'cli' .top && grep -qx 'linting' .top"
+run_test "Configured Domains reflect config (not violations)" "awk '/^## Configured Domains/{f=1;next} /^$|^###/{f=0} f' analysis-report.md | sed 's/^[- ]\{1,\}//' | sed 's/ (.*)$//' > .top && grep -qx 'dev-tools' .top && grep -qx 'cli' .top && grep -qx 'linting' .top"
 
 # 7) Issues quality: Examples present
 run_test "Issues contain Examples" "grep -q '^### Examples' issues/*.md"
 
+# 7b) Issues quality: Rich sections present
+run_test "Issues contain Summary" "grep -q '^## Summary' issues/*phase*.md"
+run_test "Issues contain Violations Breakdown" "grep -q '^## Violations Breakdown' issues/*phase*.md"
+run_test "Issues contain Top Files Affected" "grep -q '^## Top Files Affected' issues/*phase*.md"
+run_test "Issues contain Fix Strategy" "grep -q '^## Fix Strategy' issues/*phase*.md"
+run_test "Issues contain Verification" "grep -q '^## Verification' issues/*phase*.md"
+run_test "Issues contain Acceptance Criteria" "grep -q '^## Acceptance Criteria' issues/*phase*.md"
+
 # 8) If Top Domains all zero, Domain Hints appear in issues
-run_test "Issues include Domain Hints when Top Domains all zero" "lines=$(awk '/^## Top Domains/{f=1;next} /^$|^###/{f=0} f' analysis-report.md | wc -l | tr -d ' '); zeros=$(awk '/^## Top Domains/{f=1;next} /^$|^###/{f=0} f' analysis-report.md | awk -F: '{gsub(/ /,""); if($2=="0") z++} END{print z+0}'); if [ "${lines:-0}" -gt 0 ] && [ "${zeros:-0}" -eq "${lines:-0}" ]; then grep -q '^### Domain Hints' issues/*.md; else true; fi"
+run_test "Issues include Domain Hints when Top Domains all zero" "lines=$(awk '/^## Top Domains/{f=1;next} /^$|^###/{f=0} f' analysis-report.md | wc -l | tr -d ' '); zeros=$(awk '/^## Top Domains/{f=1;next} /^$|^###/{f=0} f' analysis-report.md | awk -F: '{gsub(/ /,\"\"); if($2==\"0\") z++} END{print z+0}'); if [ \"${lines:-0}\" -gt 0 ] && [ \"${zeros:-0}\" -eq \"${lines:-0}\" ]; then grep -q '^### Domain Hints' issues/*.md; else true; fi"
 
 # 9) JSON format available
 run_test "Analyze JSON output" "npx eslint-plugin-ai-code-snifftest analyze --input=lint-results.json --output=analysis.json --format=json && test -s analysis.json"

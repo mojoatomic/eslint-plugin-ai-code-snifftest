@@ -34,12 +34,19 @@ function runAll(tmpDir) {
 }
 
 describe('CLI issues hints + snippets', function () {
-  it('adds Domain Hints and code snippets to issues', function () {
+  it('adds Domain Hints and rich sections to issues', function () {
     const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'cli-issues-hints-'));
     writeLintJson(tmpDir);
     runAll(tmpDir);
     const phase2 = fs.readFileSync(path.join(tmpDir, 'issues', '03-phase2-domain-terms.md'), 'utf8');
     assert.match(phase2, /Configured Domains/);
+    // Rich sections present
+    assert.match(phase2, /^## Summary/m);
+    assert.match(phase2, /^## Violations Breakdown/m);
+    assert.match(phase2, /^## Top Files Affected/m);
+    assert.match(phase2, /^## Fix Strategy/m);
+    assert.match(phase2, /^## Verification/m);
+    assert.match(phase2, /^## Acceptance Criteria/m);
     // Examples bullet appears with rule arrow
     assert.match(phase2, /### Examples[\s\S]*- .* → /);
   });
