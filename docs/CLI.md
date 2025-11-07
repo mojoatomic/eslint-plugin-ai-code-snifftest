@@ -234,6 +234,8 @@ npx eslint-plugin-ai-code-snifftest create-issues [--input=lint-results.json] [-
 ### Behavior
 - Produces `issues/` directory with phase-oriented markdown files.
 - Includes detected domain context (Top Domains) derived from the constants catalog via `getDomain()`.
+- Adds phase-specific "Examples" sections with best‑effort code snippets derived from violations (domain terms, complexity, architecture).
+- When configured domains have zero counts, includes "Domain Hints" inferred from violations to guide domain setup (hints do not override configured domains).
 - Adds a `00-README.md` with manual and optional CLI bulk-creation instructions.
 - Platform-agnostic by default; optional `--include-commands` provides CLI snippets.
 
