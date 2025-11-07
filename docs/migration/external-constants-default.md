@@ -1,6 +1,6 @@
 # External Constants Default Flip (Planned)
 
-We plan to enable external constants by default (`experimentalExternalConstants: true`) in a future minor release.
+External constants are now enabled by default (`experimentalExternalConstants: true`).
 
 What this means:
 - Discovery (built-in + npm + local + custom) will be on by default
