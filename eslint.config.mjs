@@ -20,11 +20,11 @@ export default [
       'prefer-const': 'warn',
       'no-var': 'error',
       // Consistency
-'quotes': ['warn', 'single', { avoidEscape: true }],
+      'quotes': ['warn', 'single', { avoidEscape: true }],
       'semi': ['warn', 'always'],
-      'eqeqeq': ['error', 'always', { null: 'ignore' }],
+      'eqeqeq': ['error', 'always'],
       // Naming (basic)
-      'camelcase': ['error', { properties: 'never' }],
+      'camelcase': ['error', { properties: 'always' }],
       // Domain-specific
       'ai-code-snifftest/no-redundant-calculations': 'warn',
       'ai-code-snifftest/no-equivalent-branches': 'warn',
