@@ -183,7 +183,7 @@ Summarize ESLint JSON results with categories, domain context, and a rough effor
 
 ### Synopsis
 ```bash
-npx eslint-plugin-ai-code-snifftest analyze [--input=lint-results.json] [--output=analysis-report.md] [--format=markdown|json|html]
+npx eslint-plugin-ai-code-snifftest analyze [--input=lint-results.json] [--output=analysis-report.md] [--format=markdown|json|html] [--top-files=10] [--min-count=1] [--max-examples=5]
 ```
 
 ### Behavior
@@ -196,6 +196,9 @@ npx eslint-plugin-ai-code-snifftest analyze [--input=lint-results.json] [--outpu
 - --input, -i: Path to ESLint JSON (default: lint-results.json)
 - --output, -o: Output file (default: analysis-report.md)
 - --format: markdown (default) | json | html
+- --top-files: limit for hotspot lists (default: 10)
+- --min-count: minimum occurrences to include in lists (default: 1)
+- --max-examples: max examples per section (default: 5)
 
 ---
 
@@ -205,7 +208,7 @@ Create a phased roadmap (Quick Wins, Domain Cleanup, Refactoring, Polish) from a
 
 ### Synopsis
 ```bash
-npx eslint-plugin-ai-code-snifftest plan [--input=lint-results.json] [--output=FIXES-ROADMAP.md] [--phases=4] [--team-size=1]
+npx eslint-plugin-ai-code-snifftest plan [--input=lint-results.json] [--output=FIXES-ROADMAP.md] [--phases=4] [--team-size=1] [--top-files=10] [--min-count=1]
 ```
 
 ### Options
@@ -213,6 +216,8 @@ npx eslint-plugin-ai-code-snifftest plan [--input=lint-results.json] [--output=F
 - --output, -o: Output file (default: FIXES-ROADMAP.md)
 - --phases: Number of phases to include (default: 4)
 - --team-size: Reserved for future capacity planning (default: 1)
+- --top-files: limit for hotspot lists (default: 10)
+- --min-count: minimum occurrences to include in lists (default: 1)
 
 ---
 
@@ -222,7 +227,7 @@ Generate issue markdown files from ESLint JSON analysis. Files-only: does NOT cr
 
 ### Synopsis
 ```bash
-npx eslint-plugin-ai-code-snifftest create-issues [--input=lint-results.json] [--output=issues] [--format=markdown|json] [--include-commands=github-cli|gitlab-cli] [--labels="lint,tech-debt"]
+npx eslint-plugin-ai-code-snifftest create-issues [--input=lint-results.json] [--output=issues] [--format=markdown|json] [--include-commands=github-cli|gitlab-cli] [--labels="lint,tech-debt"] [--top-files=10] [--min-count=1]
 ```
 
 ### Behavior
@@ -237,6 +242,8 @@ npx eslint-plugin-ai-code-snifftest create-issues [--input=lint-results.json] [-
 - --format: markdown (default) | json
 - --include-commands: github-cli (default) | gitlab-cli
 - --labels: Labels to apply in CLI examples (default: "lint,tech-debt")
+- --top-files: limit for hotspot lists (default: 10)
+- --min-count: minimum occurrences to include in lists (default: 1)
 
 ---
 
