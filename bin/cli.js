@@ -8,6 +8,9 @@ const { scaffoldCommand } = require(path.join(__dirname, '..', 'lib', 'commands'
 const { initCommand, initInteractiveCommand } = require(path.join(__dirname, '..', 'lib', 'commands', 'init'));
 const { learnCommand } = require(path.join(__dirname, '..', 'lib', 'commands', 'learn'));
 const { setupCommand } = require(path.join(__dirname, '..', 'lib', 'commands', 'setup'));
+const { analyzeCommand } = require(path.join(__dirname, '..', 'lib', 'commands', 'analyze'));
+const { planCommand } = require(path.join(__dirname, '..', 'lib', 'commands', 'plan'));
+const { createIssuesCommand } = require(path.join(__dirname, '..', 'lib', 'commands', 'create-issues'));
 
 // Utilities
 const { parseArgs } = require(path.join(__dirname, '..', 'lib', 'utils', 'args-parser'));
@@ -35,6 +38,18 @@ function main() {
   if (cmd === 'setup') {
     if (!checkRequirements(process.cwd())) { process.exitCode = 1; return; }
     Promise.resolve(setupCommand(cwd, args)).then((code)=>{ process.exitCode = code; });
+    return;
+  }
+  if (cmd === 'analyze') {
+    Promise.resolve(analyzeCommand(cwd, args)).then((code)=>{ process.exitCode = code; });
+    return;
+  }
+  if (cmd === 'plan') {
+    Promise.resolve(planCommand(cwd, args)).then((code)=>{ process.exitCode = code; });
+    return;
+  }
+  if (cmd === 'create-issues') {
+    Promise.resolve(createIssuesCommand(cwd, args)).then((code)=>{ process.exitCode = code; });
     return;
   }
   if (cmd === 'scaffold' || cmd === 'create-constants') {
