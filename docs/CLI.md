@@ -199,6 +199,7 @@ npx eslint-plugin-ai-code-snifftest analyze [--input=lint-results.json] [--outpu
 - --top-files: limit for hotspot lists (default: 10)
 - --min-count: minimum occurrences to include in lists (default: 1)
 - --max-examples: max examples per section (default: 5)
+- --estimate-size=true|false: scale effort by file size (line count), capped at 2x (default: false)
 
 ---
 
