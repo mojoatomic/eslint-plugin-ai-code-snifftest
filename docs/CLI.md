@@ -37,6 +37,7 @@ npx eslint-plugin-ai-code-snifftest setup [options]
 - Interactive by default: runs learn reconciliation wizard, then writes init outputs with defaults.
 - Non-interactive: `--yes` runs learn in strict apply mode and init with defaults (AGENTS.md + ESLint).
   - Domain required: pass `--primary` or ensure project type can be inferred (eslint-plugin → dev-tools, CLI with `bin` → cli, React/Vue → web-app). If not inferable, setup exits with guidance.
+- External constants discovery is enabled by default; pass `--no-external` to opt out. Use `--allowlist` to constrain npm scopes.
 - Skip learn with `--skip-learn` to only run init.
 
 ### Common options
@@ -85,10 +86,12 @@ npx eslint-plugin-ai-code-snifftest init [options]
   - Disable architecture guardrails.
 - --arch[=true|false]
   - Explicitly enable/disable architecture guardrails. Default: enabled.
-- --external
-  - Enable experimental external constants discovery.
+- --no-external | --external=false
+  - Disable external constants discovery (enabled by default).
+- --external (interactive gating)
+  - When running interactively, show external‑discovery prompts. Default interactive flow hides these unless `--external` is passed.
 - --allowlist="@scope1,@scope2"
-  - Limit external discovery to a comma‑separated list of npm scopes.
+  - Limit external discovery to a comma‑separated list of npm scopes or package names. Regex strings are supported when starting with `^`.
 - --minimumMatch=<0..1>
   - Override minimum match threshold for name detection (default 0.6).
 - --minimumConfidence=<0..1>
@@ -122,8 +125,11 @@ npx eslint-plugin-ai-code-snifftest init --primary=web-app --additional=react,ap
 # Disable architecture guardrails
 npx eslint-plugin-ai-code-snifftest init --primary=cli --yes --no-arch
 
-# Use external constants discovery for whitelisted scopes
-npx eslint-plugin-ai-code-snifftest init --primary=general --yes --external --allowlist=@ai-constants,@company
+# Scope external discovery to whitelisted scopes (discovery is on by default)
+npx eslint-plugin-ai-code-snifftest init --primary=general --yes --allowlist=@ai-constants,@company
+
+# Opt out of external discovery entirely
+npx eslint-plugin-ai-code-snifftest init --primary=general --yes --no-external
 ```
 
 ---
@@ -209,3 +215,4 @@ npx eslint-plugin-ai-code-snifftest scaffold medical --dir=./examples/external/m
 - `.ai-coding-guide.md` generation removed; use `AGENTS.md` for human‑readable guidance.
 - `eslint.config.mjs` is generated as an ES module to avoid Node module‑type warnings.
 - Architecture guardrails are enabled by default; disable with `--no-arch` or `--arch=false`.
+- External constants discovery is enabled by default; opt out with `--no-external` or set `experimentalExternalConstants: false` in `.ai-coding-guide.json`.
