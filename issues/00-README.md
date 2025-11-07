@@ -10,6 +10,6 @@ Copy each .md into your tracker as a new issue, edit, then submit.
 for file in issues/*.md; do
   if [ "$file" = "issues/00-README.md" ]; then continue; fi
   title=$(head -n1 "$file" | sed "s/^# //")
-  gh issue create --title "$title" --body-file "$file" --label "lint,tech-debt,dogfood"
+  gh issue create --title "$title" --body-file "$file" --label "lint,tech-debt"
 done
 ```

@@ -1,9 +1,9 @@
 # FIXES Roadmap
 
 ## Summary
-- Total complexity: 86
+- Total complexity: 88
 - Total architecture: 52
-- Total domain terms: 71
+- Total domain terms: 74
 - Total magic numbers: 0
 
 ## Phase 1: Quick Wins
@@ -17,15 +17,15 @@ Items: 0
 - Auto-fix reduced violations by ~166
 
 ## Phase 2: Domain Cleanup
-Items: 71
+Items: 74
 
 ### Tasks
-- [ ] Tidy ai-code-snifftest/no-generic-names (top 71)
+- [ ] Tidy ai-code-snifftest/no-generic-names (top 74)
 ### Top Files
 - /Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/tests/lib/generators/eslint-arch-config.test.js: 12
 - /Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/tests/integration/cli-learn-interactive-snapshot.test.js: 6
 - /Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/tests/lib/utils/arch-defaults.test.js: 6
-- /Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/rules/no-redundant-calculations.js: 4
+- /Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/rules/no-redundant-calculations.js: 5
 - /Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/rules/no-redundant-conditionals.js: 4
 
 ### Success Metrics
@@ -35,7 +35,7 @@ Items: 71
 Items: 50
 
 ### Tasks
-- [ ] Reduce complexity (top 52)
+- [ ] Reduce complexity (top 54)
 - [ ] Reduce ai-code-snifftest/prefer-simpler-logic (top 25)
 - [ ] Reduce ai-code-snifftest/no-redundant-conditionals (top 9)
 ### Top Files
