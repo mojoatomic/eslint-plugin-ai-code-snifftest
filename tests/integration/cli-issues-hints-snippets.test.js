@@ -39,7 +39,7 @@ describe('CLI issues hints + snippets', function () {
     writeLintJson(tmpDir);
     runAll(tmpDir);
     const phase2 = fs.readFileSync(path.join(tmpDir, 'issues', '03-phase2-domain-terms.md'), 'utf8');
-    assert.match(phase2, /Detected Domains/);
+    assert.match(phase2, /Configured Domains/);
     // Examples bullet appears with rule arrow
     assert.match(phase2, /### Examples[\s\S]*- .* → /);
   });
