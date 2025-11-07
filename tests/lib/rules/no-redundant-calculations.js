@@ -129,7 +129,8 @@ const invalidBasicTests = [
   },
   {
     code: 'const result = 5 * 4 * 3;',
-    errors: [{ messageId: 'ambiguousConstant' }]
+    errors: [{ messageId: 'redundantCalculation' }],
+    output: 'const result = 60;'
   },
   {
     code: 'const x = (2 + 3) * 4;',
