@@ -25,13 +25,13 @@ function runCliInit(tmpDir, args = []) {
 
 describe('CLI init with external constants (experimental)', function () {
   it('generates AGENTS.md (guide removed) with external discovery enabled', function () {
-    const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'cli-ext-'));
-    write(path.join(tmp, '.ai-constants', 'x.js'),
+    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'cli-ext-'));
+    write(path.join(tempDir, '.ai-constants', 'x.js'),
       "module.exports = { domain: 'x', version: '1.0.0', constants: [{ value: 3, name: 'THREE', description: 'the number three' }], terms: { entities: ['X'] } };\n");
-    runCliInit(tmp);
+    runCliInit(tempDir);
     // Guide removed
-    assert.strictEqual(fs.existsSync(path.join(tmp, '.ai-coding-guide.md')), false);
+    assert.strictEqual(fs.existsSync(path.join(tempDir, '.ai-coding-guide.md')), false);
     // AGENTS.md should be present when --agents is passed
-    assert.strictEqual(fs.existsSync(path.join(tmp, 'AGENTS.md')), true);
+    assert.strictEqual(fs.existsSync(path.join(tempDir, 'AGENTS.md')), true);
   });
 });

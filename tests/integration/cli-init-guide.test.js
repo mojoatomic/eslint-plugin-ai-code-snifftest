@@ -20,12 +20,12 @@ const env = { ...process.env, FORCE_AI_CONFIG: '1', FORCE_ESLINT_CONFIG: '1', SK
 
 describe('CLI init guide content', function () {
   it('writes AGENTS.md with domain sections (guide removed)', function () {
-    const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'cli-guide-'));
-    runCliInit(tmp);
+    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'cli-guide-'));
+    runCliInit(tempDir);
     // Guide should NOT be present anymore
-    assert.strictEqual(fs.existsSync(path.join(tmp, '.ai-coding-guide.md')), false);
+    assert.strictEqual(fs.existsSync(path.join(tempDir, '.ai-coding-guide.md')), false);
     // Validate AGENTS.md includes core sections
-    const agents = fs.readFileSync(path.join(tmp, 'AGENTS.md'), 'utf8');
+    const agents = fs.readFileSync(path.join(tempDir, 'AGENTS.md'), 'utf8');
     assert.match(agents, /## Domain:/);
     assert.match(agents, /## Ambiguity Tactics/);
   });

@@ -151,9 +151,9 @@ module.exports = {
         }
 
         // Evaluate the expression
-        const result = evaluateTree(node);
+        const computedValue = evaluateTree(node);
 
-        if (result === null) {
+        if (computedValue === null) {
           return;
         }
 
@@ -165,11 +165,11 @@ module.exports = {
             ? 'complexCalculation'
             : 'redundantCalculation',
           data: {
-            result: String(result)
+            result: String(computedValue)
           },
           fix(fixer) {
             // Replace the entire expression with the calculated value
-            return fixer.replaceText(node, String(result));
+            return fixer.replaceText(node, String(computedValue));
           }
         });
       }

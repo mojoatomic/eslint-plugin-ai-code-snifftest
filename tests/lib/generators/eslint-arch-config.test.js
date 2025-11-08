@@ -8,15 +8,15 @@ const { generateArchitectureRules, generateArchitectureESLintConfig } = require(
 describe('eslint-arch-config generator', function () {
   describe('generateArchitectureRules', function () {
     it('generates default rules when no config provided', function () {
-      const result = generateArchitectureRules();
-      assert.ok(result.rules);
-      assert.ok(result.overrides);
-      assert.ok(Array.isArray(result.overrides));
+      const rulesConfig = generateArchitectureRules();
+      assert.ok(rulesConfig.rules);
+      assert.ok(rulesConfig.overrides);
+      assert.ok(Array.isArray(rulesConfig.overrides));
     });
 
     it('includes all base architecture rules', function () {
-      const result = generateArchitectureRules();
-      const { rules } = result;
+      const rulesConfig = generateArchitectureRules();
+      const { rules } = rulesConfig;
       
       assert.ok(rules['max-lines']);
       assert.ok(rules['max-lines-per-function']);
@@ -27,8 +27,8 @@ describe('eslint-arch-config generator', function () {
     });
 
     it('uses default values correctly', function () {
-      const result = generateArchitectureRules();
-      const { rules } = result;
+      const rulesConfig = generateArchitectureRules();
+      const { rules } = rulesConfig;
       
       assert.deepStrictEqual(rules['max-lines'], ['warn', { max: 250, skipBlankLines: true, skipComments: true }]);
       assert.deepStrictEqual(rules['max-lines-per-function'], ['warn', { max: 50, skipBlankLines: true, skipComments: true }]);
@@ -48,8 +48,8 @@ describe('eslint-arch-config generator', function () {
           maxStatements: 40
         }
       };
-      const result = generateArchitectureRules(arch);
-      const { rules } = result;
+      const rulesConfig = generateArchitectureRules(arch);
+      const { rules } = rulesConfig;
       
       assert.deepStrictEqual(rules['max-lines-per-function'], ['warn', { max: 100, skipBlankLines: true, skipComments: true }]);
       assert.deepStrictEqual(rules['complexity'], ['warn', 15]);
@@ -65,15 +65,15 @@ describe('eslint-arch-config generator', function () {
           cli: 50
         }
       };
-      const result = generateArchitectureRules(arch);
-      const { rules } = result;
+      const rulesConfig = generateArchitectureRules(arch);
+      const { rules } = rulesConfig;
       
       assert.deepStrictEqual(rules['max-lines'], ['warn', { max: 300, skipBlankLines: true, skipComments: true }]);
     });
 
     it('generates CLI file overrides', function () {
-      const result = generateArchitectureRules();
-      const cliOverride = result.overrides.find(o => o.files.includes('**/bin/*.js'));
+      const rulesConfig = generateArchitectureRules();
+      const cliOverride = rulesConfig.overrides.find(o => o.files.includes('**/bin/*.js'));
       
       assert.ok(cliOverride, 'Should have CLI override');
       assert.ok(cliOverride.rules['max-lines']);
@@ -82,40 +82,40 @@ describe('eslint-arch-config generator', function () {
     });
 
     it('generates command file overrides', function () {
-      const result = generateArchitectureRules();
-      const cmdOverride = result.overrides.find(o => o.files.includes('**/commands/**/*.js'));
+      const rulesConfig = generateArchitectureRules();
+      const cmdOverride = rulesConfig.overrides.find(o => o.files.includes('**/commands/**/*.js'));
       
       assert.ok(cmdOverride, 'Should have command override');
       assert.strictEqual(cmdOverride.rules['max-lines'][1].max, 150);
     });
 
     it('generates util file overrides', function () {
-      const result = generateArchitectureRules();
-      const utilOverride = result.overrides.find(o => o.files.includes('**/utils/**/*.js'));
+      const rulesConfig = generateArchitectureRules();
+      const utilOverride = rulesConfig.overrides.find(o => o.files.includes('**/utils/**/*.js'));
       
       assert.ok(utilOverride, 'Should have util override');
       assert.strictEqual(utilOverride.rules['max-lines'][1].max, 200);
     });
 
     it('generates generator file overrides', function () {
-      const result = generateArchitectureRules();
-      const genOverride = result.overrides.find(o => o.files.includes('**/generators/**/*.js'));
+      const rulesConfig = generateArchitectureRules();
+      const genOverride = rulesConfig.overrides.find(o => o.files.includes('**/generators/**/*.js'));
       
       assert.ok(genOverride, 'Should have generator override');
       assert.strictEqual(genOverride.rules['max-lines'][1].max, 250);
     });
 
     it('generates component file overrides', function () {
-      const result = generateArchitectureRules();
-      const compOverride = result.overrides.find(o => o.files.some(f => f.includes('**/components/**')));
+      const rulesConfig = generateArchitectureRules();
+      const compOverride = rulesConfig.overrides.find(o => o.files.some(f => f.includes('**/components/**')));
       
       assert.ok(compOverride, 'Should have component override');
       assert.strictEqual(compOverride.rules['max-lines'][1].max, 300);
     });
 
     it('generates test file overrides with lenient rules', function () {
-      const result = generateArchitectureRules();
-      const testOverride = result.overrides.find(o => o.files.includes('**/*.test.js'));
+      const rulesConfig = generateArchitectureRules();
+      const testOverride = rulesConfig.overrides.find(o => o.files.includes('**/*.test.js'));
       
       assert.ok(testOverride, 'Should have test override');
       assert.strictEqual(testOverride.rules['max-lines-per-function'], 'off');
@@ -157,9 +157,9 @@ describe('eslint-arch-config generator', function () {
       // Should be valid JavaScript object (would throw if malformed)
       assert.doesNotThrow(() => {
          
-        const result = eval(config);
-        assert.ok(result.rules);
-        assert.ok(result.overrides);
+        const evaluatedConfig = eval(config);
+        assert.ok(evaluatedConfig.rules);
+        assert.ok(evaluatedConfig.overrides);
       });
     });
   });

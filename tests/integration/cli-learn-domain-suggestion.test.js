@@ -42,16 +42,16 @@ describe('learn interactive domain suggestion', function () {
   this.timeout(35000);
 
   it('suggests and applies inferred domain when accepted', async function () {
-    const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'cli-learn-suggest-domain-'));
+    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'cli-learn-suggest-domain-'));
     // Ensure project suggests dev-tools
-    fs.writeFileSync(path.join(tmp, 'package.json'), JSON.stringify({ name: 'eslint-plugin-xyz' }, null, 2));
+    fs.writeFileSync(path.join(tempDir, 'package.json'), JSON.stringify({ name: 'eslint-plugin-xyz' }, null, 2));
     // Add minimal code so scan runs
-    fs.writeFileSync(path.join(tmp, 'index.js'), 'const x=1; function f(){return x;}\n');
+    fs.writeFileSync(path.join(tempDir, 'index.js'), 'const x=1; function f(){return x;}\n');
 
-    const res = await runInteractiveLearnAcceptAll(tmp);
+    const res = await runInteractiveLearnAcceptAll(tempDir);
     assert.strictEqual(res.code, 0, res.stderr);
 
-    const cfg = JSON.parse(fs.readFileSync(path.join(tmp, '.ai-coding-guide.json'), 'utf8'));
+    const cfg = JSON.parse(fs.readFileSync(path.join(tempDir, '.ai-coding-guide.json'), 'utf8'));
     assert.strictEqual(cfg.domains.primary, 'dev-tools');
     assert.ok(Array.isArray(cfg.domainPriority) && cfg.domainPriority[0] === 'dev-tools');
   });

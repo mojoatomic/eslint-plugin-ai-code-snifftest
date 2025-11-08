@@ -46,14 +46,14 @@ describe('CLI learn interactive post-generation prompt', function () {
   this.timeout(35000);
 
   it('offers and generates AGENTS.md + ESLint when user accepts default', async function () {
-    const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'cli-learn-gen-'));
+    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'cli-learn-gen-'));
     // Create some basic JS files to ensure scanner finds content
-    fs.writeFileSync(path.join(tmp, 'index.js'), 'const x = 1; function f(){ return x; }\n');
+    fs.writeFileSync(path.join(tempDir, 'index.js'), 'const x = 1; function f(){ return x; }\n');
 
-    const res = await runInteractiveLearnAndGenerate(tmp);
+    const res = await runInteractiveLearnAndGenerate(tempDir);
     assert.strictEqual(res.code, 0, res.stderr);
-    assert.ok(fs.existsSync(path.join(tmp, '.ai-coding-guide.json')));
-    assert.ok(fs.existsSync(path.join(tmp, 'AGENTS.md')));
-    assert.ok(fs.existsSync(path.join(tmp, 'eslint.config.mjs')));
+    assert.ok(fs.existsSync(path.join(tempDir, '.ai-coding-guide.json')));
+    assert.ok(fs.existsSync(path.join(tempDir, 'AGENTS.md')));
+    assert.ok(fs.existsSync(path.join(tempDir, 'eslint.config.mjs')));
   });
 });

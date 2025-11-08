@@ -31,26 +31,26 @@ function runCli(cmd, tmpDir, args = []) {
 describe('CLI actionable violations flow', function () {
   it('generates analysis report, roadmap, and issue files with domain context', function () {
     this.timeout(5000);
-    const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'cli-actionable-'));
-    writeLintJson(tmp);
+    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'cli-actionable-'));
+    writeLintJson(tempDir);
 
     // 1) analyze
-    runCli('analyze', tmp, ['--input=lint-results.json', '--output=analysis-report.md']);
-    const report = fs.readFileSync(path.join(tmp, 'analysis-report.md'), 'utf8');
+    runCli('analyze', tempDir, ['--input=lint-results.json', '--output=analysis-report.md']);
+    const report = fs.readFileSync(path.join(tempDir, 'analysis-report.md'), 'utf8');
     assert.match(report, /# Analysis Report/);
     assert.match(report, /## Configured Domains/);
 
     // 2) plan
-    runCli('plan', tmp, ['--input=lint-results.json', '--output=FIXES-ROADMAP.md']);
-    assert.ok(fs.existsSync(path.join(tmp, 'FIXES-ROADMAP.md')));
+    runCli('plan', tempDir, ['--input=lint-results.json', '--output=FIXES-ROADMAP.md']);
+    assert.ok(fs.existsSync(path.join(tempDir, 'FIXES-ROADMAP.md')));
 
     // 3) create-issues
-    runCli('create-issues', tmp, ['--input=lint-results.json', '--output=issues', '--include-commands=github-cli', '--labels=lint,tech-debt']);
-    const readme = fs.readFileSync(path.join(tmp, 'issues', '00-README.md'), 'utf8');
+    runCli('create-issues', tempDir, ['--input=lint-results.json', '--output=issues', '--include-commands=github-cli', '--labels=lint,tech-debt']);
+    const readme = fs.readFileSync(path.join(tempDir, 'issues', '00-README.md'), 'utf8');
     assert.match(readme, /How to Create Issues/);
     assert.match(readme, /gh issue create/);
     assert.match(readme, /lint,tech-debt/);
-    const phase1 = fs.readFileSync(path.join(tmp, 'issues', '01-phase1-magic-numbers.md'), 'utf8');
+    const phase1 = fs.readFileSync(path.join(tempDir, 'issues', '01-phase1-magic-numbers.md'), 'utf8');
     assert.match(phase1, /Configured Domains/);
     assert.match(phase1, /^-\s+\w+\s+\((primary|additional)\)/m);
     // Rich sections

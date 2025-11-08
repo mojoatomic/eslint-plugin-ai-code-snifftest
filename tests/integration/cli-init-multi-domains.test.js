@@ -20,23 +20,23 @@ const env = { ...process.env, FORCE_AI_CONFIG: '1', FORCE_ESLINT_CONFIG: '1', SK
 
 describe('CLI init across sample domains', function () {
   it('generates AGENTS.md domain sections for geometry', function () {
-    const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'cli-geom-'));
-    runCliInit(tmp, 'geometry');
-    const agents = fs.readFileSync(path.join(tmp, 'AGENTS.md'), 'utf8');
+    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'cli-geom-'));
+    runCliInit(tempDir, 'geometry');
+    const agents = fs.readFileSync(path.join(tempDir, 'AGENTS.md'), 'utf8');
     assert.match(agents, /## Domain: geometry/);
   });
 
   it('generates AGENTS.md domain sections for physics', function () {
-    const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'cli-phys-'));
-    runCliInit(tmp, 'physics');
-    const agents = fs.readFileSync(path.join(tmp, 'AGENTS.md'), 'utf8');
+    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'cli-phys-'));
+    runCliInit(tempDir, 'physics');
+    const agents = fs.readFileSync(path.join(tempDir, 'AGENTS.md'), 'utf8');
     assert.match(agents, /## Domain: physics/);
   });
 
   it('generates AGENTS.md domain sections for astronomy with additional domains', function () {
-    const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'cli-astro-'));
-    runCliInit(tmp, 'astronomy', ['--additional=geometry,math']);
-    const agents = fs.readFileSync(path.join(tmp, 'AGENTS.md'), 'utf8');
+    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'cli-astro-'));
+    runCliInit(tempDir, 'astronomy', ['--additional=geometry,math']);
+    const agents = fs.readFileSync(path.join(tempDir, 'AGENTS.md'), 'utf8');
     assert.match(agents, /## Domain: astronomy/);
     assert.match(agents, /## Domain: geometry/);
     assert.match(agents, /## Domain: math/);
