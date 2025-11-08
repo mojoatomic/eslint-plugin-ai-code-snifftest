@@ -98,4 +98,14 @@ ruleTester.run('enforce-naming-conventions', rule, {
       inject({ style: 'camelCase', booleanPrefix: ['has'], asyncPrefix: ['fetch'], pluralizeCollections: false })({ code: 'const shouldProcess = true;', errors: [{ messageId: 'booleanPrefix', suggestions: [{ messageId: 'suggestRename', output: 'const hasShouldProcess = true;' }] }] }),
     ]
   });
+
+  // minimal asyncPrefix variations
+  ruleTester.run('enforce-naming-conventions [asyncPrefix-variations]', rule, {
+    valid: [
+      inject({ style: 'camelCase', booleanPrefix: ['is'], asyncPrefix: ['load'], pluralizeCollections: true })({ code: 'async function loadUser(){}' }),
+    ],
+    invalid: [
+      inject({ style: 'camelCase', booleanPrefix: ['is'], asyncPrefix: ['load'], pluralizeCollections: true })({ code: 'async function fetchUser(){}', errors: [{ messageId: 'asyncPrefix', suggestions: [{ messageId: 'suggestRename', output: 'async function loadFetchUser(){}' }] }] }),
+    ]
+  });
 })();
