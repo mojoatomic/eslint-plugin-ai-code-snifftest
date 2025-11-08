@@ -492,6 +492,45 @@ Or in `.ai-coding-guide.json`:
 
 [Contribution guidelines]
 
+### Deterministic rule tests (injecting settings)
+
+Rule tests should not depend on the repository's `.ai-coding-guide.json`. The plugin resolves configuration with this precedence:
+
+1. RuleTester settings (`context.settings['ai-code-snifftest']`)
+2. Environment variable `AI_SNIFFTEST_CONFIG_JSON` (JSON string)
+3. Disk `.ai-coding-guide.json`
+
+Inject settings per test or suite to make behavior deterministic:
+
+```js
+// Example: dual suites for a rule
+const RuleTester = require('eslint').RuleTester;
+const rule = require('../lib/rules/your-rule');
+const tester = new RuleTester({ languageOptions: { ecmaVersion: 2021, sourceType: 'module' } });
+
+(function extConstOn(){
+  const inject = (tc) => ({ ...tc, settings: { 'ai-code-snifftest': { experimentalExternalConstants: true } } });
+  tester.run('your-rule [extConst=true]', rule, {
+    valid: [ inject({ code: '/* ... */' }) ],
+    invalid: [ inject({ code: '/* ... */', errors: [{ messageId: '...' }] }) ]
+  });
+})();
+
+(function extConstOff(){
+  const inject = (tc) => ({ ...tc, settings: { 'ai-code-snifftest': { experimentalExternalConstants: false } } });
+  tester.run('your-rule [extConst=false]', rule, {
+    valid: [ /* deterministic cases */ ],
+    invalid: [ inject({ code: '/* ... */', errors: [{ messageId: '...' }] }) ]
+  });
+})();
+```
+
+For integration tests, you can set an environment override instead of per-test settings:
+
+```bash
+export AI_SNIFFTEST_CONFIG_JSON='{"experimentalExternalConstants":false}'
+```
+
 ---
 
 **Note:** This documentation describes capabilities validated through self-testing. Results may vary based on project structure, codebase patterns, and AI assistant behavior.
