@@ -4,6 +4,7 @@ import globals from 'globals';
 import aiSnifftest from 'eslint-plugin-ai-code-snifftest';
 
 export default [
+  { ignores: ['coverage/**'] },
   js.configs.recommended,
   {
     files: ['**/*.js'],
