@@ -415,6 +415,12 @@ npm update eslint-plugin-ai-code-snifftest
 FORCE_ESLINT_CONFIG=1 npx eslint-plugin-ai-code-snifftest init
 ```
 
+### JSON ESLint output (machine-readable)
+- Preferred: `npm run lint:json` → writes `lint-results.json`
+- Alternate: `npm run lint:js -- --format json -o lint-results.json`
+- Note: the aggregator `npm run lint` uses npm-run-all and does not forward CLI flags to sub-scripts.
+- Analyze JSON: `npx eslint-plugin-ai-code-snifftest analyze --input=lint-results.json`
+
 ### Architecture guardrails missing
 If `eslint.config.mjs` doesn’t include “Architecture guardrails” or test files aren’t exempted:
 
