@@ -1,1 +1,1 @@
-npm test
+npm run lint:json && npm run analyze:current && npm run ratchet && npm test
