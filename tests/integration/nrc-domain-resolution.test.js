@@ -1,5 +1,5 @@
 /* eslint-env mocha */
-"use strict";
+'use strict';
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
@@ -22,17 +22,17 @@ tester.run('no-redundant-calculations (integration: domain resolution)', rule, {
   valid: [
     // File-level @domains geometry should allow 720/2 (=360)
     {
-      code: `// @domains geometry\nconst deg = 720 / 2;`,
+      code: '// @domains geometry\nconst deg = 720 / 2;',
     },
     // Name-based: includes geometry term
     {
-      code: `const circleAngle = 720 / 2;`,
+      code: 'const circleAngle = 720 / 2;',
     },
     // constantResolution mapping 360->geometry
     (() => {
       const t = tempConfigWithResolution({ '360': 'geometry' });
       return {
-        code: `const z = 720 / 2;`,
+        code: 'const z = 720 / 2;',
         filename: t.filename
       };
     })(),

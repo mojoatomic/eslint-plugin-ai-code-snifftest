@@ -2,14 +2,14 @@
  * @fileoverview Simplify boolean expressions and remove redundant logic
  * @author mojoatomic
  */
-"use strict";
+'use strict';
 
 //------------------------------------------------------------------------------
 // Requirements
 //------------------------------------------------------------------------------
 
-const rule = require("../../../lib/rules/prefer-simpler-logic"),
-  RuleTester = require("eslint").RuleTester;
+const rule = require('../../../lib/rules/prefer-simpler-logic'),
+  RuleTester = require('eslint').RuleTester;
 
 
 //------------------------------------------------------------------------------
@@ -382,7 +382,7 @@ if (!flag) {}
 // Run All Tests
 //------------------------------------------------------------------------------
 
-ruleTester.run("prefer-simpler-logic", rule, {
+ruleTester.run('prefer-simpler-logic', rule, {
   valid: [
     ...validBasicTests,
     ...validMultipleNegation,

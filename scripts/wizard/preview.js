@@ -2,7 +2,7 @@
  Minimal wizard preview: compose a flat ESLint config from presets and plugin rules
  Usage: node scripts/wizard/preview.js --framework react --typescript --dry-run
 */
-"use strict";
+'use strict';
 
 const path = require('path');
 const fs = require('fs');

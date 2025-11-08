@@ -1,6 +1,6 @@
 /* eslint-env mocha */
 /* global describe, it */
-"use strict";
+'use strict';
 
 const assert = require('assert');
 const fs = require('fs');
@@ -14,7 +14,7 @@ describe('CLI init consumes fingerprint', function () {
     const dir = path.join(tmp, '.ai-constants');
     fs.mkdirSync(dir, { recursive: true });
     const fpFile = path.join(dir, 'project-fingerprint.js');
-    fs.writeFileSync(fpFile, `module.exports = { constants: [ { value: 365.25, name: 'TROPICAL_YEAR_DAYS', domain: 'astronomy' } ] };\n`);
+    fs.writeFileSync(fpFile, 'module.exports = { constants: [ { value: 365.25, name: \'TROPICAL_YEAR_DAYS\', domain: \'astronomy\' } ] };\n');
 
     const cliPath = path.resolve(__dirname, '..', '..', 'bin', 'cli.js');
     const env = { ...process.env, SKIP_AI_REQUIREMENTS: '1', FORCE_AI_CONFIG: '1' };
