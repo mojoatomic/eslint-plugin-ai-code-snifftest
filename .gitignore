@@ -50,3 +50,4 @@ domain_ideas/
 
 # Init debug snapshot (created only when AI_DEBUG_INIT=1 or --debug)
 .ai-init-debug.json
+.top

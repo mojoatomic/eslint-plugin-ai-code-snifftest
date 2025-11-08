@@ -1,34 +1,32 @@
 # Analysis Report
 
-Errors: 6  Warnings: 354  Auto-fixable: 166
+Errors: 6  Warnings: 355  Auto-fixable: 166
 
 ## Categories
 - Magic numbers: 0
-- Complexity: 88
-- Domain terms: 74
+- Complexity: 91
+- Domain terms: 72
 - Architecture: 52
 
-## Top Domains
-- dev-tools: 0
-- cli: 0
-- linting: 0
+## Configured Domains
+- dev-tools (primary)
+- cli (additional)
+- linting (additional)
 
-### Domain Hints
-- biology: 76
-- graphics: 60
-- photo: 32
-- cs: 22
-- finance: 8
+### Domain term violations
+- Total: 72
+- See AGENTS.md for project terminology.
 
-## Complexity (88)
+## Complexity (91)
 ### By rule
-- complexity: 54
+- complexity: 57
 - ai-code-snifftest/prefer-simpler-logic: 25
 - ai-code-snifftest/no-redundant-conditionals: 9
 
 ### Top files
 - /Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/rules/no-redundant-conditionals.js: 39
 - /Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/rules/no-redundant-calculations.js: 6
+- /Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/commands/create-issues/markdown.js: 4
 - /Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/scanner/reconcile.js: 3
 - /Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/docs/sample-rule-no-redundant-calculations.js: 2
 - /Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/commands/init/index.js: 2
@@ -36,7 +34,6 @@ Errors: 6  Warnings: 354  Auto-fixable: 166
 - /Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/rules/enforce-domain-terms.js: 2
 - /Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/rules/no-unnecessary-abstraction.js: 2
 - /Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/scanner/extract.js: 2
-- /Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/utils/project-config.js: 2
 
 ### Examples
 - /Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/bin/cli.js:20 complexity → Function 'main' has a complexity of 16. Maximum allowed is 10.
@@ -121,62 +118,62 @@ function main() {
   const cmd = args._[0];
 ```
 
-- /Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/commands/analyze/reporter.js:7 max-lines-per-function → Function 'writeAnalysisReport' has too many lines (122). Maximum allowed is 50.
+- /Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/commands/analyze/reporter.js:6 max-lines-per-function → Function 'writeAnalysisReport' has too many lines (119). Maximum allowed is 50.
 
 ```js
-const { getDomainHints } = require('./domain');
+const path = require('path');
 
 function writeAnalysisReport(outPath, { categories, effort, returnString, topFiles = 10, minCount = 1, maxExamples = 5, cfg } = {}) {
   const lines = [];
   lines.push('# Analysis Report');
 ```
 
-- /Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/commands/analyze/reporter.js:7 max-statements → Function 'writeAnalysisReport' has too many statements (66). Maximum allowed is 30.
+- /Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/commands/analyze/reporter.js:6 max-statements → Function 'writeAnalysisReport' has too many statements (65). Maximum allowed is 30.
 
 ```js
-const { getDomainHints } = require('./domain');
+const path = require('path');
 
 function writeAnalysisReport(outPath, { categories, effort, returnString, topFiles = 10, minCount = 1, maxExamples = 5, cfg } = {}) {
   const lines = [];
   lines.push('# Analysis Report');
 ```
 
-- /Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/commands/create-issues/markdown.js:62 max-lines-per-function → Function 'buildMarkdownSections' has too many lines (124). Maximum allowed is 50.
+- /Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/commands/create-issues/markdown.js:70 max-lines-per-function → Function 'buildMarkdownSections' has too many lines (259). Maximum allowed is 50.
 
 ```js
 }
 
-function buildMarkdownSections(cats, which /* 'magic'|'terms'|'complexity'|'architecture'|null */, { topFiles = 10, minCount = 1, maxExamples = 5, cfg } = {}) {
+function buildMarkdownSections(cats, which /* 'magic'|'terms'|'complexity'|'architecture'|null */, { topFiles = 10, minCount = 1, maxExamples = 5, cfg, analysis } = {}) {
   const lines = [];
-  const ds = Array.isArray(cats.domainSummary) ? cats.domainSummary.slice(0, 5) : [];
+
 ```
 
-- /Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/commands/create-issues/markdown.js:62 max-statements → Function 'buildMarkdownSections' has too many statements (99). Maximum allowed is 30.
+- /Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/commands/create-issues/markdown.js:70 max-statements → Function 'buildMarkdownSections' has too many statements (179). Maximum allowed is 30.
 
 ```js
 }
 
-function buildMarkdownSections(cats, which /* 'magic'|'terms'|'complexity'|'architecture'|null */, { topFiles = 10, minCount = 1, maxExamples = 5, cfg } = {}) {
+function buildMarkdownSections(cats, which /* 'magic'|'terms'|'complexity'|'architecture'|null */, { topFiles = 10, minCount = 1, maxExamples = 5, cfg, analysis } = {}) {
   const lines = [];
-  const ds = Array.isArray(cats.domainSummary) ? cats.domainSummary.slice(0, 5) : [];
+
 ```
 
 
-## Domain terms (74)
+## Domain terms (72)
 ### By rule
-- ai-code-snifftest/no-generic-names: 74
+- ai-code-snifftest/no-generic-names: 72
 
 ### Top files
 - /Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/tests/lib/generators/eslint-arch-config.test.js: 12
 - /Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/tests/integration/cli-learn-interactive-snapshot.test.js: 6
 - /Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/tests/lib/utils/arch-defaults.test.js: 6
-- /Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/rules/no-redundant-calculations.js: 5
+- /Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/rules/no-redundant-calculations.js: 4
 - /Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/rules/no-redundant-conditionals.js: 4
 - /Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/rules/prefer-simpler-logic.js: 4
 - /Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/scanner/reconcile.js: 4
 - /Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/tests/integration/cli-init-arch-guardrails.test.js: 4
 - /Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/tests/integration/cli-init-multi-domains.test.js: 3
-- /Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/commands/create-issues/markdown.js: 2
+- /Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/constants/index.js: 2
 
 ### Examples
 - /Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/docs/sample-rule-no-redundant-calculations.js:154 ai-code-snifftest/no-generic-names → Generic name "result" - use a domain-specific term
@@ -189,24 +186,14 @@ function buildMarkdownSections(cats, which /* 'magic'|'terms'|'complexity'|'arch
         if (result === null) {
 ```
 
-- /Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/commands/create-issues/markdown.js:140 ai-code-snifftest/no-generic-names → Generic name "list" - use a domain-specific term
+- /Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/commands/create-issues/markdown.js:242 ai-code-snifftest/no-generic-names → Generic name "arr" - use a domain-specific term
 
 ```js
-      lines.push('');
-    }
-    const list = (cats.complexity || []).slice(0, Math.min(5, maxExamples || 5));
-    if (list.length) {
-      lines.push('### Examples');
-```
-
-- /Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/commands/create-issues/markdown.js:166 ai-code-snifftest/no-generic-names → Generic name "list" - use a domain-specific term
-
-```js
-      lines.push('');
-    }
-    const list = (cats.architecture || []).slice(0, Math.min(5, maxExamples || 5));
-    if (list.length) {
-      lines.push('### Examples');
+    for (const r of list) {
+      const k = rel(r.filePath);
+      const arr = m.get(k) || [];
+      arr.push(r);
+      m.set(k, arr);
 ```
 
 - /Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/constants/index.js:52 ai-code-snifftest/no-generic-names → Generic name "arr" - use a domain-specific term
@@ -229,22 +216,32 @@ function buildMarkdownSections(cats, which /* 'magic'|'terms'|'complexity'|'arch
       out.push({ domain, term: String(t) });
 ```
 
+- /Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/rules/no-redundant-calculations.js:318 ai-code-snifftest/no-generic-names → Generic name "item" - use a domain-specific term
+
+```js
+          if (!Array.isArray(arr)) continue;
+          const set = new Set();
+          for (const item of arr) {
+            const v = normalizeNumber(item);
+            if (v !== null) set.add(v);
+```
+
 
 ## Magic numbers (0)
 ## Effort (rough estimate)
-- Hours: 129.5
-- Days: 16.2
-- Weeks: 3.2
+- Hours: 133.9
+- Days: 16.7
+- Weeks: 3.3
 
 ### Effort by category (hours)
-- Complexity: 113.2
+- Complexity: 117.7
 - Architecture: 10.4
-- Domain terms: 5.9
+- Domain terms: 5.8
 - Magic numbers: 0
 
 ## Prioritization (impact × effort heuristic)
-- Complexity: count=88, est=113.2h
-- Domain terms: count=74, est=5.9h
+- Complexity: count=91, est=117.7h
+- Domain terms: count=72, est=5.8h
 - Architecture: count=52, est=10.4h
 - Magic numbers: count=0, est=0h
 

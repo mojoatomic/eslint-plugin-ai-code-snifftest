@@ -1,9 +1,9 @@
 # FIXES Roadmap
 
 ## Summary
-- Total complexity: 88
+- Total complexity: 91
 - Total architecture: 52
-- Total domain terms: 74
+- Total domain terms: 72
 - Total magic numbers: 0
 
 ## Phase 1: Quick Wins
@@ -17,15 +17,15 @@ Items: 0
 - Auto-fix reduced violations by ~166
 
 ## Phase 2: Domain Cleanup
-Items: 74
+Items: 72
 
 ### Tasks
-- [ ] Tidy ai-code-snifftest/no-generic-names (top 74)
+- [ ] Tidy ai-code-snifftest/no-generic-names (top 72)
 ### Top Files
 - /Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/tests/lib/generators/eslint-arch-config.test.js: 12
 - /Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/tests/integration/cli-learn-interactive-snapshot.test.js: 6
 - /Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/tests/lib/utils/arch-defaults.test.js: 6
-- /Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/rules/no-redundant-calculations.js: 5
+- /Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/rules/no-redundant-calculations.js: 4
 - /Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/rules/no-redundant-conditionals.js: 4
 
 ### Success Metrics
@@ -35,15 +35,15 @@ Items: 74
 Items: 50
 
 ### Tasks
-- [ ] Reduce complexity (top 54)
+- [ ] Reduce complexity (top 57)
 - [ ] Reduce ai-code-snifftest/prefer-simpler-logic (top 25)
 - [ ] Reduce ai-code-snifftest/no-redundant-conditionals (top 9)
 ### Top Files
 - /Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/rules/no-redundant-conditionals.js: 39
 - /Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/rules/no-redundant-calculations.js: 6
+- /Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/commands/create-issues/markdown.js: 4
 - /Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/scanner/reconcile.js: 3
 - /Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/docs/sample-rule-no-redundant-calculations.js: 2
-- /Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/commands/init/index.js: 2
 
 ### Success Metrics
 - Complexity rule counts below thresholds

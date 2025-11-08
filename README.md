@@ -154,6 +154,52 @@ We tested this tool on its own codebase during a refactoring effort.
 
 See [DOGFOOD_RESULTS.md](./docs/DOGFOOD_RESULTS.md) for complete analysis.
 
+## See It In Action (Dogfooding)
+
+This project uses itself to manage tech debt. See real results:
+
+### Analysis Results
+- [analysis-report.md](./docs/dogfood/analysis-report.md) - 360 violations analyzed in 8 minutes
+- [FIXES-ROADMAP.md](./docs/dogfood/FIXES-ROADMAP.md) - 4-phase remediation plan
+- [analysis.json](./docs/dogfood/analysis.json) - Structured data
+
+### Enhanced GitHub Issues
+See [docs/dogfood/issues-enhanced/](./docs/dogfood/issues-enhanced/) for 5 production-ready issues:
+1. [Phase 1: Auto-fix](./docs/dogfood/issues-enhanced/02-phase1-auto-fix.md) - 215 violations, 10 min effort
+2. [Phase 2: Domain Terms](./docs/dogfood/issues-enhanced/03-phase2-domain-terms.md) - 72 violations, 5.8 hours
+3. [Phase 3: Complexity](./docs/dogfood/issues-enhanced/04-phase3-complexity.md) - 91 violations, 117 hours
+4. [Phase 4: Architecture](./docs/dogfood/issues-enhanced/05-phase4-architecture.md) - 52 violations, 10.4 hours
+
+Each issue includes:
+- Problem statement (WHY it matters)
+- AGENTS.md pattern references
+- Specific fix strategies (result → ruleResult)
+- Top 10 files with line numbers
+- Code examples from violations
+- Verification commands
+
+### Compare: Before and After AI Enhancement
+- **Before** (tool output): [docs/dogfood/issues/](./docs/dogfood/issues/)
+- **After** (AI enhanced): [docs/dogfood/issues-enhanced/](./docs/dogfood/issues-enhanced/)
+
+See the difference AI makes in adding domain intelligence!
+
+### How Issues Were Enhanced
+See [ULTIMATE-ISSUE-PROMPT.md](./docs/ULTIMATE-ISSUE-PROMPT.md) for the AI prompt that transformed rich markdown into perfect, domain-aware GitHub issues.
+
+**This is what you get when you use this tool.** ✨
+
+```
+├── docs/
+│   ├── dogfood/
+│   │   ├── analysis-report.md
+│   │   ├── FIXES-ROADMAP.md
+│   │   ├── analysis.json
+│   │   ├── issues/              # Tool output
+│   │   └── issues-enhanced/     # AI enhanced
+│   └── ULTIMATE-ISSUE-PROMPT.md
+```
+
 ---
 
 ## Migration Notes

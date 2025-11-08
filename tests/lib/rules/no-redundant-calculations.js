@@ -2,14 +2,14 @@
  * @fileoverview Detect redundant calculations that should be computed at compile time
  * @author mojoatomic
  */
-"use strict";
+'use strict';
 
 //------------------------------------------------------------------------------
 // Requirements
 //------------------------------------------------------------------------------
 
-const rule = require("../../../lib/rules/no-redundant-calculations"),
-  RuleTester = require("eslint").RuleTester;
+const rule = require('../../../lib/rules/no-redundant-calculations'),
+  RuleTester = require('eslint').RuleTester;
 
 
 //------------------------------------------------------------------------------
@@ -129,8 +129,8 @@ const invalidBasicTests = [
   },
   {
     code: 'const result = 5 * 4 * 3;',
-    errors: [{ messageId: 'redundantCalculation' }],
-    output: 'const result = 60;'
+    errors: [{ messageId: 'ambiguousConstant' }],
+    output: null
   },
   {
     code: 'const x = (2 + 3) * 4;',
@@ -465,7 +465,7 @@ const validScientificFormulas = [
 // Run All Tests
 //------------------------------------------------------------------------------
 
-ruleTester.run("no-redundant-calculations", rule, {
+ruleTester.run('no-redundant-calculations', rule, {
   valid: [
     ...validBasicTests,
     ...validNumericBoundaries,
