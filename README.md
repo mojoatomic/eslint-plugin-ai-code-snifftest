@@ -464,6 +464,10 @@ This tool is designed for JavaScript/Node.js projects and is currently in active
 
 ---
 
+## Developing (Self-hosting guardrails)
+
+For contributors to this repo (self-hosting the plugin): running our rule fixers on the plugin’s own rule sources can mutate rule implementations. We added guardrails and documented a safe workflow — see docs/DEVELOPING.md.
+
 ## External Constants
 
 Built-in feature for discovering domain-specific constants from npm packages.
