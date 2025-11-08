@@ -20,17 +20,17 @@ function runCliSetup(tmpDir, args = []) {
 
 describe('CLI setup command', function () {
   it('runs learn (strict apply) then init with defaults when --yes is used', function () {
-    const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'cli-setup-'));
-    runCliSetup(tmp, ['--yes', '--primary=web-app']);
-    assert.ok(fs.existsSync(path.join(tmp, '.ai-coding-guide.json')));
-    assert.ok(fs.existsSync(path.join(tmp, 'AGENTS.md')));
-    assert.ok(fs.existsSync(path.join(tmp, 'eslint.config.mjs')));
+    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'cli-setup-'));
+    runCliSetup(tempDir, ['--yes', '--primary=web-app']);
+    assert.ok(fs.existsSync(path.join(tempDir, '.ai-coding-guide.json')));
+    assert.ok(fs.existsSync(path.join(tempDir, 'AGENTS.md')));
+    assert.ok(fs.existsSync(path.join(tempDir, 'eslint.config.mjs')));
   });
 
   it('supports --skip-learn and initializes with provided domain', function () {
-    const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'cli-setup-skip-'));
-    runCliSetup(tmp, ['--yes', '--skip-learn', '--primary=cli']);
-    const cfg = JSON.parse(fs.readFileSync(path.join(tmp, '.ai-coding-guide.json'), 'utf8'));
+    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'cli-setup-skip-'));
+    runCliSetup(tempDir, ['--yes', '--skip-learn', '--primary=cli']);
+    const cfg = JSON.parse(fs.readFileSync(path.join(tempDir, '.ai-coding-guide.json'), 'utf8'));
     assert.strictEqual(cfg.domains.primary, 'cli');
   });
 });

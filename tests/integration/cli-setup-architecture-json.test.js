@@ -20,9 +20,9 @@ function runCliSetup(tmpDir, args = []) {
 
 describe('setup persists architecture and domainPriority into JSON', function () {
   it('writes architecture and domainPriority to .ai-coding-guide.json', function () {
-    const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'cli-setup-arch-json-'));
-    runCliSetup(tmp);
-    const cfg = JSON.parse(fs.readFileSync(path.join(tmp, '.ai-coding-guide.json'), 'utf8'));
+    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'cli-setup-arch-json-'));
+    runCliSetup(tempDir);
+    const cfg = JSON.parse(fs.readFileSync(path.join(tempDir, '.ai-coding-guide.json'), 'utf8'));
     assert.ok(cfg.architecture, 'architecture section should exist');
     assert.ok(cfg.architecture.maxFileLength, 'architecture.maxFileLength should exist');
     assert.ok(Array.isArray(cfg.domainPriority) && cfg.domainPriority.length > 0, 'domainPriority should be populated');

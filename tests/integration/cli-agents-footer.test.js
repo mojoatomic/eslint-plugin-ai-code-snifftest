@@ -20,9 +20,9 @@ function runCliInit(tmpDir, args = []) {
 
 describe('AGENTS.md footer references .ai-coding-guide.json', function () {
   it('footer references .json and not .md', function () {
-    const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'cli-agents-footer-'));
-    runCliInit(tmp);
-    const agents = fs.readFileSync(path.join(tmp, 'AGENTS.md'), 'utf8');
+    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'cli-agents-footer-'));
+    runCliInit(tempDir);
+    const agents = fs.readFileSync(path.join(tempDir, 'AGENTS.md'), 'utf8');
     assert.ok(agents.includes('.ai-coding-guide.json'));
     assert.ok(!agents.includes('.ai-coding-guide.md'));
   });

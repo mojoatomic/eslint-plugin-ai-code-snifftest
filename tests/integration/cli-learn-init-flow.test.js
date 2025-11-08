@@ -11,11 +11,11 @@ const { execFileSync } = require('child_process');
 describe('CLI learn → init workflow', function () {
   it('preserves forbiddenNames through learn → init', function () {
     // Create temp directory
-    const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'learn-init-'));
+    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'learn-init-'));
     
     const cliPath = path.resolve(__dirname, '..', '..', 'bin', 'cli.js');
     const env = { ...process.env, SKIP_AI_REQUIREMENTS: '1', FORCE_AI_CONFIG: '1' };
-    const cfgPath = path.join(tmp, '.ai-coding-guide.json');
+    const cfgPath = path.join(tempDir, '.ai-coding-guide.json');
     
     // Step 1: Simulate what learn command would create
     // Create a config file with forbidden names (as if learn had saved them)
@@ -49,7 +49,7 @@ describe('CLI learn → init workflow', function () {
     
     // Step 2: Run init (should merge with existing config, not overwrite)
     execFileSync('node', [cliPath, 'init', '--primary=dev-tools', '--additional=cli'], {
-      cwd: tmp,
+      cwd: tempDir,
       env,
       stdio: 'pipe'
     });
@@ -72,6 +72,6 @@ describe('CLI learn → init workflow', function () {
       'Init should add additional domains');
     
     // Cleanup
-    fs.rmSync(tmp, { recursive: true, force: true });
+    fs.rmSync(tempDir, { recursive: true, force: true });
   });
 });

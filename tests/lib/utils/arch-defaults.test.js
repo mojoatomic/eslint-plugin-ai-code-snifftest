@@ -33,15 +33,15 @@ describe('arch-defaults', function () {
 
   describe('mergeArchitecture', function () {
     it('returns defaults when no user config provided', function () {
-      const result = mergeArchitecture();
-      assert.deepStrictEqual(result, JSON.parse(JSON.stringify(DEFAULT_ARCHITECTURE)));
+      const merged = mergeArchitecture();
+      assert.deepStrictEqual(merged, JSON.parse(JSON.stringify(DEFAULT_ARCHITECTURE)));
     });
 
     it('returns defaults when null/undefined passed', function () {
-      const result1 = mergeArchitecture(null);
-      const result2 = mergeArchitecture(undefined);
-      assert.deepStrictEqual(result1, JSON.parse(JSON.stringify(DEFAULT_ARCHITECTURE)));
-      assert.deepStrictEqual(result2, JSON.parse(JSON.stringify(DEFAULT_ARCHITECTURE)));
+      const merged1 = mergeArchitecture(null);
+      const merged2 = mergeArchitecture(undefined);
+      assert.deepStrictEqual(merged1, JSON.parse(JSON.stringify(DEFAULT_ARCHITECTURE)));
+      assert.deepStrictEqual(merged2, JSON.parse(JSON.stringify(DEFAULT_ARCHITECTURE)));
     });
 
     it('merges user fileStructure', function () {
@@ -50,10 +50,10 @@ describe('arch-defaults', function () {
           pattern: 'domain-driven'
         }
       };
-      const result = mergeArchitecture(user);
-      assert.strictEqual(result.fileStructure.pattern, 'domain-driven');
+      const merged = mergeArchitecture(user);
+      assert.strictEqual(merged.fileStructure.pattern, 'domain-driven');
       // Other defaults should remain
-      assert.strictEqual(result.maxFileLength.cli, 100);
+      assert.strictEqual(merged.maxFileLength.cli, 100);
     });
 
     it('merges user maxFileLength', function () {
@@ -63,11 +63,11 @@ describe('arch-defaults', function () {
           custom: 400
         }
       };
-      const result = mergeArchitecture(user);
-      assert.strictEqual(result.maxFileLength.cli, 150);
-      assert.strictEqual(result.maxFileLength.custom, 400);
+      const merged = mergeArchitecture(user);
+      assert.strictEqual(merged.maxFileLength.cli, 150);
+      assert.strictEqual(merged.maxFileLength.custom, 400);
       // Other defaults should remain
-      assert.strictEqual(result.maxFileLength.command, 150);
+      assert.strictEqual(merged.maxFileLength.command, 150);
     });
 
     it('merges user functions limits', function () {
@@ -77,11 +77,11 @@ describe('arch-defaults', function () {
           maxComplexity: 15
         }
       };
-      const result = mergeArchitecture(user);
-      assert.strictEqual(result.functions.maxLength, 100);
-      assert.strictEqual(result.functions.maxComplexity, 15);
+      const merged = mergeArchitecture(user);
+      assert.strictEqual(merged.functions.maxLength, 100);
+      assert.strictEqual(merged.functions.maxComplexity, 15);
       // Other defaults should remain
-      assert.strictEqual(result.functions.maxDepth, 4);
+      assert.strictEqual(merged.functions.maxDepth, 4);
     });
 
     it('merges user patterns', function () {
@@ -90,10 +90,10 @@ describe('arch-defaults', function () {
           asyncStyle: 'promises'
         }
       };
-      const result = mergeArchitecture(user);
-      assert.strictEqual(result.patterns.asyncStyle, 'promises');
+      const merged = mergeArchitecture(user);
+      assert.strictEqual(merged.patterns.asyncStyle, 'promises');
       // Other defaults should remain
-      assert.strictEqual(result.patterns.cliStyle, 'orchestration-shell');
+      assert.strictEqual(merged.patterns.cliStyle, 'orchestration-shell');
     });
 
     it('merges multiple sections at once', function () {
@@ -102,10 +102,10 @@ describe('arch-defaults', function () {
         maxFileLength: { cli: 80 },
         functions: { maxComplexity: 8 }
       };
-      const result = mergeArchitecture(user);
-      assert.strictEqual(result.fileStructure.pattern, 'layer-based');
-      assert.strictEqual(result.maxFileLength.cli, 80);
-      assert.strictEqual(result.functions.maxComplexity, 8);
+      const merged = mergeArchitecture(user);
+      assert.strictEqual(merged.fileStructure.pattern, 'layer-based');
+      assert.strictEqual(merged.maxFileLength.cli, 80);
+      assert.strictEqual(merged.functions.maxComplexity, 8);
     });
 
     it('does not mutate the default', function () {
