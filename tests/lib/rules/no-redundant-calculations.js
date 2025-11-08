@@ -465,23 +465,42 @@ const validScientificFormulas = [
 // Run All Tests
 //------------------------------------------------------------------------------
 
-ruleTester.run('no-redundant-calculations', rule, {
-  valid: [
-    ...validBasicTests,
-    ...validNumericBoundaries,
-    ...validFalsePositives,
-    ...validModernJS,
-    ...validEdgeCoverage,
-    ...validScientificFormulas,
-    ...validV111Additions
-  ],
-  invalid: [
-    ...invalidBasicTests,
-    ...invalidNumericBoundaries,
-    ...invalidOperatorPrecedence,
-    ...invalidModernJS,
-    ...invalidBranchCoverage,
-    ...invalidMultiInstance,
-    ...invalidMultiInstanceMixed
-  ]
-});
+// Suite A: explicit settings → experimentalExternalConstants: true (baseline behavior)
+(function runSuiteExtConstTrue(){
+  const injectSettings = (tc) => Object.assign({}, tc, { settings: { 'ai-code-snifftest': { experimentalExternalConstants: true } } });
+  ruleTester.run('no-redundant-calculations [extConst=true]', rule, {
+    valid: [
+      ...validBasicTests.map(injectSettings),
+      ...validNumericBoundaries.map(injectSettings),
+      ...validFalsePositives.map(injectSettings),
+      ...validModernJS.map(injectSettings),
+      ...validEdgeCoverage.map(injectSettings),
+      ...validScientificFormulas.map(injectSettings),
+      ...validV111Additions.map(injectSettings)
+    ],
+    invalid: [
+      ...invalidBasicTests.map(injectSettings),
+      ...invalidNumericBoundaries.map(injectSettings),
+      ...invalidOperatorPrecedence.map(injectSettings),
+      ...invalidModernJS.map(injectSettings),
+      ...invalidBranchCoverage.map(injectSettings),
+      ...invalidMultiInstance.map(injectSettings),
+      ...invalidMultiInstanceMixed.map(injectSettings)
+    ]
+  });
+})();
+
+// Suite B: explicit settings → experimentalExternalConstants: false (deterministic against disk)
+(function runSuiteExtConstFalse(){
+  const injectSettings = (tc) => Object.assign({}, tc, { settings: { 'ai-code-snifftest': { experimentalExternalConstants: false } } });
+  ruleTester.run('no-redundant-calculations [extConst=false]', rule, {
+    valid: [ ],
+    invalid: [
+      injectSettings({
+        code: 'const result = 5 * 4 * 3;',
+        errors: [{ messageId: 'redundantCalculation' }],
+        output: 'const result = 60;'
+      })
+    ]
+  });
+})();
