@@ -22,6 +22,8 @@
     "lint:eslint-docs": "npm-run-all \"update:eslint-docs -- --check\"",
     "lint:js": "eslint .",
     "lint:json": "eslint . -f json -o lint-results.json",
+    "lint:fix:layout": "eslint . --fix --fix-type=layout",
+    "lint:fix:sweep": "eslint . --fix --ignore-pattern 'lib/rules/**'",
     "test": "mocha tests --recursive",
     "test:coverage": "c8 --reporter=text --reporter=lcov npm test",
     "test:prettier": "mocha tests/integration/prettier-compat.test.js",
