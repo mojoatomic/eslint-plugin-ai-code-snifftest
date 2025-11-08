@@ -14,6 +14,21 @@ Suggested workflow for sweeps
 3) `npm run lint:json && npx eslint-plugin-ai-code-snifftest analyze --input=lint-results.json`
 4) `npm test`
 
+## Tech Debt Ratchet (no new violations)
+
+To prevent the “merry‑go‑round”, we enforce a ratchet: new work may not increase analyzer categories (complexity, architecture, domain terms, magic numbers).
+
+- Baseline once on main:
+  - `npm run lint:json`
+  - `npm run analyze:baseline`  # writes `analysis-baseline.json`
+- On every push (hook + CI):
+  - `npm run lint:json && npm run analyze:current && npm run ratchet`
+  - then `npm test`
+
+Refresh baseline intentionally only after reducing violations:
+- `npm run lint:json && npm run analyze:baseline`
+- Commit the updated `analysis-baseline.json` with message 'ratchet: refresh baseline after reductions'
+
 Notes
 - End-users of the plugin won’t hit this hazard; it’s specific to self-hosting (running rule fixers against their own source).
 - For deeper refactors in `lib/rules/**`, run full lint without `--fix` first and commit deliberately reviewed edits.

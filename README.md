@@ -10,10 +10,11 @@ ESLint plugin with AI agent configuration generator for JavaScript projects.
 
 ## What This Provides
 
-This plugin combines two functions:
+This plugin combines two functions and built-in guardrails:
 
 1. **ESLint rules** - 8 rules targeting AI-generated code patterns
 2. **Configuration generator** - CLI tool that creates AI agent guides and ESLint configs
+3. **Guardrails: No-New-Debt Ratchet** — hooks + CI that block increases in analyzer categories. See [No-New-Debt Ratchet (All projects)](#no-new-debt-ratchet-all-projects)
 
 ### Generated Files
 
@@ -87,6 +88,7 @@ After setup, you'll have:
 
 - Review `AGENTS.md` for coding guidelines
 - Run `npx eslint .` to check your code
+- Enable the No‑New‑Debt Ratchet to prevent regressions (see section below)
 - Use AI assistants (they'll automatically read AGENTS.md)
 
 ## Quick Start
@@ -461,6 +463,48 @@ This tool is designed for JavaScript/Node.js projects and is currently in active
 - Generic name detection may have false positives in domain-specific contexts
 - Architecture limits are suggestions only, not runtime-enforced
 - AI agent compliance not guaranteed
+
+---
+
+## No-New-Debt Ratchet (All projects)
+
+Keep quality trending in one direction only: better. The ratchet blocks any increase in analyzer categories (complexity, architecture, domain terms, magic numbers) while allowing gradual cleanup.
+
+Why this matters (works for greenfield and brownfield)
+- New templates often ship with violations; accept the baseline once, then prevent regressions
+- Rapid prototyping: iterate fast without blocking, but never get worse than the last accepted state
+- AI-generated and copied code: capture current count as baseline; fix over time
+
+How it works in this repo
+- Baseline file: analysis-baseline.json
+- Local hook: pre-push runs `npm run lint:json && npm run analyze:current && npm run ratchet && npm test`
+- CI: .github/workflows/ci-ratchet.yml runs the same and uploads artifacts
+
+Usage
+```bash
+# Create/refresh baseline from current state (intend to accept current count)
+npm run lint:json && npm run analyze:baseline
+
+# Check current branch against baseline (runs in hooks/CI)
+npm run lint:json && npm run analyze:current && npm run ratchet
+
+# After reducing violations, refresh baseline intentionally
+npm run lint:json && npm run analyze:baseline
+# Commit the updated baseline (recommended message):
+# 'ratchet: refresh baseline after reductions'
+```
+
+Modes for different project types
+- Zero-Tolerance (pure greenfield)
+  - Keep baseline at 0; optionally promote key rules to error in CI-only config
+- Flexible Greenfield (prototype mode)
+  - Set baseline from current state (e.g., template/prototype); prevent increases; ratchet down as you fix
+- Brownfield (existing code)
+  - Set baseline from current codebase; prevent increases; reduce over time; optionally use path-specific overrides for legacy areas
+
+Adopting ratchet in other repos
+- Manual setup today: copy scripts/ratchet.js, add the npm scripts shown above, wire a pre-push hook, and add a CI job similar to ci-ratchet
+- Coming soon: a one-shot "guardrails setup" command to scaffold these pieces automatically (see issue #180)
 
 ---
 

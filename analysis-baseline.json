@@ -1,0 +1,869 @@
+{
+  "categories": {
+    "magicNumbers": [],
+    "complexity": [
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/bin/cli.js",
+        "message": "Function 'main' has a complexity of 16. Maximum allowed is 10.",
+        "ruleId": "complexity",
+        "line": 20,
+        "column": 1
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/docs/sample-rule-no-redundant-calculations.js",
+        "message": "Function 'evaluateExpression' has a complexity of 11. Maximum allowed is 10.",
+        "ruleId": "complexity",
+        "line": 17,
+        "column": 1
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/docs/sample-rule-no-redundant-calculations.js",
+        "message": "Function 'evaluateTree' has a complexity of 11. Maximum allowed is 10.",
+        "ruleId": "complexity",
+        "line": 71,
+        "column": 1
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/commands/analyze/categorizer.js",
+        "message": "Function 'categorizeViolations' has a complexity of 27. Maximum allowed is 10.",
+        "ruleId": "complexity",
+        "line": 8,
+        "column": 1
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/commands/analyze/domain.js",
+        "message": "Function 'inferDomainForMessage' has a complexity of 12. Maximum allowed is 10.",
+        "ruleId": "complexity",
+        "line": 28,
+        "column": 1
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/commands/analyze/estimator.js",
+        "message": "Function 'estimateEffort' has a complexity of 17. Maximum allowed is 10.",
+        "ruleId": "complexity",
+        "line": 46,
+        "column": 1
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/commands/analyze/index.js",
+        "message": "Function 'analyzeCommand' has a complexity of 17. Maximum allowed is 10.",
+        "ruleId": "complexity",
+        "line": 13,
+        "column": 1
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/commands/analyze/reporter.js",
+        "message": "Function 'writeAnalysisReport' has a complexity of 29. Maximum allowed is 10.",
+        "ruleId": "complexity",
+        "line": 6,
+        "column": 1
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/commands/create-issues/index.js",
+        "message": "Function 'createIssuesCommand' has a complexity of 16. Maximum allowed is 10.",
+        "ruleId": "complexity",
+        "line": 12,
+        "column": 1
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/commands/create-issues/markdown.js",
+        "message": "Function 'buildMarkdownSections' has a complexity of 85. Maximum allowed is 10.",
+        "ruleId": "complexity",
+        "line": 70,
+        "column": 1
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/commands/create-issues/markdown.js",
+        "message": "Function 'pickList' has a complexity of 13. Maximum allowed is 10.",
+        "ruleId": "complexity",
+        "line": 102,
+        "column": 3
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/commands/create-issues/markdown.js",
+        "message": "Arrow function has a complexity of 13. Maximum allowed is 10.",
+        "ruleId": "complexity",
+        "line": 113,
+        "column": 24
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/commands/create-issues/markdown.js",
+        "message": "Function 'suggest' has a complexity of 16. Maximum allowed is 10.",
+        "ruleId": "complexity",
+        "line": 191,
+        "column": 9
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/commands/init/index.js",
+        "message": "Function 'initCommand' has a complexity of 40. Maximum allowed is 10.",
+        "ruleId": "complexity",
+        "line": 20,
+        "column": 1
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/commands/init/index.js",
+        "message": "Async function 'initInteractiveCommand' has a complexity of 46. Maximum allowed is 10.",
+        "ruleId": "complexity",
+        "line": 133,
+        "column": 1
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/commands/learn/index.js",
+        "message": "Async function 'learnInteractiveCommand' has a complexity of 69. Maximum allowed is 10.",
+        "ruleId": "complexity",
+        "line": 12,
+        "column": 1
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/commands/learn/index.js",
+        "message": "Function 'learnCommand' has a complexity of 22. Maximum allowed is 10.",
+        "ruleId": "complexity",
+        "line": 188,
+        "column": 1
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/commands/plan/index.js",
+        "message": "Function 'planCommand' has a complexity of 12. Maximum allowed is 10.",
+        "ruleId": "complexity",
+        "line": 12,
+        "column": 1
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/commands/setup/index.js",
+        "message": "Async function 'setupCommand' has a complexity of 15. Maximum allowed is 10.",
+        "ruleId": "complexity",
+        "line": 5,
+        "column": 1
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/generators/agents-md.js",
+        "message": "Function 'writeAgentsMd' has a complexity of 40. Maximum allowed is 10.",
+        "ruleId": "complexity",
+        "line": 32,
+        "column": 1
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/generators/config-json.js",
+        "message": "Function 'enrichConfigWithDomains' has a complexity of 15. Maximum allowed is 10.",
+        "ruleId": "complexity",
+        "line": 27,
+        "column": 1
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/generators/eslint-arch-config.js",
+        "message": "Function 'generateArchitectureRules' has a complexity of 14. Maximum allowed is 10.",
+        "ruleId": "complexity",
+        "line": 10,
+        "column": 1
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/generators/guide-md.js",
+        "message": "Function 'writeGuideMd' has a complexity of 11. Maximum allowed is 10.",
+        "ruleId": "complexity",
+        "line": 6,
+        "column": 1
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/rules/enforce-domain-terms.js",
+        "message": "Function 'collectDomainTerms' has a complexity of 29. Maximum allowed is 10.",
+        "ruleId": "complexity",
+        "line": 29,
+        "column": 1
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/rules/enforce-domain-terms.js",
+        "message": "Function 'collectExemptions' has a complexity of 13. Maximum allowed is 10.",
+        "ruleId": "complexity",
+        "line": 59,
+        "column": 1
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/rules/enforce-naming-conventions.js",
+        "message": "Method 'create' has a complexity of 15. Maximum allowed is 10.",
+        "ruleId": "complexity",
+        "line": 114,
+        "column": 9
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/rules/no-equivalent-branches.js",
+        "message": "Function 'areNodesEquivalent' has a complexity of 30. Maximum allowed is 10.",
+        "ruleId": "complexity",
+        "line": 17,
+        "column": 1
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/rules/no-generic-names.js",
+        "message": "Function 'checkIdentifier' has a complexity of 11. Maximum allowed is 10.",
+        "ruleId": "complexity",
+        "line": 41,
+        "column": 5
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/rules/no-redundant-calculations.js",
+        "message": "Function 'evaluateTree' has a complexity of 15. Maximum allowed is 10.",
+        "ruleId": "complexity",
+        "line": 100,
+        "column": 1
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/rules/no-redundant-calculations.js",
+        "message": "Function 'shouldSkipScientificCalculation' has a complexity of 18. Maximum allowed is 10.",
+        "ruleId": "complexity",
+        "line": 256,
+        "column": 5
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/rules/no-redundant-calculations.js",
+        "message": "Function 'buildEffectiveConstantsMap' has a complexity of 19. Maximum allowed is 10.",
+        "ruleId": "complexity",
+        "line": 311,
+        "column": 5
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/rules/no-redundant-calculations.js",
+        "message": "Function 'matchDomainsForValue' has a complexity of 11. Maximum allowed is 10.",
+        "ruleId": "complexity",
+        "line": 354,
+        "column": 5
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/rules/no-redundant-calculations.js",
+        "message": "Function 'shouldSkipByDomainResolution' has a complexity of 14. Maximum allowed is 10.",
+        "ruleId": "complexity",
+        "line": 380,
+        "column": 5
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/rules/no-redundant-calculations.js",
+        "message": "Method 'BinaryExpression' has a complexity of 15. Maximum allowed is 10.",
+        "ruleId": "complexity",
+        "line": 412,
+        "column": 23
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/rules/no-redundant-conditionals.js",
+        "message": "Function 'isConstant' has a complexity of 12. Maximum allowed is 10.",
+        "ruleId": "complexity",
+        "line": 41,
+        "column": 5
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/rules/no-redundant-conditionals.js",
+        "message": "Function 'getBooleanValue' has a complexity of 16. Maximum allowed is 10.",
+        "ruleId": "complexity",
+        "line": 73,
+        "column": 5
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/rules/no-redundant-conditionals.js",
+        "message": "Function 'isRedundantBooleanComparison' has a complexity of 26. Maximum allowed is 10.",
+        "ruleId": "complexity",
+        "line": 119,
+        "column": 5
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/rules/no-redundant-conditionals.js",
+        "message": "Function 'evaluateConstant' has a complexity of 35. Maximum allowed is 10.",
+        "ruleId": "complexity",
+        "line": 167,
+        "column": 5
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/rules/no-redundant-conditionals.js",
+        "message": "Function 'simplifyLogicalExpression' has a complexity of 22. Maximum allowed is 10.",
+        "ruleId": "complexity",
+        "line": 228,
+        "column": 5
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/rules/no-redundant-conditionals.js",
+        "message": "Method 'ConditionalExpression' has a complexity of 14. Maximum allowed is 10.",
+        "ruleId": "complexity",
+        "line": 542,
+        "column": 28
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/rules/no-unnecessary-abstraction.js",
+        "message": "Function 'getTrivialWrapperInfo' has a complexity of 13. Maximum allowed is 10.",
+        "ruleId": "complexity",
+        "line": 42,
+        "column": 5
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/rules/no-unnecessary-abstraction.js",
+        "message": "Method 'Program:exit' has a complexity of 11. Maximum allowed is 10.",
+        "ruleId": "complexity",
+        "line": 185,
+        "column": 21
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/rules/prefer-simpler-logic.js",
+        "message": "Method 'BinaryExpression' has a complexity of 17. Maximum allowed is 10.",
+        "ruleId": "complexity",
+        "line": 48,
+        "column": 23
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/scanner/extract.js",
+        "message": "Function 'walk' has a complexity of 14. Maximum allowed is 10.",
+        "ruleId": "complexity",
+        "line": 10,
+        "column": 3
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/scanner/extract.js",
+        "message": "Function 'aggregateSummaries' has a complexity of 17. Maximum allowed is 10.",
+        "ruleId": "complexity",
+        "line": 135,
+        "column": 1
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/scanner/reconcile.js",
+        "message": "Function 'reconcileNaming' has a complexity of 15. Maximum allowed is 10.",
+        "ruleId": "complexity",
+        "line": 24,
+        "column": 1
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/scanner/reconcile.js",
+        "message": "Function 'reconcileConstants' has a complexity of 25. Maximum allowed is 10.",
+        "ruleId": "complexity",
+        "line": 70,
+        "column": 1
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/scanner/reconcile.js",
+        "message": "Function 'reconcile' has a complexity of 11. Maximum allowed is 10.",
+        "ruleId": "complexity",
+        "line": 128,
+        "column": 1
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/utils/arch-defaults.js",
+        "message": "Function 'mergeArchitecture' has a complexity of 13. Maximum allowed is 10.",
+        "ruleId": "complexity",
+        "line": 52,
+        "column": 1
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/utils/arch-switch.js",
+        "message": "Function 'normalizeBoolean' has a complexity of 16. Maximum allowed is 10.",
+        "ruleId": "complexity",
+        "line": 3,
+        "column": 1
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/utils/discover-constants.js",
+        "message": "Function 'discoverNpmPackages' has a complexity of 26. Maximum allowed is 10.",
+        "ruleId": "complexity",
+        "line": 31,
+        "column": 1
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/utils/domain-annotations.js",
+        "message": "Function 'getNearestSectionDomain' has a complexity of 11. Maximum allowed is 10.",
+        "ruleId": "complexity",
+        "line": 25,
+        "column": 1
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/utils/fingerprint.js",
+        "message": "Function 'applyFingerprintToConfig' has a complexity of 11. Maximum allowed is 10.",
+        "ruleId": "complexity",
+        "line": 16,
+        "column": 1
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/utils/merge-constants.js",
+        "message": "Function 'mergeConstants' has a complexity of 23. Maximum allowed is 10.",
+        "ruleId": "complexity",
+        "line": 3,
+        "column": 1
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/utils/project-config.js",
+        "message": "Function 'shallowValidate' has a complexity of 11. Maximum allowed is 10.",
+        "ruleId": "complexity",
+        "line": 26,
+        "column": 1
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/utils/project-config.js",
+        "message": "Function 'deepMerge' has a complexity of 11. Maximum allowed is 10.",
+        "ruleId": "complexity",
+        "line": 35,
+        "column": 1
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/utils/project-config.js",
+        "message": "Function 'readProjectConfig' has a complexity of 40. Maximum allowed is 10.",
+        "ruleId": "complexity",
+        "line": 76,
+        "column": 1
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/utils/project-detection.js",
+        "message": "Function 'detectProjectContext' has a complexity of 18. Maximum allowed is 10.",
+        "ruleId": "complexity",
+        "line": 6,
+        "column": 1
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/utils/requirements.js",
+        "message": "Function 'checkRequirements' has a complexity of 13. Maximum allowed is 10.",
+        "ruleId": "complexity",
+        "line": 5,
+        "column": 1
+      }
+    ],
+    "domainTerms": [],
+    "architecture": [
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/bin/cli.js",
+        "message": "Function 'main' has too many statements (39). Maximum allowed is 30.",
+        "ruleId": "max-statements",
+        "line": 20,
+        "column": 1
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/commands/analyze/reporter.js",
+        "message": "Function 'writeAnalysisReport' has too many lines (119). Maximum allowed is 50.",
+        "ruleId": "max-lines-per-function",
+        "line": 6,
+        "column": 1
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/commands/analyze/reporter.js",
+        "message": "Function 'writeAnalysisReport' has too many statements (65). Maximum allowed is 30.",
+        "ruleId": "max-statements",
+        "line": 6,
+        "column": 1
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/commands/create-issues/markdown.js",
+        "message": "Function 'buildMarkdownSections' has too many lines (259). Maximum allowed is 50.",
+        "ruleId": "max-lines-per-function",
+        "line": 70,
+        "column": 1
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/commands/create-issues/markdown.js",
+        "message": "Function 'buildMarkdownSections' has too many statements (179). Maximum allowed is 30.",
+        "ruleId": "max-statements",
+        "line": 70,
+        "column": 1
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/commands/create-issues/markdown.js",
+        "message": "File has too many lines (394). Maximum allowed is 150.",
+        "ruleId": "max-lines",
+        "line": 169,
+        "column": 1
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/commands/init/index.js",
+        "message": "Function 'initCommand' has too many lines (94). Maximum allowed is 50.",
+        "ruleId": "max-lines-per-function",
+        "line": 20,
+        "column": 1
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/commands/init/index.js",
+        "message": "Function 'initCommand' has too many statements (48). Maximum allowed is 30.",
+        "ruleId": "max-statements",
+        "line": 20,
+        "column": 1
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/commands/init/index.js",
+        "message": "Async function 'initInteractiveCommand' has too many lines (109). Maximum allowed is 50.",
+        "ruleId": "max-lines-per-function",
+        "line": 133,
+        "column": 1
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/commands/init/index.js",
+        "message": "Async function 'initInteractiveCommand' has too many statements (77). Maximum allowed is 30.",
+        "ruleId": "max-statements",
+        "line": 133,
+        "column": 1
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/commands/init/index.js",
+        "message": "File has too many lines (217). Maximum allowed is 150.",
+        "ruleId": "max-lines",
+        "line": 180,
+        "column": 1
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/commands/init/index.js",
+        "message": "Blocks are nested too deeply (5). Maximum allowed is 4.",
+        "ruleId": "max-depth",
+        "line": 180,
+        "column": 11
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/commands/init/index.js",
+        "message": "Blocks are nested too deeply (6). Maximum allowed is 4.",
+        "ruleId": "max-depth",
+        "line": 182,
+        "column": 13
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/commands/init/index.js",
+        "message": "Blocks are nested too deeply (5). Maximum allowed is 4.",
+        "ruleId": "max-depth",
+        "line": 192,
+        "column": 13
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/commands/init/index.js",
+        "message": "Blocks are nested too deeply (6). Maximum allowed is 4.",
+        "ruleId": "max-depth",
+        "line": 194,
+        "column": 15
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/commands/learn/index.js",
+        "message": "Async function 'learnInteractiveCommand' has too many lines (152). Maximum allowed is 50.",
+        "ruleId": "max-lines-per-function",
+        "line": 12,
+        "column": 1
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/commands/learn/index.js",
+        "message": "Async function 'learnInteractiveCommand' has too many parameters (5). Maximum allowed is 4.",
+        "ruleId": "max-params",
+        "line": 12,
+        "column": 1
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/commands/learn/index.js",
+        "message": "Async function 'learnInteractiveCommand' has too many statements (116). Maximum allowed is 30.",
+        "ruleId": "max-statements",
+        "line": 12,
+        "column": 1
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/commands/learn/index.js",
+        "message": "Blocks are nested too deeply (5). Maximum allowed is 4.",
+        "ruleId": "max-depth",
+        "line": 96,
+        "column": 11
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/commands/learn/index.js",
+        "message": "Blocks are nested too deeply (6). Maximum allowed is 4.",
+        "ruleId": "max-depth",
+        "line": 99,
+        "column": 13
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/commands/learn/index.js",
+        "message": "Blocks are nested too deeply (5). Maximum allowed is 4.",
+        "ruleId": "max-depth",
+        "line": 105,
+        "column": 11
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/commands/learn/index.js",
+        "message": "Blocks are nested too deeply (5). Maximum allowed is 4.",
+        "ruleId": "max-depth",
+        "line": 110,
+        "column": 11
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/commands/learn/index.js",
+        "message": "Blocks are nested too deeply (5). Maximum allowed is 4.",
+        "ruleId": "max-depth",
+        "line": 116,
+        "column": 11
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/commands/learn/index.js",
+        "message": "File has too many lines (209). Maximum allowed is 150.",
+        "ruleId": "max-lines",
+        "line": 174,
+        "column": 1
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/commands/learn/index.js",
+        "message": "Function 'learnCommand' has too many statements (37). Maximum allowed is 30.",
+        "ruleId": "max-statements",
+        "line": 188,
+        "column": 1
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/commands/plan/roadmap.js",
+        "message": "Function 'writeRoadmap' has too many lines (69). Maximum allowed is 50.",
+        "ruleId": "max-lines-per-function",
+        "line": 23,
+        "column": 1
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/commands/plan/roadmap.js",
+        "message": "Arrow function has too many lines (57). Maximum allowed is 50.",
+        "ruleId": "max-lines-per-function",
+        "line": 35,
+        "column": 18
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/commands/plan/roadmap.js",
+        "message": "Arrow function has too many statements (48). Maximum allowed is 30.",
+        "ruleId": "max-statements",
+        "line": 35,
+        "column": 18
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/generators/agents-md.js",
+        "message": "Function 'writeAgentsMd' has too many lines (75). Maximum allowed is 50.",
+        "ruleId": "max-lines-per-function",
+        "line": 32,
+        "column": 1
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/generators/agents-md.js",
+        "message": "Function 'writeAgentsMd' has too many statements (62). Maximum allowed is 30.",
+        "ruleId": "max-statements",
+        "line": 32,
+        "column": 1
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/generators/eslint-arch-config.js",
+        "message": "Function 'generateArchitectureRules' has too many lines (68). Maximum allowed is 50.",
+        "ruleId": "max-lines-per-function",
+        "line": 10,
+        "column": 1
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/rules/enforce-domain-terms.js",
+        "message": "Method 'create' has too many lines (58). Maximum allowed is 50.",
+        "ruleId": "max-lines-per-function",
+        "line": 103,
+        "column": 3
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/rules/enforce-naming-conventions.js",
+        "message": "Method 'create' has too many lines (78). Maximum allowed is 50.",
+        "ruleId": "max-lines-per-function",
+        "line": 114,
+        "column": 3
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/rules/no-redundant-calculations.js",
+        "message": "Method 'create' has too many lines (210). Maximum allowed is 50.",
+        "ruleId": "max-lines-per-function",
+        "line": 179,
+        "column": 3
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/rules/no-redundant-calculations.js",
+        "message": "File has too many lines (322). Maximum allowed is 250.",
+        "ruleId": "max-lines",
+        "line": 385,
+        "column": 1
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/rules/no-redundant-conditionals.js",
+        "message": "Method 'create' has too many lines (451). Maximum allowed is 50.",
+        "ruleId": "max-lines-per-function",
+        "line": 31,
+        "column": 3
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/rules/no-redundant-conditionals.js",
+        "message": "Function 'simplifyLogicalExpression' has too many lines (52). Maximum allowed is 50.",
+        "ruleId": "max-lines-per-function",
+        "line": 228,
+        "column": 5
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/rules/no-redundant-conditionals.js",
+        "message": "Method 'IfStatement' has too many lines (71). Maximum allowed is 50.",
+        "ruleId": "max-lines-per-function",
+        "line": 291,
+        "column": 7
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/rules/no-redundant-conditionals.js",
+        "message": "File has too many lines (471). Maximum allowed is 250.",
+        "ruleId": "max-lines",
+        "line": 335,
+        "column": 1
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/rules/no-redundant-conditionals.js",
+        "message": "Method 'SwitchStatement' has too many lines (78). Maximum allowed is 50.",
+        "ruleId": "max-lines-per-function",
+        "line": 450,
+        "column": 7
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/rules/no-redundant-conditionals.js",
+        "message": "Method 'SwitchStatement' has too many statements (33). Maximum allowed is 30.",
+        "ruleId": "max-statements",
+        "line": 450,
+        "column": 22
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/rules/no-unnecessary-abstraction.js",
+        "message": "Method 'create' has too many lines (157). Maximum allowed is 50.",
+        "ruleId": "max-lines-per-function",
+        "line": 28,
+        "column": 3
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/rules/no-unnecessary-abstraction.js",
+        "message": "Method 'Program:exit' has too many lines (61). Maximum allowed is 50.",
+        "ruleId": "max-lines-per-function",
+        "line": 185,
+        "column": 7
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/rules/prefer-simpler-logic.js",
+        "message": "Method 'create' has too many lines (121). Maximum allowed is 50.",
+        "ruleId": "max-lines-per-function",
+        "line": 44,
+        "column": 3
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/rules/prefer-simpler-logic.js",
+        "message": "Method 'BinaryExpression' has too many lines (74). Maximum allowed is 50.",
+        "ruleId": "max-lines-per-function",
+        "line": 48,
+        "column": 7
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/utils/discover-constants.js",
+        "message": "Function 'discoverNpmPackages' has too many statements (31). Maximum allowed is 30.",
+        "ruleId": "max-statements",
+        "line": 31,
+        "column": 1
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/utils/project-config.js",
+        "message": "Function 'readProjectConfig' has too many lines (61). Maximum allowed is 50.",
+        "ruleId": "max-lines-per-function",
+        "line": 76,
+        "column": 1
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/utils/project-config.js",
+        "message": "Function 'readProjectConfig' has too many statements (49). Maximum allowed is 30.",
+        "ruleId": "max-statements",
+        "line": 76,
+        "column": 1
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/utils/project-config.js",
+        "message": "Blocks are nested too deeply (5). Maximum allowed is 4.",
+        "ruleId": "max-depth",
+        "line": 92,
+        "column": 11
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/utils/project-config.js",
+        "message": "Blocks are nested too deeply (5). Maximum allowed is 4.",
+        "ruleId": "max-depth",
+        "line": 93,
+        "column": 11
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/utils/project-config.js",
+        "message": "Blocks are nested too deeply (6). Maximum allowed is 4.",
+        "ruleId": "max-depth",
+        "line": 97,
+        "column": 13
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/utils/project-config.js",
+        "message": "Blocks are nested too deeply (7). Maximum allowed is 4.",
+        "ruleId": "max-depth",
+        "line": 100,
+        "column": 15
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/utils/project-detection.js",
+        "message": "Function 'detectProjectContext' has too many lines (84). Maximum allowed is 50.",
+        "ruleId": "max-lines-per-function",
+        "line": 6,
+        "column": 1
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/lib/utils/project-detection.js",
+        "message": "Function 'detectProjectContext' has too many statements (31). Maximum allowed is 30.",
+        "ruleId": "max-statements",
+        "line": 6,
+        "column": 1
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/scripts/ratchet.js",
+        "message": "Function 'main' has too many statements (32). Maximum allowed is 30.",
+        "ruleId": "max-statements",
+        "line": 77,
+        "column": 1
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/tests/lib/rules/no-redundant-calculations.js",
+        "message": "File has too many lines (384). Maximum allowed is 250.",
+        "ruleId": "max-lines",
+        "line": 338,
+        "column": 1
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/tests/lib/rules/no-redundant-conditionals.js",
+        "message": "File has too many lines (593). Maximum allowed is 250.",
+        "ruleId": "max-lines",
+        "line": 340,
+        "column": 1
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/tests/lib/rules/no-unnecessary-abstraction.js",
+        "message": "File has too many lines (669). Maximum allowed is 250.",
+        "ruleId": "max-lines",
+        "line": 327,
+        "column": 1
+      },
+      {
+        "filePath": "/Users/dougfennell/vscode/projects/eslint-plugin-ai-code-snifftest/tests/lib/rules/prefer-simpler-logic.js",
+        "message": "File has too many lines (295). Maximum allowed is 250.",
+        "ruleId": "max-lines",
+        "line": 349,
+        "column": 1
+      }
+    ],
+    "counts": {
+      "errors": 0,
+      "warnings": 128,
+      "autoFixable": 0
+    },
+    "domainSummary": [
+      {
+        "domain": "dev-tools",
+        "count": 0,
+        "rank": 0
+      },
+      {
+        "domain": "cli",
+        "count": 0,
+        "rank": 1
+      },
+      {
+        "domain": "linting",
+        "count": 0,
+        "rank": 2
+      }
+    ]
+  },
+  "effort": {
+    "hours": 100.2,
+    "days": 12.5,
+    "weeks": 2.5,
+    "byCategory": {
+      "magicNumbers": 0,
+      "domainTerms": 0,
+      "architecture": 11.7,
+      "complexity": 88.5
+    }
+  }
+}
