@@ -73,6 +73,19 @@ export default [
     }
   },
   {
+    files: ["lib/rules/**/*.js"],
+    rules: {
+      // Guardrail: do not run our plugin rules on the plugin rule source itself
+      'ai-code-snifftest/no-redundant-calculations': 'off',
+      'ai-code-snifftest/no-equivalent-branches': 'off',
+      'ai-code-snifftest/prefer-simpler-logic': 'off',
+      'ai-code-snifftest/no-redundant-conditionals': 'off',
+      'ai-code-snifftest/no-unnecessary-abstraction': 'off',
+      'ai-code-snifftest/no-generic-names': 'off',
+      'ai-code-snifftest/enforce-domain-terms': 'off'
+    }
+  },
+  {
     files: ["**/*.test.js","**/*.spec.js","**/tests/**/*.js"],
     rules: {
       'max-lines-per-function': "off",

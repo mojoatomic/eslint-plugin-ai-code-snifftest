@@ -2,7 +2,7 @@
  * @fileoverview Prettier Compatibility Integration Tests
  * Verifies that ESLint auto-fixes work seamlessly with Prettier formatting
  */
-"use strict";
+'use strict';
 
 /* global describe, it */
 
@@ -100,35 +100,35 @@ describe('Prettier Compatibility Integration Tests', function() {
     it('should work with no spacing', async () => {
       await testPrettierCompat(
         'const x=1+2+3;',
-        "const x = 6;"
+        'const x = 6;'
       );
     });
 
     it('should work with normal spacing', async () => {
       await testPrettierCompat(
         'const x = 1 + 2 + 3;',
-        "const x = 6;"
+        'const x = 6;'
       );
     });
 
     it('should work with inconsistent spacing', async () => {
       await testPrettierCompat(
         'const x=1 +2+ 3;',
-        "const x = 6;"
+        'const x = 6;'
       );
     });
 
     it('should work with nested calculations', async () => {
       await testPrettierCompat(
         'const x=(1+2)*(3+4);',
-        "const x = 21;"
+        'const x = 21;'
       );
     });
 
     it('should work with multiple calculations', async () => {
       await testPrettierCompat(
         'const x=1+2,y=3+4;',
-        "const x = 3,\n  y = 7;"
+        'const x = 3,\n  y = 7;'
       );
     });
   });
@@ -137,14 +137,14 @@ describe('Prettier Compatibility Integration Tests', function() {
     it('should work with compact formatting', async () => {
       await testPrettierCompat(
         'function test() { if (x) { return 1; } else { return 1; } }',
-        "function test() {\n  return 1;\n}"
+        'function test() {\n  return 1;\n}'
       );
     });
 
     it('should work with expanded formatting', async () => {
       await testPrettierCompat(
         'function test() {\n  if (condition) {\n    return true;\n  } else {\n    return true;\n  }\n}',
-        "function test() {\n  return true;\n}"
+        'function test() {\n  return true;\n}'
       );
     });
   });
@@ -153,21 +153,21 @@ describe('Prettier Compatibility Integration Tests', function() {
     it('should work with no spacing', async () => {
       await testPrettierCompat(
         'const x=!!value;',
-        "const x = !!value;"  // Rule doesn't apply in assignment context
+        'const x = !!value;'  // Rule doesn't apply in assignment context
       );
     });
 
     it('should work with normal spacing', async () => {
       await testPrettierCompat(
         'const x = !!value;',
-        "const x = !!value;"  // Rule doesn't apply in assignment context
+        'const x = !!value;'  // Rule doesn't apply in assignment context
       );
     });
 
     it('should work with x===true in if', async () => {
       await testPrettierCompat(
         'if(value===true){work();}',
-        "if (value) {\n  work();\n}"
+        'if (value) {\n  work();\n}'
       );
     });
   });
@@ -176,21 +176,21 @@ describe('Prettier Compatibility Integration Tests', function() {
     it('should work with constant conditions', async () => {
       await testPrettierCompat(
         'if(true){doSomething();}',
-        "doSomething();"
+        'doSomething();'
       );
     });
 
     it('should work with boolean comparisons', async () => {
       await testPrettierCompat(
         'if(x===true){doWork();}',
-        "if (x) {\n  doWork();\n}"
+        'if (x) {\n  doWork();\n}'
       );
     });
 
     it('should work with ternaries', async () => {
       await testPrettierCompat(
         'const result=condition?true:false;',
-        "const result = Boolean(condition);"
+        'const result = Boolean(condition);'
       );
     });
   });
@@ -213,14 +213,14 @@ describe('Prettier Compatibility Integration Tests', function() {
     it('should handle multiple rule fixes in same file', async () => {
       await testPrettierCompat(
         'const x=1+2;if(condition===true){work();}if(flag===false){stop();}',
-        "const x = 3;\nif (condition) {\n  work();\n}\nif (!flag) {\n  stop();\n}"
+        'const x = 3;\nif (condition) {\n  work();\n}\nif (!flag) {\n  stop();\n}'
       );
     });
 
     it('should handle nested fixes', async () => {
       await testPrettierCompat(
         'function test(){if(x===true){return 1+2+3;}}',
-        "function test() {\n  if (x) {\n    return 6;\n  }\n}"
+        'function test() {\n  if (x) {\n    return 6;\n  }\n}'
       );
     });
   });
