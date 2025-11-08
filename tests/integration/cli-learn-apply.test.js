@@ -1,6 +1,6 @@
 /* eslint-env mocha */
 /* global describe, it */
-"use strict";
+'use strict';
 
 const assert = require('assert');
 const fs = require('fs');
@@ -41,7 +41,7 @@ describe('CLI learn (non-interactive)', function () {
 
   it('strict mode updates config; permissive writes report only', function () {
     const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'cli-learn-'));
-    writeFile(tmp, 'src/b.js', `const snake_case = 1; const data = 0; const data = 1; const data = 2;`);
+    writeFile(tmp, 'src/b.js', 'const snake_case = 1; const data = 0; const data = 1; const data = 2;');
     runCliLearn(tmp, ['--strict']);
     const cfgPath = path.join(tmp, '.ai-coding-guide.json');
     assert.ok(fs.existsSync(cfgPath));
@@ -49,7 +49,7 @@ describe('CLI learn (non-interactive)', function () {
     assert.strictEqual(cfg.naming.style, 'camelCase');
 
     const tmp2 = fs.mkdtempSync(path.join(os.tmpdir(), 'cli-learn-'));
-    writeFile(tmp2, 'src/c.js', `const snake_case = 1;`);
+    writeFile(tmp2, 'src/c.js', 'const snake_case = 1;');
     runCliLearn(tmp2, ['--permissive']);
     const reportPath = path.join(tmp2, '.ai-learn-report.json');
     assert.ok(fs.existsSync(reportPath));

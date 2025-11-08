@@ -1,0 +1,29 @@
+name: self-hosting-guardrails
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 6 * * 1'  # Weekly, Monday 06:00 UTC
+
+jobs:
+  guardrails:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint fix (layout only)
+        run: npm run lint:fix:layout
+
+      - name: Lint fix (sweep, skip rule sources)
+        run: npm run lint:fix:sweep
+
+      - name: Run tests
+        run: npm test

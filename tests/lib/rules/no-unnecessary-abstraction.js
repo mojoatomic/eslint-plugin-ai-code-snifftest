@@ -2,14 +2,14 @@
  * @fileoverview Suggest inlining trivial single-use wrapper functions that add no value
  * @author mojoatomic
  */
-"use strict";
+'use strict';
 
 //------------------------------------------------------------------------------
 // Requirements
 //------------------------------------------------------------------------------
 
-const rule = require("../../../lib/rules/no-unnecessary-abstraction"),
-  RuleTester = require("eslint").RuleTester;
+const rule = require('../../../lib/rules/no-unnecessary-abstraction'),
+  RuleTester = require('eslint').RuleTester;
 
 
 //------------------------------------------------------------------------------
@@ -685,62 +685,62 @@ formatUser({ name: 'Alice' });`,
 const invalidFixerWhitespace = [
   // 1) Same-line preceding code: left-trim eats preceding space; newline after wrapper is removed
   {
-    code: `const a = 1; function wrapper(x) { return compute(x); }\nfunction compute(x) { return x * 2; }\nwrapper(5);`,
+    code: 'const a = 1; function wrapper(x) { return compute(x); }\nfunction compute(x) { return x * 2; }\nwrapper(5);',
     errors: [{
       messageId: 'unnecessaryWrapper',
       data: { name: 'wrapper', wrappedName: 'compute' },
       suggestions: [{
         messageId: 'inlineFunction',
         // Note: space before function is removed; newline after wrapper is removed
-        output: `const a = 1;function compute(x) { return x * 2; }\nwrapper(5);`
+        output: 'const a = 1;function compute(x) { return x * 2; }\nwrapper(5);'
       }]
     }],
   },
   // 2) Trailing spaces + newline after wrapper: right-trim eats spaces and one newline
   {
-    code: `function wrapper(x) { return compute(x); }    \nfunction compute(x) { return x * 2; }\nwrapper(5);`,
+    code: 'function wrapper(x) { return compute(x); }    \nfunction compute(x) { return x * 2; }\nwrapper(5);',
     errors: [{
       messageId: 'unnecessaryWrapper',
       data: { name: 'wrapper', wrappedName: 'compute' },
       suggestions: [{
         messageId: 'inlineFunction',
-        output: `function compute(x) { return x * 2; }\nwrapper(5);`
+        output: 'function compute(x) { return x * 2; }\nwrapper(5);'
       }]
     }],
   },
   // 3) Clean case: function at start of line
   {
-    code: `function wrapper(x) { return compute(x); }\nfunction compute(x) { return x * 2; }\nwrapper(5);`,
+    code: 'function wrapper(x) { return compute(x); }\nfunction compute(x) { return x * 2; }\nwrapper(5);',
     errors: [{
       messageId: 'unnecessaryWrapper',
       data: { name: 'wrapper', wrappedName: 'compute' },
       suggestions: [{
         messageId: 'inlineFunction',
-        output: `function compute(x) { return x * 2; }\nwrapper(5);`
+        output: 'function compute(x) { return x * 2; }\nwrapper(5);'
       }]
     }],
   },
   // 4) Next token on same line (no newline): right-trim eats spaces but not next token
   {
-    code: `function wrapper(x) { return compute(x); }   console.log('x');\nfunction compute(x) { return x * 2; }\nwrapper(5);`,
+    code: 'function wrapper(x) { return compute(x); }   console.log(\'x\');\nfunction compute(x) { return x * 2; }\nwrapper(5);',
     errors: [{
       messageId: 'unnecessaryWrapper',
       data: { name: 'wrapper', wrappedName: 'compute' },
       suggestions: [{
         messageId: 'inlineFunction',
-        output: `console.log('x');\nfunction compute(x) { return x * 2; }\nwrapper(5);`
+        output: 'console.log(\'x\');\nfunction compute(x) { return x * 2; }\nwrapper(5);'
       }]
     }],
   },
   // 5) CRLF handling: trailing CRLF is removed as a single newline by the fixer loop
   {
-    code: "function wrapper(x) { return compute(x); }\r\nfunction compute(x) { return x * 2; }\nwrapper(5);",
+    code: 'function wrapper(x) { return compute(x); }\r\nfunction compute(x) { return x * 2; }\nwrapper(5);',
     errors: [{
       messageId: 'unnecessaryWrapper',
       data: { name: 'wrapper', wrappedName: 'compute' },
       suggestions: [{
         messageId: 'inlineFunction',
-        output: `function compute(x) { return x * 2; }\nwrapper(5);`
+        output: 'function compute(x) { return x * 2; }\nwrapper(5);'
       }]
     }],
   },
@@ -788,7 +788,7 @@ w1(1); w2(2);
 // Run All Tests
 //------------------------------------------------------------------------------
 
-ruleTester.run("no-unnecessary-abstraction", rule, {
+ruleTester.run('no-unnecessary-abstraction', rule, {
   valid: [
     ...validBasicTests,
     ...validRecursive,

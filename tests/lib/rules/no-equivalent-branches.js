@@ -2,14 +2,14 @@
  * @fileoverview Detect if/else branches that do the same thing
  * @author mojoatomic
  */
-"use strict";
+'use strict';
 
 //------------------------------------------------------------------------------
 // Requirements
 //------------------------------------------------------------------------------
 
-const rule = require("../../../lib/rules/no-equivalent-branches"),
-  RuleTester = require("eslint").RuleTester;
+const rule = require('../../../lib/rules/no-equivalent-branches'),
+  RuleTester = require('eslint').RuleTester;
 
 
 //------------------------------------------------------------------------------
@@ -336,7 +336,7 @@ fn();
 // Run All Tests
 //------------------------------------------------------------------------------
 
-ruleTester.run("no-equivalent-branches", rule, {
+ruleTester.run('no-equivalent-branches', rule, {
   valid: [
     ...validBasicTests,
     ...validFalsyValues,

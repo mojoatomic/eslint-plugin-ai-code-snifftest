@@ -2,14 +2,14 @@
  * @fileoverview Simplify redundant conditional expressions
  * @author mojoatomic
  */
-"use strict";
+'use strict';
 
 //------------------------------------------------------------------------------
 // Requirements
 //------------------------------------------------------------------------------
 
-const rule = require("../../../lib/rules/no-redundant-conditionals"),
-  RuleTester = require("eslint").RuleTester;
+const rule = require('../../../lib/rules/no-redundant-conditionals'),
+  RuleTester = require('eslint').RuleTester;
 
 
 //------------------------------------------------------------------------------
@@ -712,7 +712,7 @@ C();
 // Run All Tests
 //------------------------------------------------------------------------------
 
-ruleTester.run("no-redundant-conditionals", rule, {
+ruleTester.run('no-redundant-conditionals', rule, {
   valid: [
     ...validBasicTests,
     ...validFalsyValues,

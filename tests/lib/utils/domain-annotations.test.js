@@ -1,6 +1,6 @@
 /* eslint-env mocha */
 /* global describe, it */
-"use strict";
+'use strict';
 
 const assert = require('assert');
 const eslint = require('eslint');
@@ -26,7 +26,7 @@ function parse(code) {
 
 describe('domain-annotations', function () {
   it('detects file-level @domains', function () {
-    const res = parse(`// @domains astronomy, geometry\nconst x = 1;`);
+    const res = parse('// @domains astronomy, geometry\nconst x = 1;');
     assert.deepStrictEqual(res.fileDomains, ['astronomy','geometry']);
   });
 
@@ -42,7 +42,7 @@ describe('domain-annotations', function () {
         };
       }
     };
-    linter.verify(`// header\n/* @domain geometry */\nconst y = 360;`, [{ languageOptions: { ecmaVersion: 2021 }, plugins: { test: { rules: { probe2 } } }, rules: { 'test/probe2': 'error' } }]);
+    linter.verify('// header\n/* @domain geometry */\nconst y = 360;', [{ languageOptions: { ecmaVersion: 2021 }, plugins: { test: { rules: { probe2 } } }, rules: { 'test/probe2': 'error' } }]);
     assert.strictEqual(seen, 'geometry');
   });
 
@@ -58,7 +58,7 @@ describe('domain-annotations', function () {
         };
       }
     };
-    const code = `// banner\n// @domain astronomy\nconst a = 1;\n\n// some text\n// @domain geometry\nfunction f(){}\n\nconst b = 2;`;
+    const code = '// banner\n// @domain astronomy\nconst a = 1;\n\n// some text\n// @domain geometry\nfunction f(){}\n\nconst b = 2;';
     linter.verify(code, [{ languageOptions: { ecmaVersion: 2021 }, plugins: { test: { rules: { probe3 } } }, rules: { 'test/probe3': 'error' } }]);
     // The last var decl should pick up geometry section
     assert.strictEqual(last, 'geometry');
@@ -76,7 +76,7 @@ describe('domain-annotations', function () {
         };
       }
     };
-    const code = `/**\n * @domain physics\n */\nconst c = 299792458;`;
+    const code = '/**\n * @domain physics\n */\nconst c = 299792458;';
     linter.verify(code, [{ languageOptions: { ecmaVersion: 2021 }, plugins: { test: { rules: { probe4 } } }, rules: { 'test/probe4': 'error' } }]);
     assert.strictEqual(seen, 'physics');
   });
