@@ -1,5 +1,7 @@
 # Context-Aware Linting and Telemetry
 
+See also: EXECUTABLE-LINES.md for exLOC metrics reported in analysis JSON and ratchet output.
+
 This codebase supports a context-aware ratchet that understands refactoring intent and reports a composite Code Health score (telemetry). The traditional ratchet remains the merge gate.
 
 What you get

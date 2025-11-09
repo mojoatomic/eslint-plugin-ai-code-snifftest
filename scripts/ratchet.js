@@ -23,7 +23,7 @@ function readJson(p) {
   try {
     const full = path.isAbsolute(p) ? p : path.join(process.cwd(), p);
     return JSON.parse(fs.readFileSync(full, 'utf8'));
-  } catch (e) {
+  } catch {
     return null;
   }
 }
@@ -32,10 +32,11 @@ function len(x) { return Array.isArray(x) ? x.length : 0; }
 function num(x) { return typeof x === 'number' && Number.isFinite(x) ? x : 0; }
 
 function summarize(payload) {
-  // Expected shape: { categories: { magicNumbers, complexity, domainTerms, architecture, counts? }, effort: { byCategory? } }
+  // Expected shape includes categories, effort, optional lines
   const cat = payload && payload.categories ? payload.categories : {};
   const effort = payload && payload.effort ? payload.effort : {};
   const byCat = (effort && effort.byCategory) ? effort.byCategory : {};
+  const lines = payload && payload.lines ? payload.lines : {};
   return {
     magicNumbers: len(cat.magicNumbers),
     complexity: len(cat.complexity),
@@ -52,6 +53,12 @@ function summarize(payload) {
       complexity: num(byCat.complexity),
       domainTerms: num(byCat.domainTerms),
       architecture: num(byCat.architecture)
+    },
+    lines: {
+      physical: num(lines.physical),
+      executable: num(lines.executable),
+      comments: num(lines.comments),
+      commentRatio: typeof lines.commentRatio === 'number' ? lines.commentRatio : 0
     }
   };
 }
@@ -101,8 +108,21 @@ function main() {
   if (deltas.length === 0) {
     console.log('[ratchet] OK: no increases in analyzer categories');
     if (effortInc.length) {
-      const lines = effortInc.map(d => `  effort.${d.key}: ${d.base}h -> ${d.current}h`);
-      console.log('[ratchet] Note: effort increased (informational):\n' + lines.join('\n'));
+      const linesInfo = effortInc.map(d => `  effort.${d.key}: ${d.base}h -> ${d.current}h`);
+      console.log('[ratchet] Note: effort increased (informational):\n' + linesInfo.join('\n'));
+    }
+    // Non-blocking: show line metrics deltas if present
+    if ((b.lines && (b.lines.physical || b.lines.executable)) || (c.lines && (c.lines.physical || c.lines.executable))) {
+      const physB = num(b.lines && b.lines.physical);
+      const physC = num(c.lines && c.lines.physical);
+      const exB = num(b.lines && b.lines.executable);
+      const exC = num(c.lines && c.lines.executable);
+      const crB = b.lines ? b.lines.commentRatio : 0;
+      const crC = c.lines ? c.lines.commentRatio : 0;
+      console.log('[ratchet] Lines (informational):');
+      if (physB || physC) console.log(`  physical: ${physB} -> ${physC} (${physC - physB >= 0 ? '+' : ''}${physC - physB})`);
+      if (exB || exC) console.log(`  executable: ${exB} -> ${exC} (${exC - exB >= 0 ? '+' : ''}${exC - exB})`);
+      console.log(`  commentRatio: ${(crB*100).toFixed(1)}% -> ${(crC*100).toFixed(1)}%`);
     }
     process.exit(0);
     return;
