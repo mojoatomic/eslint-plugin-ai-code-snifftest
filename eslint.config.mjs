@@ -94,5 +94,18 @@ export default [
       'max-depth': "off",
       'camelcase': "off"
     }
+  },
+  {
+    files: ["scripts/**/*.js"],
+    rules: {
+      // Support scripts: exclude from architecture/complexity/domain-term metrics
+      'max-lines': "off",
+      'max-lines-per-function': "off",
+      'max-statements': "off",
+      'max-depth': "off",
+      'complexity': "off",
+      'ai-code-snifftest/enforce-domain-terms': "off",
+      'ai-code-snifftest/no-generic-names': "off"
+    }
   }
 ];
