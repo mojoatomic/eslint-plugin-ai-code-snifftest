@@ -27,6 +27,8 @@
     "analyze:current": "node bin/cli.js analyze --input=lint-results.json --format=json --output=analysis-current.json",
     "analyze:baseline": "node bin/cli.js analyze --input=lint-results.json --format=json --output=analysis-baseline.json",
     "ratchet": "node scripts/ratchet.js --baseline=analysis-baseline.json --current=analysis-current.json",
+    "ratchet:context": "node scripts/ratchet.js --mode=context --baseline=analysis-baseline.json --current=analysis-current.json",
+    "guardrails:baseline": "node scripts/guardrails-baseline.js",
     "ci:ratchet": "npm run lint:json && npm run analyze:current && npm run ratchet",
     "test": "mocha tests --recursive",
     "test:coverage": "c8 --reporter=text --reporter=lcov npm test",
