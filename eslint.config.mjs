@@ -86,6 +86,25 @@ export default [
     }
   },
   {
+    files: ["scripts/**/*.js"],
+    rules: {
+      // Support scripts: exclude from architecture/complexity/domain metrics
+      'max-lines': "off",
+      'max-lines-per-function': "off",
+      'max-statements': "off",
+      'max-depth': "off",
+      'max-params': "off",
+      'complexity': "off",
+      // Turn off plugin complexity rules for scripts
+      'ai-code-snifftest/prefer-simpler-logic': "off",
+      'ai-code-snifftest/no-redundant-conditionals': "off",
+      'ai-code-snifftest/no-equivalent-branches': "off",
+      // Domain-term rules off for scripts
+      'ai-code-snifftest/enforce-domain-terms': "off",
+      'ai-code-snifftest/no-generic-names': "off"
+    }
+  },
+  {
     files: ["**/*.test.js","**/*.spec.js","**/tests/**/*.js"],
     rules: {
       'max-lines-per-function': "off",
