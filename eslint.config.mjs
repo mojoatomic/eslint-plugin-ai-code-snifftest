@@ -4,6 +4,8 @@ import globals from 'globals';
 import aiSnifftest from 'eslint-plugin-ai-code-snifftest';
 
 export default [
+  // Ignore prototype sandboxes not part of plugin linting/analysis
+  { ignores: ['line_count/**'] },
   js.configs.recommended,
   {
     files: ['**/*.js'],
