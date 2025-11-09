@@ -17,48 +17,44 @@ const { parseArgs } = require(path.join(__dirname, '..', 'lib', 'utils', 'args-p
 const { usage } = require(path.join(__dirname, '..', 'lib', 'utils', 'cli-help'));
 const { checkRequirements } = require(path.join(__dirname, '..', 'lib', 'utils', 'requirements'));
 
+// ===== Helpers to reduce main() complexity =====
+function shouldInteractiveInit(args) {
+  return !args.primary && (process.stdin.isTTY || process.env.FORCE_CLI_INTERACTIVE);
+}
+
+function runAsync(cmdPromise) {
+  Promise.resolve(cmdPromise).then((code)=>{ process.exitCode = code; });
+}
+
+function requireCheck() {
+  if (!checkRequirements(process.cwd())) { process.exitCode = 1; return false; }
+  return true;
+}
+
+function dispatch(cwd, cmd, args) {
+  if (cmd === 'init') {
+    if (!requireCheck()) return;
+    if (shouldInteractiveInit(args)) return runAsync(initInteractiveCommand(cwd, args));
+    process.exitCode = initCommand(cwd, args); return;
+  }
+  if (cmd === 'learn') { if (!requireCheck()) return; return runAsync(learnCommand(cwd, args)); }
+  if (cmd === 'setup') { if (!requireCheck()) return; return runAsync(setupCommand(cwd, args)); }
+  if (cmd === 'analyze') return runAsync(analyzeCommand(cwd, args));
+  if (cmd === 'plan') return runAsync(planCommand(cwd, args));
+  if (cmd === 'create-issues') return runAsync(createIssuesCommand(cwd, args));
+  if (cmd === 'scaffold' || cmd === 'create-constants') {
+    const dom = args._[1];
+    const outDir = args.dir || args.out;
+    process.exitCode = scaffoldCommand(cwd, dom, outDir); return;
+  }
+  usage();
+}
+
 function main() {
   const args = parseArgs(process.argv);
   const cmd = args._[0];
   const cwd = process.cwd();
-  if (cmd === 'init') {
-    if (!checkRequirements(process.cwd())) { process.exitCode = 1; return; }
-    if (!args.primary && (process.stdin.isTTY || process.env.FORCE_CLI_INTERACTIVE)) {
-      initInteractiveCommand(cwd, args).then((code)=>{ process.exitCode = code; });
-      return;
-    }
-    process.exitCode = initCommand(cwd, args);
-    return;
-  }
-  if (cmd === 'learn') {
-    if (!checkRequirements(process.cwd())) { process.exitCode = 1; return; }
-    Promise.resolve(learnCommand(cwd, args)).then((code)=>{ process.exitCode = code; });
-    return;
-  }
-  if (cmd === 'setup') {
-    if (!checkRequirements(process.cwd())) { process.exitCode = 1; return; }
-    Promise.resolve(setupCommand(cwd, args)).then((code)=>{ process.exitCode = code; });
-    return;
-  }
-  if (cmd === 'analyze') {
-    Promise.resolve(analyzeCommand(cwd, args)).then((code)=>{ process.exitCode = code; });
-    return;
-  }
-  if (cmd === 'plan') {
-    Promise.resolve(planCommand(cwd, args)).then((code)=>{ process.exitCode = code; });
-    return;
-  }
-  if (cmd === 'create-issues') {
-    Promise.resolve(createIssuesCommand(cwd, args)).then((code)=>{ process.exitCode = code; });
-    return;
-  }
-  if (cmd === 'scaffold' || cmd === 'create-constants') {
-    const dom = args._[1];
-    const outDir = args.dir || args.out;
-    process.exitCode = scaffoldCommand(cwd, dom, outDir);
-    return;
-  }
-  usage();
+  dispatch(cwd, cmd, args);
 }
 
 main();
