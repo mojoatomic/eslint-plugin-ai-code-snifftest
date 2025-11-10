@@ -84,5 +84,9 @@
       "errorHandling": "explicit",
       "asyncStyle": "async-await"
     }
+  },
+  "ratchet": {
+    "tolerance": { "total": 5 },
+    "health": { "enabled": false }
   }
 }

@@ -214,7 +214,7 @@ function runTraditionalMode(base, curr, args) {
   // Health telemetry + optional gating
   const cfg = loadProjectConfig();
   const healthCfg = (cfg && cfg.ratchet && cfg.ratchet.health) || { enabled: false };
-const scores = computeHealth(curr);
+  const scores = computeHealth(curr);
   const gateOn = String(healthCfg.gateOn || 'overall').toLowerCase();
   const minOverall = Number(healthCfg.minOverall || 70);
   const intent = detectIntent(args);
@@ -225,6 +225,10 @@ const scores = computeHealth(curr);
   const gateActive = !!healthCfg.enabled && !shouldBypass(healthCfg);
   const gateFail = gateActive && currentScore < threshold;
 
+  // Tolerance band (configurable) to avoid blocking normal fluctuation
+  const tolCfg = (cfg && cfg.ratchet && cfg.ratchet.tolerance) || {};
+  const totalTolerance = Number(tolCfg.total || 0);
+
 if (deltas.length === 0) {
     console.log('[ratchet] OK: no increases in analyzer categories');
     if (effortInc.length) {
@@ -232,6 +236,24 @@ if (deltas.length === 0) {
       console.log('[ratchet] Note: effort increased (informational):\n' + lines.join('\n'));
     }
     // Health telemetry (informational)
+    console.log(`[ratchet] Health (informational): overall=${scores.overall} structural=${scores.structural} semantic=${scores.semantic}`);
+    if (gateFail) {
+      console.error(`[ratchet] HEALTH-GATE FAIL: ${failureMessage}`);
+      console.error(`  gateOn=${gateOn} threshold=${threshold} actual=${currentScore} intent=${intent}`);
+      return 1;
+    }
+    return 0;
+  }
+
+  // If within tolerance, allow pass with notice
+  const totalIncrease = deltas.reduce((sum, d) => sum + (d.current - d.base), 0);
+  if (totalIncrease <= totalTolerance) {
+    console.log(`[ratchet] OK: within tolerance (+${totalIncrease} violations, tolerance: ${totalTolerance})`);
+    for (const d of deltas) {
+      console.log(`  ${d.key}: ${d.base} → ${d.current} (+${d.current - d.base})`);
+    }
+    console.log('\nSmall increases accepted during active development.');
+    // Health telemetry (informational) and optional gate still apply
     console.log(`[ratchet] Health (informational): overall=${scores.overall} structural=${scores.structural} semantic=${scores.semantic}`);
     if (gateFail) {
       console.error(`[ratchet] HEALTH-GATE FAIL: ${failureMessage}`);
