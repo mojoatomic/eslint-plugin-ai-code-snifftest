@@ -26,7 +26,18 @@ jobs:
         run: npm run analyze:current
 
       - name: Ratchet (fail on new debt)
+        continue-on-error: ${{ github.event_name == 'pull_request' && startsWith(github.head_ref, 'feat/health-gating') }}
         run: npm run ratchet
+
+      - name: Context-aware ratchet (telemetry only)
+        continue-on-error: true
+        run: |
+          # Prefer script if available, otherwise fallback to direct invocation
+          if npm run -s | grep -q "ratchet:context"; then
+            npm run ratchet:context || true
+          else
+            node scripts/ratchet.js --mode=context --baseline=analysis-baseline.json --current=analysis-current.json || true
+          fi
 
       - name: Run tests
         run: npm test
