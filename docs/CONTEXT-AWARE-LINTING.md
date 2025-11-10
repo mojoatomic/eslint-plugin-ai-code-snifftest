@@ -2,6 +2,8 @@
 
 This codebase supports a context-aware ratchet that understands refactoring intent and reports a composite Code Health score (telemetry). The traditional ratchet remains the merge gate.
 
+See also: EXECUTABLE-LINES.md (exLOC metrics) and HEALTH-GATING.md (configuration and behavior).
+
 What you get
 - Intent signals: refactoring / ai-generation-suspect / neutral (with confidence)
 - Structural proxies: per-rule breakdowns for complexity and architecture
