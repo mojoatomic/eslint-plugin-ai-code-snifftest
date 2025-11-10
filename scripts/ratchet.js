@@ -32,7 +32,6 @@ function len(x) { return Array.isArray(x) ? x.length : 0; }
 function num(x) { return typeof x === 'number' && Number.isFinite(x) ? x : 0; }
 
 function summarize(payload) {
-  // Expected shape: { categories: { magicNumbers, complexity, domainTerms, architecture, counts? }, effort: { byCategory? } }
   const cat = payload && payload.categories ? payload.categories : {};
   const effort = payload && payload.effort ? payload.effort : {};
   const byCat = (effort && effort.byCategory) ? effort.byCategory : {};
@@ -41,7 +40,6 @@ function summarize(payload) {
     complexity: len(cat.complexity),
     domainTerms: len(cat.domainTerms),
     architecture: len(cat.architecture),
-    // Optional counts (informational)
     counts: {
       errors: num(cat.counts && cat.counts.errors),
       warnings: num(cat.counts && cat.counts.warnings),
@@ -64,7 +62,6 @@ function compare(base, curr) {
     const c = num(curr[f]);
     if (c > b) deltas.push({ key: f, base: b, current: c, type: 'count' });
   }
-  // Effort ratchet (optional, do not fail but report increases)
   const effortInc = [];
   for (const f of fields) {
     const b = num(base.effortByCategory && base.effortByCategory[f]);
@@ -74,29 +71,75 @@ function compare(base, curr) {
   return { deltas, effortInc };
 }
 
-function main() {
-  const args = parseArgs(process.argv);
-  const baselinePath = args.baseline || args._[0] || 'analysis-baseline.json';
-  const currentPath = args.current || args._[1] || 'analysis-current.json';
+function detectIntent(base, curr) {
+  const totalDelta = (curr.magicNumbers - base.magicNumbers) +
+                     (curr.complexity - base.complexity) +
+                     (curr.domainTerms - base.domainTerms) +
+                     (curr.architecture - base.architecture);
 
-  const base = readJson(baselinePath);
-  if (!base) {
-    console.log(`[ratchet] Baseline not found at ${baselinePath}.\n` +
-      'Run: npm run lint:json && npm run analyze:baseline\n' +
-      'Skipping ratchet (non-blocking)');
-    process.exit(0);
-    return;
-  }
-  const curr = readJson(currentPath);
-  if (!curr) {
-    console.error(`[ratchet] Current analysis not found at ${currentPath}. Run: npm run lint:json && npm run analyze:current`);
-    process.exit(1);
-    return;
+  let intent = 'neutral';
+  let confidence = 0.5;
+  const signals = [];
+
+  if (totalDelta < -10) {
+    intent = 'cleanup';
+    confidence = 0.7;
+    signals.push('Violations decreased significantly');
+  } else if (totalDelta > 20 && curr.domainTerms > base.domainTerms * 1.3) {
+    intent = 'ai-generation-suspect';
+    confidence = 0.6;
+    signals.push('Large increase in domain term violations');
+    signals.push('Rapid violation growth pattern');
+  } else if (curr.complexity < base.complexity * 0.8 && curr.architecture < base.architecture * 0.8) {
+    intent = 'refactoring';
+    confidence = 0.65;
+    signals.push('Complexity decreased');
+    signals.push('Architecture violations decreased');
   }
 
-  const b = summarize(base);
-  const c = summarize(curr);
-  const { deltas, effortInc } = compare(b, c);
+  return { intent, confidence, signals };
+}
+
+function runContextMode(base, curr) {
+  console.log('\n📊 Context-Aware Telemetry');
+  console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
+  console.log('Mode: Non-blocking (burn-in period)\n');
+
+  console.log('Category Counts:');
+  const categories = [
+    { key: 'magicNumbers', label: 'Magic Numbers' },
+    { key: 'complexity', label: 'Complexity' },
+    { key: 'domainTerms', label: 'Domain Terms' },
+    { key: 'architecture', label: 'Architecture' }
+  ];
+
+  for (const cat of categories) {
+    const baseVal = base[cat.key];
+    const currVal = curr[cat.key];
+    const delta = currVal - baseVal;
+    const emoji = delta > 0 ? '⚠️' : (delta < 0 ? '✅' : '➖');
+    const sign = delta > 0 ? '+' : '';
+    console.log(`  ${cat.label.padEnd(15)} ${baseVal} → ${currVal} (${sign}${delta}) ${emoji}`);
+  }
+
+  console.log();
+
+  const { intent, confidence, signals } = detectIntent(base, curr);
+
+  console.log('Intent Detection:');
+  console.log(`  Detected: ${intent}`);
+  console.log(`  Confidence: ${(confidence * 100).toFixed(0)}%`);
+  if (signals.length > 0) {
+    console.log('  Signals:');
+    signals.forEach(s => console.log(`    • ${s}`));
+  }
+
+  console.log('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+  console.log('\n✅ Telemetry complete (non-blocking)\n');
+}
+
+function runTraditionalMode(base, curr) {
+  const { deltas, effortInc } = compare(base, curr);
 
   if (deltas.length === 0) {
     console.log('[ratchet] OK: no increases in analyzer categories');
@@ -104,8 +147,7 @@ function main() {
       const lines = effortInc.map(d => `  effort.${d.key}: ${d.base}h -> ${d.current}h`);
       console.log('[ratchet] Note: effort increased (informational):\n' + lines.join('\n'));
     }
-    process.exit(0);
-    return;
+    return 0;
   }
 
   console.error('[ratchet] FAIL: new violations introduced');
@@ -117,7 +159,42 @@ function main() {
   console.error('  - compare with analysis-baseline.json');
   console.error('\nIf intentional reductions were made and counts decreased overall, refresh baseline:');
   console.error('  npm run analyze:baseline');
-  process.exit(1);
+  return 1;
+}
+
+function main() {
+  const args = parseArgs(process.argv);
+  const mode = args.mode || 'traditional';
+  const baselinePath = args.baseline || args._[0] || 'analysis-baseline.json';
+  const currentPath = args.current || args._[1] || 'analysis-current.json';
+
+  const base = readJson(baselinePath);
+  if (!base) {
+    console.log(`[ratchet] Baseline not found at ${baselinePath}.\n` +
+      'Run: npm run lint:json && npm run analyze:baseline\n' +
+      'Skipping ratchet (non-blocking)');
+    process.exit(0);
+    return;
+  }
+
+  const curr = readJson(currentPath);
+  if (!curr) {
+    console.error(`[ratchet] Current analysis not found at ${currentPath}. Run: npm run lint:json && npm run analyze:current`);
+    process.exit(1);
+    return;
+  }
+
+  const b = summarize(base);
+  const c = summarize(curr);
+
+  if (mode === 'context') {
+    runContextMode(b, c);
+    process.exit(0);
+    return;
+  }
+
+  const exitCode = runTraditionalMode(b, c);
+  process.exit(exitCode);
 }
 
 main();
