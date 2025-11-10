@@ -2,6 +2,18 @@
 
 This codebase supports a context-aware ratchet that understands refactoring intent and reports a composite Code Health score (telemetry). The traditional ratchet remains the merge gate.
 
+See also: EXECUTABLE-LINES.md for exLOC metrics reported in analysis JSON and ratchet output.
+
+Example Lines section (non-blocking) from ratchet:
+
+```
+[ratchet] Lines (informational):
+  physical: 12000 -> 12500 (+500)
+  executable: 8000 -> 7800 (-200)
+  commentRatio: 33.3% -> 37.6%
+  Assessment: executable ↓, docs ↑
+```
+
 What you get
 - Intent signals: refactoring / ai-generation-suspect / neutral (with confidence)
 - Structural proxies: per-rule breakdowns for complexity and architecture

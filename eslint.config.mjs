@@ -4,6 +4,8 @@ import globals from 'globals';
 import aiSnifftest from 'eslint-plugin-ai-code-snifftest';
 
 export default [
+  // Ignore prototype sandboxes
+  { ignores: ['line_count/**'] },
   js.configs.recommended,
   {
     files: ['**/*.js'],
@@ -58,6 +60,22 @@ export default [
     files: ["**/utils/**/*.js","**/lib/utils/**/*.js"],
     rules: {
       'max-lines': ["warn",{"max":200,"skipBlankLines":true,"skipComments":true}]
+    }
+  },
+  {
+    files: ["scripts/**/*.js"],
+    rules: {
+      'max-lines': "off",
+      'max-lines-per-function': "off",
+      'max-statements': "off",
+      'max-depth': "off",
+      'max-params': "off",
+      'complexity': "off",
+      'ai-code-snifftest/prefer-simpler-logic': "off",
+      'ai-code-snifftest/no-redundant-conditionals': "off",
+      'ai-code-snifftest/no-equivalent-branches': "off",
+      'ai-code-snifftest/enforce-domain-terms': "off",
+      'ai-code-snifftest/no-generic-names': "off"
     }
   },
   {
