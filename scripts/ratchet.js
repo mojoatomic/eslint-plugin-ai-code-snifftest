@@ -225,11 +225,75 @@ function runTraditionalMode(base, curr, args) {
   const gateActive = !!healthCfg.enabled && !shouldBypass(healthCfg);
   const gateFail = gateActive && currentScore < threshold;
 
+  const strategy = (cfg && cfg.ratchet && cfg.ratchet.strategy) || 'classic';
+
+  // Hybrid strategy: density-based for critical vs minor categories (per 1K LOC)
+  if (strategy === 'hybrid') {
+    const hybridCfg = (cfg && cfg.ratchet && cfg.ratchet.hybrid) || {};
+    const critical = Array.isArray(hybridCfg.critical) && hybridCfg.critical.length ? hybridCfg.critical : ['complexity', 'architecture'];
+    const minor = Array.isArray(hybridCfg.minor) && hybridCfg.minor.length ? hybridCfg.minor : ['domainTerms', 'magicNumbers'];
+    const tol = (hybridCfg.tolerance) || {};
+    const critTol = Number(tol.criticalDensity || 1.05); // allow 5% increase
+    const minorTol = Number(tol.minorDensity || 1.20);    // allow 20% increase
+
+    const baseLoc = Math.max(1, Number(base.lines && base.lines.executable) || Number(base.lines && base.lines.physical) || 1);
+    const currLoc = Math.max(1, Number(curr.lines && curr.lines.executable) || Number(curr.lines && curr.lines.physical) || 1);
+    const perK = (count, loc) => (count / (loc / 1000));
+
+    let failed = false;
+
+    console.log('\n[ratchet] Hybrid density check (per 1K LOC)');
+    console.log(`LOC: ${baseLoc} → ${currLoc} (${currLoc - baseLoc >= 0 ? '+' : ''}${currLoc - baseLoc})`);
+
+    console.log('\nCritical (strict):');
+    for (const cat of critical) {
+      const b = Number(base[cat]) || 0;
+      const c = Number(curr[cat]) || 0;
+      const bd = perK(b, baseLoc);
+      const cd = perK(c, currLoc);
+      const ratio = bd === 0 ? (cd === 0 ? 1 : Infinity) : (cd / bd);
+      const status = ratio > critTol ? '❌' : '✅';
+      console.log(`  ${String(cat).padEnd(15)} ${b} → ${c} (density: ${bd.toFixed(2)} → ${cd.toFixed(2)}) ${status}`);
+      if (ratio > critTol) failed = true;
+    }
+
+    console.log('\nMinor (relaxed):');
+    for (const cat of minor) {
+      const b = Number(base[cat]) || 0;
+      const c = Number(curr[cat]) || 0;
+      const bd = perK(b, baseLoc);
+      const cd = perK(c, currLoc);
+      const ratio = bd === 0 ? (cd === 0 ? 1 : Infinity) : (cd / bd);
+      const status = ratio > minorTol ? '⚠️' : '✅';
+      console.log(`  ${String(cat).padEnd(15)} ${b} → ${c} (density: ${bd.toFixed(2)} → ${cd.toFixed(2)}) ${status}`);
+    }
+
+    // Health telemetry (informational)
+    console.log(`\n[ratchet] Health (informational): overall=${scores.overall} structural=${scores.structural} semantic=${scores.semantic}`);
+
+    if (gateFail) {
+      console.error(`[ratchet] HEALTH-GATE FAIL: ${failureMessage}`);
+      console.error(`  gateOn=${gateOn} threshold=${threshold} actual=${currentScore} intent=${intent}`);
+      return 1;
+    }
+
+    if (failed) {
+      console.error('\n❌ [ratchet] FAIL: Critical violation density increased');
+      console.error('Complexity and architecture are strictly controlled.');
+      console.error('Refactor to reduce complexity or update baseline if intentional.');
+      return 1;
+    }
+
+    console.log('\n✅ [ratchet] PASS: Quality maintained or improved');
+    return 0;
+  }
+
+  // Classic strategy with tolerance band
   // Tolerance band (configurable) to avoid blocking normal fluctuation
   const tolCfg = (cfg && cfg.ratchet && cfg.ratchet.tolerance) || {};
   const totalTolerance = Number(tolCfg.total || 0);
 
-if (deltas.length === 0) {
+  if (deltas.length === 0) {
     console.log('[ratchet] OK: no increases in analyzer categories');
     if (effortInc.length) {
       const lines = effortInc.map(d => `  effort.${d.key}: ${d.base}h -> ${d.current}h`);

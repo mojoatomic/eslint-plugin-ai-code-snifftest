@@ -86,7 +86,13 @@
     }
   },
   "ratchet": {
+    "strategy": "hybrid",
     "tolerance": { "total": 5 },
+    "hybrid": {
+      "critical": ["complexity", "architecture"],
+      "minor": ["domainTerms", "magicNumbers"],
+      "tolerance": { "criticalDensity": 1.05, "minorDensity": 1.2 }
+    },
     "health": { "enabled": false }
   }
 }
