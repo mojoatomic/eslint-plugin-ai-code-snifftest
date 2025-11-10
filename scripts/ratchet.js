@@ -7,11 +7,22 @@ const cp = require('child_process');
 
 // Best-effort project config loader (for health gating)
 function loadProjectConfig() {
+  // 1) Try full project-config util (honors env/settings overlays)
   try {
     const mod = require(path.join(process.cwd(), 'lib', 'utils', 'project-config.js'));
     if (mod && typeof mod.readProjectConfig === 'function') {
       return mod.readProjectConfig({ getCwd: () => process.cwd() });
     }
+  } catch (_) { /* ignore */ }
+  // 2) Env override (supports tests/standalone use)
+  try {
+    const envRaw = process.env.AI_SNIFFTEST_CONFIG_JSON;
+    if (envRaw) return JSON.parse(envRaw);
+  } catch (_) { /* ignore */ }
+  // 3) Fallback to reading .ai-coding-guide.json in CWD if present
+  try {
+    const p = path.join(process.cwd(), '.ai-coding-guide.json');
+    if (fs.existsSync(p)) return JSON.parse(fs.readFileSync(p, 'utf8'));
   } catch (_) { /* ignore */ }
   return {};
 }
