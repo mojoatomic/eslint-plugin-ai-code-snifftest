@@ -73,6 +73,17 @@ export default [
     }
   },
   {
+    files: ["scripts/**/*.js"],
+    rules: {
+      // Exclude support scripts from architecture/complexity metrics to keep product telemetry stable
+      'complexity': 'off',
+      'max-statements': 'off',
+      'max-lines-per-function': 'off',
+      'max-depth': 'off',
+      'max-lines': 'off'
+    }
+  },
+  {
     files: ["lib/rules/**/*.js"],
     rules: {
       // Guardrail: do not run our plugin rules on the plugin rule source itself
