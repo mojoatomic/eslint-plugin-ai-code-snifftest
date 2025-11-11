@@ -31,6 +31,31 @@ Running `init` creates:
 
 ## Installation
 
+### CI-safe setup (recommended)
+
+Add scripts to your package.json:
+
+```json
+{
+  "scripts": {
+    "lint": "eslint .",
+    "lint:ci": "eslint . || true",
+    "lint:json": "eslint . -f json -o lint-results.json",
+    "analyze:current": "eslint-plugin-ai-code-snifftest analyze --input=lint-results.json --format=json --output=analysis-current.json",
+    "ratchet": "eslint-plugin-ai-code-snifftest ratchet"
+  }
+}
+```
+
+GitHub Actions example:
+
+```yaml
+- name: Lint (non-blocking)
+  run: npm run lint:ci
+- name: Ratchet (blocks on regression)
+  run: npm run ci:ratchet
+```
+
 ### Requirements
 - Node.js 18+
 - ESLint 9+
