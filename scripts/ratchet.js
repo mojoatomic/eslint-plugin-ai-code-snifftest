@@ -175,7 +175,8 @@ function formatExamples(messages, ruleId, max = 3) {
   for (const m of messages || []) {
     if (ruleId && m.ruleId !== ruleId) continue;
     if (!m.ruleId) continue;
-    const loc = m.line != null ? `${m.line}:${m.column || 1}` : '';
+    const hasLine = (m.line !== null && m.line !== undefined);
+    const loc = hasLine ? `${m.line}:${m.column || 1}` : '';
     out.push(`  • ${m.filePath || m.filename || 'file'}:${loc} – ${m.message}`);
     if (out.length >= max) break;
   }
@@ -183,7 +184,6 @@ function formatExamples(messages, ruleId, max = 3) {
 }
 
 function runContextMode(base, curr) {
-  console.log('\n📊 Context-Aware Telemetry');
   console.log('\n📊 Context-Aware Telemetry');
   console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
   console.log('Mode: Non-blocking (burn-in period)\n');
