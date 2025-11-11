@@ -170,7 +170,20 @@ function detectIntentFromMetrics(base, curr) {
   return { intent, confidence, signals };
 }
 
+function formatExamples(messages, ruleId, max = 3) {
+  const out = [];
+  for (const m of messages || []) {
+    if (ruleId && m.ruleId !== ruleId) continue;
+    if (!m.ruleId) continue;
+    const loc = m.line != null ? `${m.line}:${m.column || 1}` : '';
+    out.push(`  • ${m.filePath || m.filename || 'file'}:${loc} – ${m.message}`);
+    if (out.length >= max) break;
+  }
+  return out.join('\n');
+}
+
 function runContextMode(base, curr) {
+  console.log('\n📊 Context-Aware Telemetry');
   console.log('\n📊 Context-Aware Telemetry');
   console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
   console.log('Mode: Non-blocking (burn-in period)\n');
@@ -209,6 +222,21 @@ const { intent, confidence, signals } = detectIntentFromMetrics(base, curr);
 }
 
 function runTraditionalMode(base, curr, args) {
+  // Optional lint file for better failure messaging
+  let lintMessages = null;
+  try {
+    const lintPath = args.lint || args.lintCurrent || process.env.AI_SNIFFTEST_LINT_CURRENT;
+    if (lintPath && fs.existsSync(lintPath)) {
+      const raw = readJson(lintPath);
+      if (Array.isArray(raw)) {
+        lintMessages = [];
+        for (const f of raw) {
+          const filePath = f.filePath || f.filename;
+          for (const m of (f.messages || [])) lintMessages.push({ ...m, filePath });
+        }
+      }
+    }
+  } catch (_) { /* ignore */ }
   const { deltas, effortInc } = compare(base, curr);
 
   // Health telemetry + optional gating
@@ -327,10 +355,31 @@ function runTraditionalMode(base, curr, args) {
     return 0;
   }
 
-  console.error('[ratchet] FAIL: new violations introduced');
-  for (const d of deltas) {
+console.error('[ratchet] FAIL: new violations introduced');
+  const ruleMap = {
+    magicNumbers: 'ai-code-snifftest/no-redundant-calculations',
+    complexity: null,
+    domainTerms: null,
+    architecture: null,
+    eqeqeq: 'eqeqeq',
+    camelcase: 'camelcase',
+    empty: 'no-empty'
+  };
+for (const d of deltas) {
     console.error(`  ${d.key}: ${d.base} -> ${d.current} (+${d.current - d.base})`);
+    try {
+      const ruleId = ruleMap[d.key];
+      if (lintMessages && ruleId) {
+        const ex = formatExamples(lintMessages, ruleId, 3);
+        if (ex) {
+          console.error('  New occurrences:');
+          console.error(ex);
+        }
+      }
+    } catch (_) { /* ignore */ }
   }
+  console.error('\n💡 To fix: address new violations, or if intentional, unlock this check:');
+  console.error('   npm run ratchet -- --unlock=<rule>');
   // Health telemetry (informational) and optional gate
   console.error(`[ratchet] Health (informational): overall=${scores.overall} structural=${scores.structural} semantic=${scores.semantic}`);
   if (gateFail) {
