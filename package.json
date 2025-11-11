@@ -11,11 +11,15 @@
   "main": "./lib/index.js",
   "exports": "./lib/index.js",
   "files": [
-    "lib",
-    "bin"
+    "bin/",
+    "lib/",
+    "scripts/ratchet.js",
+    "README.md",
+    "LICENSE"
   ],
   "bin": {
-    "eslint-plugin-ai-code-snifftest": "./bin/cli.js"
+    "eslint-plugin-ai-code-snifftest": "./bin/cli.js",
+    "eslint-plugin-ai-code-snifftest-ratchet": "./scripts/ratchet.js"
   },
   "scripts": {
     "lint": "npm-run-all \"lint:*\"",

@@ -1,5 +1,7 @@
 # Flag generic names; enforce domain-specific naming (`ai-code-snifftest/no-generic-names`)
 
+⚠️ This rule _warns_ in the `permissive-start` config.
+
 <!-- end auto-generated rule header -->
 
 Flags generic identifiers like `data`, `result`, `temp`, or those containing forbidden domain terms (e.g., `song`) based on your project’s `.ai-coding-guide.json` or rule options.
