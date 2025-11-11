@@ -1,5 +1,7 @@
 # Simplify boolean expressions and remove redundant logic (`ai-code-snifftest/prefer-simpler-logic`)
 
+⚠️ This rule _warns_ in the `permissive-start` config.
+
 🔧 This rule is automatically fixable by the [`--fix` CLI option](https://eslint.org/docs/latest/user-guide/command-line-interface#--fix).
 
 <!-- end auto-generated rule header -->

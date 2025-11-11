@@ -1,5 +1,7 @@
 # Encourage domain-specific naming using declared project terms (`ai-code-snifftest/enforce-domain-terms`)
 
+⚠️ This rule _warns_ in the `permissive-start` config.
+
 💡 This rule is manually fixable by [editor suggestions](https://eslint.org/docs/latest/use/core-concepts#rule-suggestions).
 
 <!-- end auto-generated rule header -->
