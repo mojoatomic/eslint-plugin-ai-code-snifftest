@@ -33,7 +33,7 @@ Running `init` creates:
 
 ### CI-safe setup (recommended)
 
-Add scripts to your package.json:
+Add scripts to your package.json (init will add these automatically):
 
 ```json
 {
@@ -47,14 +47,27 @@ Add scripts to your package.json:
 }
 ```
 
-GitHub Actions example:
+GitHub Actions options:
 
-```yaml
-- name: Lint (non-blocking)
-  run: npm run lint:ci
-- name: Ratchet (blocks on regression)
-  run: npm run ci:ratchet
+A) Scaffold with the CLI
+```bash
+npx eslint-plugin-ai-code-snifftest init --ci
 ```
+
+B) Reusable workflow
+```yaml
+name: ci-ratchet
+on: [push, pull_request]
+jobs:
+  ratchet-and-tests:
+    uses: mojoatomic/eslint-plugin-ai-code-snifftest/.github/workflows/ratchet-reusable.yml@main
+    with:
+      node-version: '20'
+```
+
+Branch protection
+- Require status check: ratchet-and-tests
+- Optional: also require your primary test job (e.g., Test on Node.js 20.x)
 
 ### Requirements
 - Node.js 18+

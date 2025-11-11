@@ -30,9 +30,9 @@ Configuration (optional)
   }
 
 Promoting telemetry to a required PR check
-1) Burn‑in: keep telemetry job non‑blocking for a few PRs; review reported signals and health deltas in CI.
-2) Branch protection: mark the telemetry job (ratchet-context) as “required” in repository settings; optionally remove continue-on-error.
-3) (Optional) Health gating: after calibration, enable policy to block when overall health decreases. This can be added as a future enhancement (tracked in issue) and controlled via config (e.g., ratchet.health.gate with minDelta).
+- Prefer enabling health gating (see HEALTH-GATING.md) via the `ratchet-and-tests` job.
+- Burn‑in: keep `health.enabled=false`, review telemetry; then flip to true and require the job in branch protection.
+- Use `init --ci` or the reusable workflow to wire CI quickly.
 
 Notes
 - Support scripts under scripts/**/*.js are excluded from complexity/architecture and plugin-complexity rules, keeping product metrics accurate.
