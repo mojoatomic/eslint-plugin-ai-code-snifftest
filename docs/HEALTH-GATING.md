@@ -17,16 +17,16 @@ Configuration (.ai-coding-guide.json)
 {
   "ratchet": {
     "health": {
-      "enabled": false,                 
-      "gateOn": "overall",            
-      "minOverall": 70,                
-      "intentOverrides": {             
+      "enabled": false,
+      "gateOn": "overall",
+      "minOverall": 70,
+      "intentOverrides": {
         "refactoring": { "minOverall": 65 }
       },
-      "bypass": {                       
-        "label": "health-bypass",     
+      "bypass": {
+        "label": "health-bypass",
         "commitToken": "[health-bypass]",
-        "maxBypassPerPR": 1            
+        "maxBypassPerPR": 1
       },
       "failureMessage": "Code health decreased below threshold. See telemetry output (intent, density, health)."
     }
@@ -38,13 +38,42 @@ Notes
 - intent detection: CLI accepts --refactoring or --intent=refactoring (best-effort; extend later).
 - bypass: commit messages containing the commitToken or env HEALTH_BYPASS=true will bypass; label reserved for future CI integration.
 
-CI recommendation
-- Keep the context-aware step non-blocking during burn-in; monitor health scores in PRs.
-- Once calibrated, flip health.enabled to true and remove continue-on-error; mark the job required in branch protection.
+## Enable in CI
+
+Option A: Scaffold workflow with the CLI
+```bash
+npx eslint-plugin-ai-code-snifftest init --ci
+```
+This creates `.github/workflows/ci-ratchet.yml` with a `ratchet-and-tests` job.
+
+Option B: Reusable workflow (no files needed)
+```yaml
+name: ci-ratchet
+on: [push, pull_request]
+jobs:
+  ratchet-and-tests:
+    uses: mojoatomic/eslint-plugin-ai-code-snifftest/.github/workflows/ratchet-reusable.yml@main
+    with:
+      node-version: '20'
+```
+
+Branch protection (GitHub → Settings → Branches → main)
+- Require status checks: `ratchet-and-tests`
+- Optional: also require your test matrix job (e.g., `Test on Node.js 20.x`)
+
+## Calibration (burn‑in → enforce)
+1) Burn‑in: keep `health.enabled=false` and watch the reported scores in PRs.
+2) Choose thresholds: set `gateOn` and `minOverall` based on observed ranges.
+3) Flip the switch: set `health.enabled=true` to enforce. The CI job will fail if score < threshold.
 
 Troubleshooting
 - No lines.executable in analysis: health falls back to physical lines; check analyzer wiring.
 - Unexpected gate failures: confirm thresholds, gateOn, and any intent override are set as intended; use a one-time bypass with the commit token for urgent fixes.
+
+Failure message anatomy
+- HEALTH-GATE FAIL: <message>
+- gateOn, threshold, actual, intent printed for quick diagnosis
+- Example suggestions printed by the ratchet script for common rules
 
 ## Health Score Calculation
 
@@ -69,12 +98,12 @@ overall:    3   // Balanced (all categories)
 // Good code
 executableLOC = 5000
 violations.structural = 10
-// density = 10 / 5 = 2.0; score (structural) = 100 - (2.0 * 5) = 90 ✅
+// density = 10 / 5 = 2.0; score (structural) = 90 ✅
 
 // Poor code
 executableLOC = 5000
 violations.structural = 50
-// density = 50 / 5 = 10.0; score (structural) = 100 - (10.0 * 5) = 50 ❌
+// density = 50 / 5 = 10.0; score (structural) = 50 ❌
 
 // Refactoring intent (relaxed overall)
 executableLOC = 5000
