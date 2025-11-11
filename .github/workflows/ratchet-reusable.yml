@@ -1,0 +1,53 @@
+name: ratchet-reusable
+
+on:
+  workflow_call:
+    inputs:
+      node-version:
+        required: false
+        type: string
+        default: '20'
+
+jobs:
+  ratchet-and-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ inputs.node-version }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: ESLint JSON
+        run: npm run lint:json
+
+      - name: Analyze current
+        run: npm run analyze:current
+
+      - name: Ratchet (fail on new debt)
+        run: npm run ratchet
+
+      - name: Health gate (context-aware ratchet)
+        run: |
+          if npm run -s | grep -q "ratchet:context"; then
+            npm run ratchet:context
+          else
+            node scripts/ratchet.js --mode=context --baseline=analysis-baseline.json --current=analysis-current.json
+          fi
+
+      - name: Upload artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: analysis-and-lint-${{ github.sha }}
+          path: |
+            lint-results.json
+            analysis-current.json
+          if-no-files-found: error
+          retention-days: 7
