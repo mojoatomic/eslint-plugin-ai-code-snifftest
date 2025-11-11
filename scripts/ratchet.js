@@ -85,22 +85,8 @@ function summarize(payload) {
   };
 }
 
-// Rough health scoring using violation density (per K executable LOC if available)
-function computeHealth(summary) {
-  const exec = Math.max(1, num(summary.lines && summary.lines.executable) || num(summary.lines && summary.lines.physical) || 1000);
-  const total = num(summary.magicNumbers) + num(summary.complexity) + num(summary.domainTerms) + num(summary.architecture);
-  const structuralTotal = num(summary.complexity) + num(summary.architecture);
-  const semanticTotal = num(summary.domainTerms) + num(summary.magicNumbers);
-  const perK = total / (exec / 1000);
-  const perKStructural = structuralTotal / (exec / 1000);
-  const perKSemantic = semanticTotal / (exec / 1000);
-  const toScore = (d) => Math.max(0, Math.min(100, 100 - d * 10));
-  return {
-    overall: Math.round(toScore(perK)),
-    structural: Math.round(toScore(perKStructural)),
-    semantic: Math.round(toScore(perKSemantic))
-  };
-}
+// Health scoring moved to utility for testability
+const { computeHealth } = require(path.join(__dirname, '..', 'lib', 'utils', 'health.js'));
 
 function detectIntent(args) {
   if (args && (args.refactoring || args.intent === 'refactoring')) return 'refactoring';
