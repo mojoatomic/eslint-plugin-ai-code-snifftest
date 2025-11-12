@@ -77,7 +77,7 @@ describe('eslint-arch-config generator', function () {
       
       assert.ok(cliOverride, 'Should have CLI override');
       assert.ok(cliOverride.rules['max-lines']);
-      assert.strictEqual(cliOverride.rules['max-lines'][0], 'error'); // CLI is error, not warn
+      assert.strictEqual(cliOverride.rules['max-lines'][0], 'warn'); // CLI is warn in passive start
       assert.strictEqual(cliOverride.rules['max-lines'][1].max, 100);
     });
 
